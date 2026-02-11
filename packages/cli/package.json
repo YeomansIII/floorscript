@@ -1,0 +1,20 @@
+{
+  "name": "@floorscript/cli",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "floorscript": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@floorscript/core": "workspace:*",
+    "@floorscript/render-svg": "workspace:*",
+    "commander": "^13.0.0"
+  }
+}
