@@ -20,8 +20,10 @@ export function renderWindow(
 
   if (dir === "south" || dir === "north") {
     // Horizontal wall: window lines are horizontal, offset vertically
+    // gapStart.y is at the wall rect edge in SVG; wall thickness extends
+    // upward in SVG (negative Y), so center is at gapStart.y - wallThick/2
     const lineOffset = wallThick * 0.25;
-    const midY = (gapStart.y + gapEnd.y) / 2; // same y for horizontal walls
+    const midY = gapStart.y - wallThick / 2;
 
     parts.push(
       `<line x1="${n(gapStart.x)}" y1="${n(midY - lineOffset)}" x2="${n(gapEnd.x)}" y2="${n(midY - lineOffset)}"/>`,
@@ -31,8 +33,10 @@ export function renderWindow(
     );
   } else {
     // Vertical wall: window lines are vertical, offset horizontally
+    // gapStart.x is at the wall rect left edge in SVG; wall thickness extends
+    // rightward (positive X), so center is at gapStart.x + wallThick/2
     const lineOffset = wallThick * 0.25;
-    const midX = (gapStart.x + gapEnd.x) / 2; // same x for vertical walls
+    const midX = gapStart.x + wallThick / 2;
 
     parts.push(
       `<line x1="${n(midX - lineOffset)}" y1="${n(gapStart.y)}" x2="${n(midX - lineOffset)}" y2="${n(gapEnd.y)}"/>`,

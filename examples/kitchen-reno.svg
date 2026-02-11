@@ -1,16 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1080" width="1200" height="1080">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1240" width="1200" height="1240">
 <style>
-  .wall-exterior { fill: #000; stroke: #000; stroke-width: 0.7mm; }
-  .wall-interior { fill: #333; stroke: #333; stroke-width: 0.5mm; }
-  .wall-load-bearing { fill: #333; stroke: #333; stroke-width: 0.5mm; }
+  .wall-exterior { fill: #000; stroke: none; }
+  .wall-interior { fill: #333; stroke: none; }
+  .wall-load-bearing { fill: #333; stroke: none; }
   .opening line, .opening path { stroke: #000; stroke-width: 0.35mm; fill: none; }
-  .dimension line { stroke: #000; stroke-width: 0.18mm; }
+  .dimension line { stroke: #555; stroke-width: 0.18mm; }
   .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
-  .room-label { font-size: 14px; font-weight: 500; }
-  .dim-label { font-size: 10px; }
   .title-block .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
 </style>
-<rect x="0" y="0" width="1200" height="1080" fill="white"/>
+<rect x="0" y="0" width="1200" height="1240" fill="white"/>
 <g class="layer-structural">
 <g class="room" id="room-kitchen">
 <g class="walls">
@@ -24,38 +22,38 @@
 </g>
 </g>
 <g class="opening window">
-<line x1="232.5" y1="660" x2="232.5" y2="420"/>
 <line x1="247.5" y1="660" x2="247.5" y2="420"/>
+<line x1="262.5" y1="660" x2="262.5" y2="420"/>
 </g>
 </g>
 <g class="layer-labels">
-<text x="600" y="540" class="label room-label" text-anchor="middle" dominant-baseline="central">Kitchen</text>
+<text x="600" y="540" class="label" font-size="30" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
 </g>
 <g class="layer-dimensions">
 <g class="dimension">
 <line x1="240" y1="960" x2="960" y2="960"/>
-<line x1="236" y1="964" x2="244" y2="956"/>
-<line x1="956" y1="964" x2="964" y2="956"/>
-<text x="600" y="954" class="label dim-label" text-anchor="middle">12&apos;-0&quot;</text>
+<line x1="231" y1="969" x2="249" y2="951"/>
+<line x1="951" y1="969" x2="969" y2="951"/>
+<text x="600" y="945" class="label" font-size="21" text-anchor="middle">12&apos;-0&quot;</text>
 </g>
 <g class="dimension">
 <line x1="120" y1="840" x2="120" y2="240"/>
-<line x1="116" y1="844" x2="124" y2="836"/>
-<line x1="116" y1="244" x2="124" y2="236"/>
-<text x="114" y="540" class="label dim-label" text-anchor="middle" transform="rotate(-90, 114, 540)">10&apos;-0&quot;</text>
+<line x1="111" y1="849" x2="129" y2="831"/>
+<line x1="111" y1="249" x2="129" y2="231"/>
+<text x="105" y="540" class="label" font-size="21" text-anchor="middle" transform="rotate(-90, 105, 540)">10&apos;-0&quot;</text>
 </g>
 </g>
 <g class="layer-title-block">
 <g class="title-block">
-<rect x="930" y="940" width="250" height="120" fill="white" stroke="#000" stroke-width="0.35mm"/>
-<line x1="930" y1="1015" x2="1180" y2="1015" stroke="#000" stroke-width="0.25mm"/>
-<text x="940" y="960" class="label" font-size="14" font-weight="bold">Kitchen Renovation - 123 Main St</text>
-<text x="940" y="978" class="label" font-size="10">123 Main Street, Anytown, ST 12345</text>
-<text x="940" y="994" class="label" font-size="10">Jane Smith</text>
-<text x="940" y="1033" class="label" font-size="9">Sheet: A1</text>
-<text x="1065" y="1033" class="label" font-size="9">Date: 2026-02-11</text>
-<text x="940" y="1048" class="label" font-size="9">Scale: 1/4in = 1ft</text>
-<text x="940" y="1058" class="label" font-size="8" fill="#666">Drawn by: FloorScript v0.1</text>
+<rect x="830" y="1080" width="350" height="140" fill="white" stroke="#000" stroke-width="0.5"/>
+<line x1="830" y1="1170" x2="1180" y2="1170" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="1104" class="label" font-size="18" font-weight="bold">Kitchen Renovation - 123 Main St</text>
+<text x="842" y="1126" class="label" font-size="13">123 Main Street, Anytown, ST 12345</text>
+<text x="842" y="1146" class="label" font-size="13">Jane Smith</text>
+<text x="842" y="1190" class="label" font-size="12">Sheet: A1</text>
+<text x="1015" y="1190" class="label" font-size="12">Date: 2026-02-11</text>
+<text x="842" y="1208" class="label" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1208" class="label" font-size="10" fill="#666">FloorScript v0.1</text>
 </g>
 </g>
 </svg>

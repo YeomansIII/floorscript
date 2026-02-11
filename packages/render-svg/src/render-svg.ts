@@ -27,16 +27,17 @@ const DEFAULT_OPTIONS: Required<SvgRenderOptions> = {
 };
 
 const SVG_STYLE = `
-  .wall-exterior { fill: #000; stroke: #000; stroke-width: 0.7mm; }
-  .wall-interior { fill: #333; stroke: #333; stroke-width: 0.5mm; }
-  .wall-load-bearing { fill: #333; stroke: #333; stroke-width: 0.5mm; }
+  .wall-exterior { fill: #000; stroke: none; }
+  .wall-interior { fill: #333; stroke: none; }
+  .wall-load-bearing { fill: #333; stroke: none; }
   .opening line, .opening path { stroke: #000; stroke-width: 0.35mm; fill: none; }
-  .dimension line { stroke: #000; stroke-width: 0.18mm; }
+  .dimension line { stroke: #555; stroke-width: 0.18mm; }
   .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
-  .room-label { font-size: 14px; font-weight: 500; }
-  .dim-label { font-size: 10px; }
   .title-block .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
 `;
+
+// Extra SVG height reserved for the title block below the drawing area
+const TITLE_BLOCK_RESERVE = 160;
 
 export function renderSvg(
   plan: ResolvedPlan,
@@ -45,8 +46,13 @@ export function renderSvg(
   const opts = { ...DEFAULT_OPTIONS, ...options };
   const ctx = createTransform(plan, opts.width, opts.margin);
 
+  // Reserve extra height for the title block so it doesn't overlap the drawing
+  const totalHeight = opts.showTitleBlock
+    ? ctx.svgHeight + TITLE_BLOCK_RESERVE
+    : ctx.svgHeight;
+
   const doc = new SvgDocument(
-    { x: 0, y: 0, width: ctx.svgWidth, height: ctx.svgHeight },
+    { x: 0, y: 0, width: ctx.svgWidth, height: totalHeight },
     opts.background,
   );
 
@@ -81,11 +87,11 @@ export function renderSvg(
     }
   }
 
-  // Title block
+  // Title block — placed at bottom of the extended SVG area
   if (opts.showTitleBlock) {
     doc.addToLayer(
       "title-block",
-      renderTitleBlock(plan.project, ctx.svgWidth, ctx.svgHeight),
+      renderTitleBlock(plan.project, ctx.svgWidth, totalHeight),
     );
   }
 
