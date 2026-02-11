@@ -1,0 +1,31 @@
+version: "0.1"
+project:
+  title: "Single Room"
+  scale: "1/4in = 1ft"
+units: imperial
+
+plans:
+  - id: main
+    title: "Floor Plan"
+    rooms:
+      - id: room1
+        label: "Living Room"
+        position: [0, 0]
+        width: 15ft
+        height: 12ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east:
+            type: exterior
+            openings:
+              - type: window
+                position: 3ft
+                width: 6ft
+          west:
+            type: exterior
+            openings:
+              - type: door
+                position: 4ft
+                width: 3ft
+                swing: inward-right

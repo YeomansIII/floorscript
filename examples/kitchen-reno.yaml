@@ -1,0 +1,62 @@
+version: "0.1"
+project:
+  title: "Kitchen Renovation - 123 Main St"
+  address: "123 Main Street, Anytown, ST 12345"
+  owner: "Jane Smith"
+  date: "2026-02-11"
+  sheet: "A1"
+  scale: "1/4in = 1ft"
+units: imperial
+
+plans:
+  - id: existing
+    title: "Existing Kitchen"
+    rooms:
+      - id: kitchen
+        label: "Kitchen"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        walls:
+          north: { type: exterior, thickness: 6in }
+          south: { type: interior }
+          east: { type: interior }
+          west:
+            type: exterior
+            thickness: 6in
+            openings:
+              - type: window
+                position: 3ft
+                width: 4ft
+
+  - id: proposed
+    title: "Proposed Kitchen"
+    rooms:
+      - id: kitchen
+        label: "Kitchen"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        walls:
+          north: { type: exterior, thickness: 6in }
+          south: { type: interior }
+          east:
+            type: interior
+            openings:
+              - type: door
+                style: cased-opening
+                position: 2ft
+                width: 8ft
+          west:
+            type: exterior
+            thickness: 6in
+            openings:
+              - type: window
+                position: 3ft
+                width: 4ft
+
+diffs:
+  - before: existing
+    after: proposed
+    title: "Kitchen Renovation"
+    outputs: [demolition, construction, combined, summary]
