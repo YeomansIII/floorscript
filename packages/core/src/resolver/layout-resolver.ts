@@ -5,6 +5,8 @@ import { resolveWalls } from "./wall-resolver.js";
 import { resolveOpenings } from "./opening-resolver.js";
 import { resolveWallSegments } from "./segment-resolver.js";
 import { generateDimensions } from "./dimension-resolver.js";
+import { resolveElectrical } from "./electrical-resolver.js";
+import { resolvePlumbing } from "./plumbing-resolver.js";
 
 /**
  * Resolve a parsed FloorPlanConfig into a ResolvedPlan ready for rendering.
@@ -30,6 +32,14 @@ export function resolveLayout(
   const bounds = computeBounds(rooms);
   const dimensions = generateDimensions(rooms, config.units);
 
+  const electrical = plan.electrical
+    ? resolveElectrical(plan.electrical, rooms, config.units)
+    : undefined;
+
+  const plumbing = plan.plumbing
+    ? resolvePlumbing(plan.plumbing, config.units)
+    : undefined;
+
   return {
     project: config.project,
     units: config.units,
@@ -37,6 +47,9 @@ export function resolveLayout(
     rooms,
     dimensions,
     bounds,
+    electrical,
+    plumbing,
+    layers: plan.layers,
   };
 }
 

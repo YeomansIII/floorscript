@@ -73,4 +73,32 @@ describe("visual regression", () => {
 
     expect(svg).toMatchSnapshot();
   });
+
+  it("multi-room with electrical hidden renders consistently", () => {
+    const yaml = readFileSync(resolve(EXAMPLES_DIR, "multi-room.yaml"), "utf-8");
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+
+    const svg = renderSvg(resolved, {
+      layers: { electrical: { visible: false } },
+    });
+
+    expect(svg).not.toContain('class="layer-electrical"');
+    expect(svg).toContain('class="layer-plumbing"');
+    expect(svg).toMatchSnapshot();
+  });
+
+  it("multi-room with plumbing hidden renders consistently", () => {
+    const yaml = readFileSync(resolve(EXAMPLES_DIR, "multi-room.yaml"), "utf-8");
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+
+    const svg = renderSvg(resolved, {
+      layers: { plumbing: { visible: false } },
+    });
+
+    expect(svg).not.toContain('class="layer-plumbing"');
+    expect(svg).toContain('class="layer-electrical"');
+    expect(svg).toMatchSnapshot();
+  });
 });

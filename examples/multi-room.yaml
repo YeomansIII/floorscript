@@ -92,3 +92,88 @@ plans:
                 width: 3ft
           east: { type: interior }
           west: { type: exterior }
+
+    electrical:
+      panel:
+        position: [2ft, 10ft]
+        amps: 200
+        label: "Main Panel"
+      outlets:
+        - id: lr-out-1
+          type: duplex
+          position: [5ft, 0]
+          wall: living.south
+          circuit: 1
+        - id: k-out-1
+          type: gfci
+          position: [4ft, 0]
+          wall: kitchen.south
+          circuit: 2
+        - id: bath-out-1
+          type: gfci
+          position: [3ft, 0]
+          wall: bathroom.west
+          circuit: 3
+      switches:
+        - type: single
+          position: [8ft, 0]
+          wall: living.west
+          controls: [lr-light-1]
+          circuit: 1
+        - type: three-way
+          position: [8ft, 0]
+          wall: kitchen.south
+          controls: [k-light-1]
+          circuit: 2
+      fixtures:
+        - id: lr-light-1
+          type: recessed
+          position: [7.5ft, 6ft]
+          circuit: 1
+        - id: k-light-1
+          type: surface
+          position: [21ft, 7ft]
+          circuit: 2
+      smoke_detectors:
+        - position: [7.5ft, 10ft]
+          type: combo
+      runs:
+        - circuit: 1
+          path: [[2ft, 10ft], [2ft, 6ft], [7.5ft, 6ft]]
+          style: solid
+        - circuit: 2
+          path: [[2ft, 10ft], [15ft, 10ft], [21ft, 10ft], [21ft, 7ft]]
+          style: solid
+
+    plumbing:
+      fixtures:
+        - id: bath-toilet
+          type: toilet
+          position: [2, -4.5]
+          width: 18in
+          depth: 28in
+        - id: bath-sink
+          type: bath-sink
+          position: [5, -4]
+          width: 20in
+          depth: 16in
+      supply_runs:
+        - type: cold
+          path: [[5, -4], [5, -1]]
+          size: "1/2in"
+        - type: hot
+          path: [[5.5, -4], [5.5, -1]]
+          size: "1/2in"
+      drain_runs:
+        - path: [[2, -4.5], [2, -6]]
+          size: "3in"
+
+    layers:
+      structural:
+        visible: true
+      electrical:
+        visible: true
+      plumbing:
+        visible: true
+      dimensions:
+        visible: true
