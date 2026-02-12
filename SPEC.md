@@ -63,8 +63,8 @@ There is no existing "floor plan as code" DSL in the ecosystem today. FloorScrip
 | Module | Responsibility |
 |--------|---------------|
 | `@floorscript/core` | Model types, parser, layout resolver, diff engine |
-| `@floorscript/render-svg` | SVG output renderer |
-| `@floorscript/render-pdf` | PDF output renderer (via PDFKit) |
+| `@floorscript/render-svg` | SVG output renderer (via `DrawingContext` abstraction) |
+| `@floorscript/render-pdf` | PDF output renderer (via PDFKit + `DrawingContext`) |
 | `@floorscript/validate` | Code compliance checks and structural validation |
 | `@floorscript/cli` | CLI tool for file-based workflows |
 | `@floorscript/symbols` | Standard architectural symbol library (electrical, plumbing, fixtures) |
@@ -1173,15 +1173,26 @@ diffs:
 
 ## 13. Implementation Roadmap
 
-### Phase 1: Core Foundation (MVP)
-- [ ] Config parser (JSON + YAML)
-- [ ] Room model with wall generation
-- [ ] Door and window placement on walls
-- [ ] Basic SVG renderer (walls, doors, windows, room labels)
-- [ ] Dimension generation (automatic room dimensions)
-- [ ] Title block rendering
-- [ ] CLI: `render` and `init` commands
-- [ ] Unit system (imperial + metric)
+### Phase 1: Core Foundation (MVP) — Complete
+- [x] Config parser (JSON + YAML)
+- [x] Room model with wall generation
+- [x] Door and window placement on walls
+- [x] Basic SVG renderer (walls, doors, windows, room labels)
+- [x] Dimension generation (automatic room dimensions)
+- [x] Title block rendering
+- [x] CLI: `render` and `init` commands
+- [x] Unit system (imperial + metric)
+
+### Phase 1.5: Architecture Improvements — Complete
+- [x] Wall centerline on resolved openings (prevents Y-flip bugs in renderers)
+- [x] Wall segmentation moved from renderer to resolver (`ResolvedWall.segments`)
+- [x] Visual regression tests (6 SVG snapshot test cases)
+- [x] Multi-room example (4-room adjacency test)
+- [x] Dynamic margin (3ft based on dimension line requirements)
+- [x] Proportional title block scaling
+- [x] Fully inline SVG styling (CSS block removed)
+- [x] DrawingContext abstraction (enables PDF backend without renderer changes)
+- [x] Shared utilities module (`n()`, `escapeXml()`)
 
 ### Phase 2: Electrical & Plumbing
 - [ ] Electrical symbol placement (outlets, switches, fixtures)

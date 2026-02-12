@@ -1,0 +1,94 @@
+version: "0.1"
+project:
+  title: "Multi-Room Floor Plan"
+  address: "456 Oak Avenue, Anytown, ST 12345"
+  owner: "John Doe"
+  date: "2026-02-11"
+  sheet: "A1"
+  scale: "1/4in = 1ft"
+units: imperial
+
+plans:
+  - id: main
+    title: "Floor Plan"
+    rooms:
+      - id: living
+        label: "Living Room"
+        position: [0, 0]
+        width: 15ft
+        height: 12ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: interior }
+          west:
+            type: exterior
+            openings:
+              - type: door
+                position: 4ft
+                width: 3ft
+                swing: inward-right
+
+      - id: kitchen
+        label: "Kitchen"
+        adjacent_to:
+          room: living
+          wall: east
+          alignment: end
+        width: 12ft
+        height: 10ft
+        walls:
+          north: { type: exterior }
+          south: { type: interior }
+          east:
+            type: exterior
+            openings:
+              - type: window
+                position: 3ft
+                width: 4ft
+          west:
+            type: interior
+            openings:
+              - type: door
+                style: cased-opening
+                position: 1ft
+                width: 6ft
+
+      - id: hallway
+        label: "Hallway"
+        adjacent_to:
+          room: kitchen
+          wall: south
+          alignment: start
+        width: 10ft
+        height: 3ft
+        walls:
+          north: { type: interior }
+          south: { type: interior }
+          east: { type: interior }
+          west: { type: interior }
+
+      - id: bathroom
+        label: "Bathroom"
+        adjacent_to:
+          room: living
+          wall: south
+          alignment: start
+        width: 8ft
+        height: 6ft
+        walls:
+          north:
+            type: interior
+            openings:
+              - type: door
+                position: 2ft
+                width: 2ft 6in
+                swing: inward-left
+          south:
+            type: exterior
+            openings:
+              - type: window
+                position: 2ft
+                width: 3ft
+          east: { type: interior }
+          west: { type: exterior }

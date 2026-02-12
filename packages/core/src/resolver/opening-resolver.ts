@@ -1,5 +1,5 @@
 import type { OpeningConfig, UnitSystem } from "../types/config.js";
-import type { ResolvedOpening, ResolvedWall } from "../types/geometry.js";
+import type { LineSegment, ResolvedOpening, ResolvedWall } from "../types/geometry.js";
 import { parseDimension } from "../parser/dimension.js";
 
 /**
@@ -34,6 +34,7 @@ function resolveOpeningGeometry(
   let gapStart: { x: number; y: number };
   let gapEnd: { x: number; y: number };
   let center: { x: number; y: number };
+  let centerline: LineSegment;
 
   switch (dir) {
     case "south":
@@ -42,9 +43,14 @@ function resolveOpeningGeometry(
       const startX = rect.x + position;
       const endX = startX + width;
       const wallY = rect.y;
+      const midY = wallY + wall.thickness / 2;
       gapStart = { x: startX, y: wallY };
       gapEnd = { x: endX, y: wallY };
-      center = { x: startX + width / 2, y: wallY + wall.thickness / 2 };
+      center = { x: startX + width / 2, y: midY };
+      centerline = {
+        start: { x: startX, y: midY },
+        end: { x: endX, y: midY },
+      };
       break;
     }
     case "east":
@@ -53,9 +59,14 @@ function resolveOpeningGeometry(
       const startY = rect.y + position;
       const endY = startY + width;
       const wallX = rect.x;
+      const midX = wallX + wall.thickness / 2;
       gapStart = { x: wallX, y: startY };
       gapEnd = { x: wallX, y: endY };
-      center = { x: wallX + wall.thickness / 2, y: startY + width / 2 };
+      center = { x: midX, y: startY + width / 2 };
+      centerline = {
+        start: { x: midX, y: startY },
+        end: { x: midX, y: endY },
+      };
       break;
     }
   }
@@ -70,5 +81,6 @@ function resolveOpeningGeometry(
     swing: config.type === "door" ? config.swing : undefined,
     gapStart,
     gapEnd,
+    centerline,
   };
 }

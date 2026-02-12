@@ -1,6 +1,7 @@
 import type { ResolvedPlan } from "@floorscript/core";
 import { SvgDocument } from "./svg-document.js";
 import { createTransform } from "./coordinate-transform.js";
+import { SvgDrawingContext } from "./svg-drawing-context.js";
 import { renderWalls } from "./renderers/wall-renderer.js";
 import { renderDoor } from "./renderers/door-renderer.js";
 import { renderWindow } from "./renderers/window-renderer.js";
@@ -17,38 +18,33 @@ export interface SvgRenderOptions {
   showTitleBlock?: boolean;
 }
 
-const DEFAULT_OPTIONS: Required<SvgRenderOptions> = {
+const DEFAULT_OPTIONS = {
   width: 1200,
   background: "white",
-  margin: 4,
   showDimensions: true,
   showLabels: true,
   showTitleBlock: true,
-};
+} as const;
 
-const SVG_STYLE = `
-  .wall-exterior { fill: #000; stroke: none; }
-  .wall-interior { fill: #333; stroke: none; }
-  .wall-load-bearing { fill: #333; stroke: none; }
-  .opening line, .opening path { stroke: #000; stroke-width: 0.35mm; fill: none; }
-  .dimension line { stroke: #555; stroke-width: 0.18mm; }
-  .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
-  .title-block .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
-`;
+// Compute margin based on what needs to fit: dimension line offset + text + padding
+const DEFAULT_MARGIN = 3; // 2ft dim offset + 0.5ft text + 0.5ft padding
 
-// Extra SVG height reserved for the title block below the drawing area
-const TITLE_BLOCK_RESERVE = 160;
+// Base title block reserve at reference width of 1200px
+const BASE_TITLE_BLOCK_RESERVE = 160;
+const REFERENCE_WIDTH = 1200;
 
 export function renderSvg(
   plan: ResolvedPlan,
   options?: SvgRenderOptions,
 ): string {
   const opts = { ...DEFAULT_OPTIONS, ...options };
-  const ctx = createTransform(plan, opts.width, opts.margin);
+  const margin = options?.margin ?? DEFAULT_MARGIN;
+  const ctx = createTransform(plan, opts.width, margin);
 
-  // Reserve extra height for the title block so it doesn't overlap the drawing
+  // Reserve extra height for the title block, scaled proportionally
+  const titleBlockReserve = BASE_TITLE_BLOCK_RESERVE * (ctx.svgWidth / REFERENCE_WIDTH);
   const totalHeight = opts.showTitleBlock
-    ? ctx.svgHeight + TITLE_BLOCK_RESERVE
+    ? ctx.svgHeight + titleBlockReserve
     : ctx.svgHeight;
 
   const doc = new SvgDocument(
@@ -56,19 +52,21 @@ export function renderSvg(
     opts.background,
   );
 
-  doc.setStyle(SVG_STYLE);
-
   // Render rooms (walls + openings)
   for (const room of plan.rooms) {
-    doc.addToLayer("structural", renderWalls(room, ctx));
+    const dc = new SvgDrawingContext();
+    renderWalls(room, ctx, dc);
+    doc.addToLayer("structural", dc.getOutput());
 
     for (const wall of room.walls) {
       for (const opening of wall.openings) {
+        const openingDc = new SvgDrawingContext();
         if (opening.type === "door") {
-          doc.addToLayer("structural", renderDoor(opening, ctx));
+          renderDoor(opening, ctx, openingDc);
         } else if (opening.type === "window") {
-          doc.addToLayer("structural", renderWindow(opening, ctx));
+          renderWindow(opening, ctx, openingDc);
         }
+        doc.addToLayer("structural", openingDc.getOutput());
       }
     }
   }
@@ -76,23 +74,26 @@ export function renderSvg(
   // Labels
   if (opts.showLabels) {
     for (const room of plan.rooms) {
-      doc.addToLayer("labels", renderLabel(room, ctx));
+      const dc = new SvgDrawingContext();
+      renderLabel(room, ctx, dc);
+      doc.addToLayer("labels", dc.getOutput());
     }
   }
 
   // Dimensions
   if (opts.showDimensions) {
     for (const dim of plan.dimensions) {
-      doc.addToLayer("dimensions", renderDimension(dim, ctx));
+      const dc = new SvgDrawingContext();
+      renderDimension(dim, ctx, dc);
+      doc.addToLayer("dimensions", dc.getOutput());
     }
   }
 
   // Title block — placed at bottom of the extended SVG area
   if (opts.showTitleBlock) {
-    doc.addToLayer(
-      "title-block",
-      renderTitleBlock(plan.project, ctx.svgWidth, totalHeight),
-    );
+    const dc = new SvgDrawingContext();
+    renderTitleBlock(plan.project, ctx.svgWidth, totalHeight, dc);
+    doc.addToLayer("title-block", dc.getOutput());
   }
 
   return doc.toString();

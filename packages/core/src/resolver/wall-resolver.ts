@@ -123,5 +123,6 @@ function resolveWallGeometry(
     innerEdge: { start: innerStart, end: innerEnd },
     rect,
     openings: [],
+    segments: [rect],
   };
 }

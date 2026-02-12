@@ -3,6 +3,7 @@ import type { Rect, ResolvedPlan, ResolvedRoom } from "../types/geometry.js";
 import { parseDimension } from "../parser/dimension.js";
 import { resolveWalls } from "./wall-resolver.js";
 import { resolveOpenings } from "./opening-resolver.js";
+import { resolveWallSegments } from "./segment-resolver.js";
 import { generateDimensions } from "./dimension-resolver.js";
 
 /**
@@ -106,14 +107,14 @@ function resolveRoom(
   // Resolve walls
   const walls = resolveWalls(config.walls, config.id, bounds, units);
 
-  // Resolve openings on each wall
-  const directions = ["north", "south", "east", "west"] as const;
+  // Resolve openings on each wall, then compute wall segments
   for (const wall of walls) {
     const wallDir = wall.direction;
     const wallConfig = config.walls?.[wallDir];
     if (wallConfig?.openings && wallConfig.openings.length > 0) {
       wall.openings = resolveOpenings(wall, wallConfig.openings, units);
     }
+    wall.segments = resolveWallSegments(wall);
   }
 
   return {

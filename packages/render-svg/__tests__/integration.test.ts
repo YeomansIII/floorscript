@@ -54,8 +54,8 @@ describe("end-to-end SVG rendering", () => {
     expect(svg).toContain("Test Room");
     expect(svg).toContain("FloorScript v0.1");
 
-    // Wall classes
-    expect(svg).toContain("wall-exterior");
+    // Wall inline styles
+    expect(svg).toContain('fill="#000"');
 
     // Openings
     expect(svg).toContain("opening door");
