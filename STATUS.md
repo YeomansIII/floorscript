@@ -5,11 +5,12 @@
 
 ## Summary
 
-Phase 1 (Core Foundation / MVP) is **complete and tested**. All subsequent phases are either stubbed at the type level or not yet started.
+Phase 1 (Core Foundation / MVP) is **complete and tested**. Phase 1.5 (Architecture Improvements) is **complete** — all 9 pre-Phase-2 recommendations implemented. All subsequent phases are either stubbed at the type level or not yet started.
 
 | Phase | Name | Status | Progress |
 |-------|------|--------|----------|
 | 1 | Core Foundation (MVP) | **Complete** | 8/8 items |
+| 1.5 | Architecture Improvements | **Complete** | 9/9 items |
 | 2 | Electrical & Plumbing | Not started | 0/5 items |
 | 3 | Renovation & Diffing | Not started | 0/6 items |
 | 4 | Validation | Not started | 0/3 items |
@@ -52,14 +53,14 @@ All Phase 1 deliverables are implemented, tested, and working end-to-end.
 |---------|-------|--------|
 | DOM-free SVG builder | `packages/render-svg/src/svg-document.ts` | Done |
 | Y-flip coordinate transform (architectural Y-up to SVG Y-down) | `packages/render-svg/src/coordinate-transform.ts` | Done |
-| Wall rectangles with opening segmentation | `packages/render-svg/src/renderers/wall-renderer.ts` | Done |
+| Wall rectangles (pre-segmented in resolver) | `packages/render-svg/src/renderers/wall-renderer.ts` | Done |
 | Door symbols (standard swing + cased-opening) | `packages/render-svg/src/renderers/door-renderer.ts` | Done |
 | All 4 swing directions (inward/outward + left/right) | `packages/render-svg/src/renderers/door-renderer.ts` | Done |
 | Window symbols | `packages/render-svg/src/renderers/window-renderer.ts` | Done |
 | Room labels (centered) | `packages/render-svg/src/renderers/label-renderer.ts` | Done |
 | Dimension lines with extension lines, ticks, and text | `packages/render-svg/src/renderers/dimension-renderer.ts` | Done |
 | Title block (project metadata, lower-right corner) | `packages/render-svg/src/renderers/title-block-renderer.ts` | Done |
-| CSS class-based semantic SVG structure | `packages/render-svg/src/render-svg.ts` | Done |
+| Fully inline SVG styling (no CSS classes) | `packages/render-svg/src/render-svg.ts` | Done |
 | Render options: `--no-dimensions`, `--no-labels`, `--no-title-block`, `--width` | `packages/render-svg/src/render-svg.ts` | Done |
 
 ### CLI
@@ -79,6 +80,9 @@ All Phase 1 deliverables are implemented, tested, and working end-to-end.
 | `packages/core/__tests__/dimension.test.ts` | Imperial/metric string formats, fraction parsing |
 | `packages/core/__tests__/layout-resolver.test.ts` | Room bounds, wall geometry, adjacency, openings, dimensions |
 | `packages/render-svg/__tests__/integration.test.ts` | End-to-end SVG rendering, render options |
+| `packages/render-svg/__tests__/visual-regression.test.ts` | SVG snapshot regression (6 cases) |
+
+**Total: 44 tests across 5 test files (all passing)**
 
 ### Examples
 
@@ -86,6 +90,7 @@ All Phase 1 deliverables are implemented, tested, and working end-to-end.
 |---------|-------|
 | Single room | `examples/single-room.yaml`, `.svg`, `.png` |
 | Kitchen renovation | `examples/kitchen-reno.yaml`, `.svg`, `.png` |
+| Multi-room (4 rooms) | `examples/multi-room.yaml`, `.svg` |
 
 ### Public API Surface
 
@@ -100,7 +105,51 @@ export * from "./types/geometry.js";
 // @floorscript/render-svg
 export { renderSvg } from "./render-svg.js";
 export type { SvgRenderOptions } from "./render-svg.js";
+export type { DrawingContext } from "./drawing-context.js";
+export { SvgDrawingContext } from "./svg-drawing-context.js";
 ```
+
+---
+
+## Phase 1.5: Architecture Improvements — Complete
+
+All 9 recommendations from `RECOMMENDATIONS.md` implemented in commit `eee1f6d`. See `PLAN.md` for the detailed implementation plan.
+
+### Geometry Layer Improvements
+
+| Feature | Files | Status |
+|---------|-------|--------|
+| Wall centerline on `ResolvedOpening` | `geometry.ts`, `opening-resolver.ts` | Done |
+| Wall segmentation in resolver (`ResolvedWall.segments`) | `geometry.ts`, `segment-resolver.ts` (new), `layout-resolver.ts`, `wall-resolver.ts` | Done |
+
+### Rendering Improvements
+
+| Feature | Files | Status |
+|---------|-------|--------|
+| Dynamic margin (3ft default, down from 4ft) | `render-svg.ts` | Done |
+| Proportional title block scaling | `title-block-renderer.ts`, `render-svg.ts` | Done |
+| Fully inline styling (CSS block removed) | All renderers, `render-svg.ts` | Done |
+| DrawingContext abstraction | `drawing-context.ts` (new), `svg-drawing-context.ts` (new), all renderers | Done |
+| `n()` utility relocation | `utils.ts` (new), `svg-document.ts`, all renderers | Done |
+
+### Testing & Examples
+
+| Feature | Files | Status |
+|---------|-------|--------|
+| Visual regression tests (6 snapshot cases) | `visual-regression.test.ts` (new) | Done |
+| Multi-room example (4 rooms with adjacency) | `multi-room.yaml`, `multi-room.svg` (new) | Done |
+
+### New Files Created
+
+| File | Purpose |
+|------|---------|
+| `packages/render-svg/src/utils.ts` | Shared utilities (`n()`, `escapeXml()`) |
+| `packages/render-svg/src/drawing-context.ts` | `DrawingContext` interface for renderer abstraction |
+| `packages/render-svg/src/svg-drawing-context.ts` | SVG implementation of `DrawingContext` |
+| `packages/core/src/resolver/segment-resolver.ts` | Wall segmentation logic (moved from render layer) |
+| `packages/render-svg/__tests__/visual-regression.test.ts` | SVG snapshot regression tests |
+| `examples/multi-room.yaml` | 4-room floor plan with adjacency |
+| `PLAN.md` | Implementation plan for the 9 recommendations |
 
 ---
 
@@ -278,3 +327,8 @@ The spec defines 8 door styles. Only 2 are rendered with distinct visuals:
 | `af00bce` | Implement FloorScript MVP (full Phase 1) |
 | `d923ca1` | Add example floor plan outputs (YAML, SVG, PNG) |
 | `43573de` | Add CLAUDE.md with codebase documentation |
+| `35b348b` | Add STATUS.md documenting implementation progress |
+| `de59c25` | Fix SVG rendering: window alignment, wall weight, font sizes, title block |
+| `16cdb9b` | Add LESSONS.md with development notes |
+| `57e8e69` | Add RECOMMENDATIONS.md with architecture improvements |
+| `eee1f6d` | Implement pre-Phase-2 architecture recommendations (all 9) |
