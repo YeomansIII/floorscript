@@ -31,6 +31,9 @@ export interface DrawingContext {
     sweepFlag: 0 | 1,
     opts?: StyleOpts,
   ): void;
+  circle(cx: number, cy: number, r: number, opts?: StyleOpts): void;
+  polyline(points: { x: number; y: number }[], opts?: StyleOpts): void;
+  ellipse(cx: number, cy: number, rx: number, ry: number, opts?: StyleOpts): void;
   openGroup(attrs?: Record<string, string>): void;
   closeGroup(): void;
   getOutput(): string;

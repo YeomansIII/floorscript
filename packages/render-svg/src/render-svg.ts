@@ -8,6 +8,8 @@ import { renderWindow } from "./renderers/window-renderer.js";
 import { renderLabel } from "./renderers/label-renderer.js";
 import { renderDimension } from "./renderers/dimension-renderer.js";
 import { renderTitleBlock } from "./renderers/title-block-renderer.js";
+import { renderElectrical } from "./renderers/electrical-renderer.js";
+import { renderPlumbing } from "./renderers/plumbing-renderer.js";
 
 export interface SvgRenderOptions {
   width?: number;
@@ -16,6 +18,7 @@ export interface SvgRenderOptions {
   showDimensions?: boolean;
   showLabels?: boolean;
   showTitleBlock?: boolean;
+  layers?: Record<string, { visible: boolean; color_override?: string | null }>;
 }
 
 const DEFAULT_OPTIONS = {
@@ -32,6 +35,24 @@ const DEFAULT_MARGIN = 3; // 2ft dim offset + 0.5ft text + 0.5ft padding
 // Base title block reserve at reference width of 1200px
 const BASE_TITLE_BLOCK_RESERVE = 160;
 const REFERENCE_WIDTH = 1200;
+
+/**
+ * Check if a layer is visible. Precedence:
+ * 1. Render options (opts.layers) override everything
+ * 2. Plan-level layers config (plan.layers)
+ * 3. Default: visible
+ */
+function isLayerVisible(
+  layerName: string,
+  plan: ResolvedPlan,
+  opts: SvgRenderOptions,
+): boolean {
+  const optLayer = opts.layers?.[layerName];
+  if (optLayer !== undefined) return optLayer.visible;
+  const planLayer = plan.layers?.[layerName];
+  if (planLayer !== undefined) return planLayer.visible;
+  return true;
+}
 
 export function renderSvg(
   plan: ResolvedPlan,
@@ -53,26 +74,28 @@ export function renderSvg(
   );
 
   // Render rooms (walls + openings)
-  for (const room of plan.rooms) {
-    const dc = new SvgDrawingContext();
-    renderWalls(room, ctx, dc);
-    doc.addToLayer("structural", dc.getOutput());
+  if (isLayerVisible("structural", plan, opts)) {
+    for (const room of plan.rooms) {
+      const dc = new SvgDrawingContext();
+      renderWalls(room, ctx, dc);
+      doc.addToLayer("structural", dc.getOutput());
 
-    for (const wall of room.walls) {
-      for (const opening of wall.openings) {
-        const openingDc = new SvgDrawingContext();
-        if (opening.type === "door") {
-          renderDoor(opening, ctx, openingDc);
-        } else if (opening.type === "window") {
-          renderWindow(opening, ctx, openingDc);
+      for (const wall of room.walls) {
+        for (const opening of wall.openings) {
+          const openingDc = new SvgDrawingContext();
+          if (opening.type === "door") {
+            renderDoor(opening, ctx, openingDc);
+          } else if (opening.type === "window") {
+            renderWindow(opening, ctx, openingDc);
+          }
+          doc.addToLayer("structural", openingDc.getOutput());
         }
-        doc.addToLayer("structural", openingDc.getOutput());
       }
     }
   }
 
   // Labels
-  if (opts.showLabels) {
+  if (opts.showLabels && isLayerVisible("labels", plan, opts)) {
     for (const room of plan.rooms) {
       const dc = new SvgDrawingContext();
       renderLabel(room, ctx, dc);
@@ -81,12 +104,26 @@ export function renderSvg(
   }
 
   // Dimensions
-  if (opts.showDimensions) {
+  if (opts.showDimensions && isLayerVisible("dimensions", plan, opts)) {
     for (const dim of plan.dimensions) {
       const dc = new SvgDrawingContext();
       renderDimension(dim, ctx, dc);
       doc.addToLayer("dimensions", dc.getOutput());
     }
+  }
+
+  // Electrical
+  if (plan.electrical && isLayerVisible("electrical", plan, opts)) {
+    const dc = new SvgDrawingContext();
+    renderElectrical(plan.electrical, ctx, dc);
+    doc.addToLayer("electrical", dc.getOutput());
+  }
+
+  // Plumbing
+  if (plan.plumbing && isLayerVisible("plumbing", plan, opts)) {
+    const dc = new SvgDrawingContext();
+    renderPlumbing(plan.plumbing, ctx, dc);
+    doc.addToLayer("plumbing", dc.getOutput());
   }
 
   // Title block — placed at bottom of the extended SVG area

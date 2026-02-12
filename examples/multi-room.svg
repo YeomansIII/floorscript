@@ -1,150 +1,205 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1051.43" width="1200" height="1051.43">
-<style>
-  .wall-exterior { fill: #000; stroke: none; }
-  .wall-interior { fill: #333; stroke: none; }
-  .wall-load-bearing { fill: #333; stroke: none; }
-  .opening line, .opening path { stroke: #000; stroke-width: 0.35mm; fill: none; }
-  .dimension line { stroke: #555; stroke-width: 0.18mm; }
-  .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
-  .title-block .label { font-family: 'Helvetica', 'Arial', sans-serif; fill: #000; }
-</style>
-<rect x="0" y="0" width="1200" height="1051.43" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1032.73" width="1200" height="1032.73">
+<rect x="0" y="0" width="1200" height="1032.73" fill="white"/>
 <g class="layer-structural">
 <g class="room" id="room-living">
 <g class="walls">
-<rect x="137.14" y="137.14" width="514.29" height="17.14" class="wall-exterior"/>
-<rect x="137.14" y="531.43" width="514.29" height="17.14" class="wall-exterior"/>
-<rect x="638.57" y="137.14" width="12.86" height="411.43" class="wall-interior"/>
-<g class="wall-exterior">
-<rect x="137.14" y="411.43" width="17.14" height="137.14"/>
-<rect x="137.14" y="137.14" width="17.14" height="171.43"/>
+<rect x="109.09" y="109.09" width="545.45" height="18.18" stroke="none" fill="#000"/>
+<rect x="109.09" y="527.27" width="545.45" height="18.18" stroke="none" fill="#000"/>
+<rect x="640.91" y="109.09" width="13.64" height="436.36" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="109.09" y="400" width="18.18" height="145.45"/>
+<rect x="109.09" y="109.09" width="18.18" height="181.82"/>
 </g>
 </g>
 </g>
-<g class="opening door">
-<line x1="137.14" y1="308.57" x2="240" y2="308.57"/>
-<path d="M 240,308.57 A 102.86,102.86 0 0,1 137.14,411.43" fill="none"/>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="109.09" y1="290.91" x2="218.18" y2="290.91"/>
+<path d="M 218.18,290.91 A 109.09,109.09 0 0,1 109.09,400"/>
 </g>
 <g class="room" id="room-kitchen">
 <g class="walls">
-<rect x="651.43" y="137.14" width="411.43" height="17.14" class="wall-exterior"/>
-<rect x="651.43" y="467.14" width="411.43" height="12.86" class="wall-interior"/>
-<g class="wall-exterior">
-<rect x="1045.71" y="377.14" width="17.14" height="102.86"/>
-<rect x="1045.71" y="137.14" width="17.14" height="102.86"/>
+<rect x="654.55" y="109.09" width="436.36" height="18.18" stroke="none" fill="#000"/>
+<rect x="654.55" y="459.09" width="436.36" height="13.64" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="1072.73" y="363.64" width="18.18" height="109.09"/>
+<rect x="1072.73" y="109.09" width="18.18" height="109.09"/>
 </g>
-<g class="wall-interior">
-<rect x="651.43" y="445.71" width="12.86" height="34.29"/>
-<rect x="651.43" y="137.14" width="12.86" height="102.86"/>
+<g fill="#333" stroke="none">
+<rect x="654.55" y="436.36" width="13.64" height="36.36"/>
+<rect x="654.55" y="109.09" width="13.64" height="109.09"/>
 </g>
 </g>
 </g>
-<g class="opening window">
-<line x1="1050" y1="377.14" x2="1050" y2="240"/>
-<line x1="1058.57" y1="377.14" x2="1058.57" y2="240"/>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1077.27" y1="363.64" x2="1077.27" y2="218.18"/>
+<line x1="1086.36" y1="363.64" x2="1086.36" y2="218.18"/>
 </g>
-<g class="opening cased-opening">
-<line x1="645" y1="445.71" x2="657.86" y2="445.71"/>
-<line x1="645" y1="240" x2="657.86" y2="240"/>
+<g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="647.73" y1="436.36" x2="661.36" y2="436.36"/>
+<line x1="647.73" y1="218.18" x2="661.36" y2="218.18"/>
 </g>
 <g class="room" id="room-hallway">
 <g class="walls">
-<rect x="651.43" y="480" width="342.86" height="12.86" class="wall-interior"/>
-<rect x="651.43" y="570" width="342.86" height="12.86" class="wall-interior"/>
-<rect x="981.43" y="480" width="12.86" height="102.86" class="wall-interior"/>
-<rect x="651.43" y="480" width="12.86" height="102.86" class="wall-interior"/>
+<rect x="654.55" y="472.73" width="363.64" height="13.64" stroke="none" fill="#333"/>
+<rect x="654.55" y="568.18" width="363.64" height="13.64" stroke="none" fill="#333"/>
+<rect x="1004.55" y="472.73" width="13.64" height="109.09" stroke="none" fill="#333"/>
+<rect x="654.55" y="472.73" width="13.64" height="109.09" stroke="none" fill="#333"/>
 </g>
 </g>
 <g class="room" id="room-bathroom">
 <g class="walls">
-<g class="wall-interior">
-<rect x="137.14" y="548.57" width="68.57" height="12.86"/>
-<rect x="291.43" y="548.57" width="120" height="12.86"/>
+<g fill="#333" stroke="none">
+<rect x="109.09" y="545.45" width="72.73" height="13.64"/>
+<rect x="272.73" y="545.45" width="127.27" height="13.64"/>
 </g>
-<g class="wall-exterior">
-<rect x="137.14" y="737.14" width="68.57" height="17.14"/>
-<rect x="308.57" y="737.14" width="102.86" height="17.14"/>
+<g fill="#000" stroke="none">
+<rect x="109.09" y="745.45" width="72.73" height="18.18"/>
+<rect x="290.91" y="745.45" width="109.09" height="18.18"/>
 </g>
-<rect x="398.57" y="548.57" width="12.86" height="205.71" class="wall-interior"/>
-<rect x="137.14" y="548.57" width="17.14" height="205.71" class="wall-exterior"/>
+<rect x="386.36" y="545.45" width="13.64" height="218.18" stroke="none" fill="#333"/>
+<rect x="109.09" y="545.45" width="18.18" height="218.18" stroke="none" fill="#000"/>
 </g>
 </g>
-<g class="opening door">
-<line x1="205.71" y1="561.43" x2="205.71" y2="647.14"/>
-<path d="M 205.71,647.14 A 85.71,85.71 0 0,1 291.43,561.43" fill="none"/>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="181.82" y1="559.09" x2="181.82" y2="650"/>
+<path d="M 181.82,650 A 90.91,90.91 0 0,1 272.73,559.09"/>
 </g>
-<g class="opening window">
-<line x1="205.71" y1="741.43" x2="308.57" y2="741.43"/>
-<line x1="205.71" y1="750" x2="308.57" y2="750"/>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="181.82" y1="750" x2="290.91" y2="750"/>
+<line x1="181.82" y1="759.09" x2="290.91" y2="759.09"/>
 </g>
 </g>
 <g class="layer-labels">
-<text x="394.29" y="342.86" class="label" font-size="17.14" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
-<text x="857.14" y="308.57" class="label" font-size="17.14" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
-<text x="822.86" y="531.43" class="label" font-size="17.14" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
-<text x="274.29" y="651.43" class="label" font-size="17.14" font-weight="500" text-anchor="middle" dominant-baseline="central">Bathroom</text>
+<text x="381.82" y="327.27" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
+<text x="872.73" y="290.91" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
+<text x="836.36" y="527.27" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
+<text x="254.55" y="654.55" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Bathroom</text>
 </g>
 <g class="layer-dimensions">
-<g class="dimension">
-<line x1="137.14" y1="617.14" x2="651.43" y2="617.14"/>
-<line x1="132" y1="622.29" x2="142.29" y2="612"/>
-<line x1="646.29" y1="622.29" x2="656.57" y2="612"/>
-<text x="394.29" y="608.57" class="label" font-size="12" text-anchor="middle">15&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="109.09" y1="618.18" x2="654.55" y2="618.18"/>
+<line x1="103.64" y1="623.64" x2="114.55" y2="612.73"/>
+<line x1="649.09" y1="623.64" x2="660" y2="612.73"/>
+<text x="381.82" y="609.09" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">15&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="68.57" y1="548.57" x2="68.57" y2="137.14"/>
-<line x1="63.43" y1="553.71" x2="73.71" y2="543.43"/>
-<line x1="63.43" y1="142.29" x2="73.71" y2="132"/>
-<text x="60" y="342.86" class="label" font-size="12" text-anchor="middle" transform="rotate(-90, 60, 342.86)">12&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="36.36" y1="545.45" x2="36.36" y2="109.09"/>
+<line x1="30.91" y1="550.91" x2="41.82" y2="540"/>
+<line x1="30.91" y1="114.55" x2="41.82" y2="103.64"/>
+<text x="27.27" y="327.27" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 27.27, 327.27)">12&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="651.43" y1="548.57" x2="1062.86" y2="548.57"/>
-<line x1="646.29" y1="553.71" x2="656.57" y2="543.43"/>
-<line x1="1057.71" y1="553.71" x2="1068" y2="543.43"/>
-<text x="857.14" y="540" class="label" font-size="12" text-anchor="middle">12&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="654.55" y1="545.45" x2="1090.91" y2="545.45"/>
+<line x1="649.09" y1="550.91" x2="660" y2="540"/>
+<line x1="1085.45" y1="550.91" x2="1096.36" y2="540"/>
+<text x="872.73" y="536.36" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">12&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="582.86" y1="480" x2="582.86" y2="137.14"/>
-<line x1="577.71" y1="485.14" x2="588" y2="474.86"/>
-<line x1="577.71" y1="142.29" x2="588" y2="132"/>
-<text x="574.29" y="308.57" class="label" font-size="12" text-anchor="middle" transform="rotate(-90, 574.29, 308.57)">10&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="581.82" y1="472.73" x2="581.82" y2="109.09"/>
+<line x1="576.36" y1="478.18" x2="587.27" y2="467.27"/>
+<line x1="576.36" y1="114.55" x2="587.27" y2="103.64"/>
+<text x="572.73" y="290.91" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 572.73, 290.91)">10&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="651.43" y1="651.43" x2="994.29" y2="651.43"/>
-<line x1="646.29" y1="656.57" x2="656.57" y2="646.29"/>
-<line x1="989.14" y1="656.57" x2="999.43" y2="646.29"/>
-<text x="822.86" y="642.86" class="label" font-size="12" text-anchor="middle">10&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="654.55" y1="654.55" x2="1018.18" y2="654.55"/>
+<line x1="649.09" y1="660" x2="660" y2="649.09"/>
+<line x1="1012.73" y1="660" x2="1023.64" y2="649.09"/>
+<text x="836.36" y="645.45" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">10&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="582.86" y1="582.86" x2="582.86" y2="480"/>
-<line x1="577.71" y1="588" x2="588" y2="577.71"/>
-<line x1="577.71" y1="485.14" x2="588" y2="474.86"/>
-<text x="574.29" y="531.43" class="label" font-size="12" text-anchor="middle" transform="rotate(-90, 574.29, 531.43)">3&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="581.82" y1="581.82" x2="581.82" y2="472.73"/>
+<line x1="576.36" y1="587.27" x2="587.27" y2="576.36"/>
+<line x1="576.36" y1="478.18" x2="587.27" y2="467.27"/>
+<text x="572.73" y="527.27" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 572.73, 527.27)">3&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="137.14" y1="822.86" x2="411.43" y2="822.86"/>
-<line x1="132" y1="828" x2="142.29" y2="817.71"/>
-<line x1="406.29" y1="828" x2="416.57" y2="817.71"/>
-<text x="274.29" y="814.29" class="label" font-size="12" text-anchor="middle">8&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="109.09" y1="836.36" x2="400" y2="836.36"/>
+<line x1="103.64" y1="841.82" x2="114.55" y2="830.91"/>
+<line x1="394.55" y1="841.82" x2="405.45" y2="830.91"/>
+<text x="254.55" y="827.27" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">8&apos;-0&quot;</text>
 </g>
-<g class="dimension">
-<line x1="68.57" y1="754.29" x2="68.57" y2="548.57"/>
-<line x1="63.43" y1="759.43" x2="73.71" y2="749.14"/>
-<line x1="63.43" y1="553.71" x2="73.71" y2="543.43"/>
-<text x="60" y="651.43" class="label" font-size="12" text-anchor="middle" transform="rotate(-90, 60, 651.43)">6&apos;-0&quot;</text>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="36.36" y1="763.64" x2="36.36" y2="545.45"/>
+<line x1="30.91" y1="769.09" x2="41.82" y2="758.18"/>
+<line x1="30.91" y1="550.91" x2="41.82" y2="540"/>
+<text x="27.27" y="654.55" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 27.27, 654.55)">6&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-electrical">
+<g class="electrical">
+<g class="electrical-panel">
+<rect x="163.64" y="154.55" width="36.36" height="54.55" stroke="#000" stroke-width="0.4mm" fill="#fff"/>
+<text x="181.82" y="173.64" fill="#000" font-family="sans-serif" font-size="8" font-weight="bold" text-anchor="middle" dominant-baseline="central">PANEL</text>
+<text x="181.82" y="192.73" fill="#000" font-family="sans-serif" font-size="6.55" text-anchor="middle" dominant-baseline="central">200A</text>
+<text x="181.82" y="214.55" fill="#666" font-family="sans-serif" font-size="5.82" text-anchor="middle" dominant-baseline="hanging">Main Panel</text>
+</g>
+<polyline points="181.82,181.82 181.82,327.27 381.82,327.27" stroke="#333" stroke-width="0.25mm" fill="none"/>
+<polyline points="181.82,181.82 654.55,181.82 872.73,181.82 872.73,290.91" stroke="#333" stroke-width="0.25mm" fill="none"/>
+<g class="outlet outlet-duplex">
+<circle cx="290.91" cy="536.36" r="12.73" stroke="#000" stroke-width="0.3mm" fill="#fff"/>
+<line x1="282" y1="531.91" x2="299.82" y2="531.91" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<line x1="282" y1="540.82" x2="299.82" y2="540.82" stroke="#000" stroke-width="0.3mm" fill="none"/>
+</g>
+<g class="outlet outlet-gfci">
+<circle cx="800" cy="465.91" r="12.73" stroke="#000" stroke-width="0.3mm" fill="#fff"/>
+<text x="800" y="484.09" fill="#000" font-size="8.91" text-anchor="middle" dominant-baseline="hanging">GFI</text>
+</g>
+<g class="outlet outlet-gfci">
+<circle cx="118.18" cy="654.55" r="12.73" stroke="#000" stroke-width="0.3mm" fill="#fff"/>
+<text x="118.18" y="672.73" fill="#000" font-size="8.91" text-anchor="middle" dominant-baseline="hanging">GFI</text>
+</g>
+<g class="switch switch-single">
+<circle cx="118.18" cy="254.55" r="12.73" stroke="#000" stroke-width="0.3mm" fill="#fff"/>
+<text x="118.18" y="254.55" fill="#000" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="central">S</text>
+</g>
+<g class="switch switch-three-way">
+<circle cx="945.45" cy="465.91" r="12.73" stroke="#000" stroke-width="0.3mm" fill="#fff"/>
+<text x="945.45" y="465.91" fill="#000" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle" dominant-baseline="central">S3</text>
+</g>
+<g class="light-fixture light-recessed">
+<rect x="366.55" y="312" width="30.55" height="30.55" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<circle cx="381.82" cy="327.27" r="8.91" stroke="#000" stroke-width="0.3mm" fill="none"/>
+</g>
+<g class="light-fixture light-surface">
+<circle cx="872.73" cy="290.91" r="12.73" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<line x1="859.23" y1="277.41" x2="863.73" y2="281.91" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<line x1="886.23" y1="277.41" x2="881.73" y2="281.91" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<line x1="859.23" y1="304.41" x2="863.73" y2="299.91" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<line x1="886.23" y1="304.41" x2="881.73" y2="299.91" stroke="#000" stroke-width="0.3mm" fill="none"/>
+</g>
+<g class="smoke-detector">
+<circle cx="381.82" cy="181.82" r="12.73" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<text x="381.82" y="181.82" fill="#000" font-family="sans-serif" font-size="11.45" text-anchor="middle" dominant-baseline="central">S/CO</text>
+</g>
+</g>
+</g>
+<g class="layer-plumbing">
+<g class="plumbing">
+<polyline points="290.91,690.91 290.91,581.82" stroke="#0000CC" stroke-width="0.4mm" fill="none"/>
+<text x="296.36" y="581.82" fill="#0000CC" font-family="sans-serif" font-size="5.45" text-anchor="start" dominant-baseline="central">1/2in</text>
+<polyline points="309.09,690.91 309.09,581.82" stroke="#CC0000" stroke-width="0.4mm" fill="none"/>
+<text x="314.55" y="581.82" fill="#CC0000" font-family="sans-serif" font-size="5.45" text-anchor="start" dominant-baseline="central">1/2in</text>
+<polyline points="181.82,709.09 181.82,763.64" stroke="#006600" stroke-width="0.5mm" fill="none"/>
+<g class="plumbing-fixture fixture-toilet">
+<rect x="160" y="666.67" width="43.64" height="21.21" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<ellipse cx="181.82" cy="717.58" rx="27.27" ry="33.94" stroke="#000" stroke-width="0.3mm" fill="none"/>
+</g>
+<g class="plumbing-fixture fixture-bath-sink">
+<ellipse cx="290.91" cy="690.91" rx="30.3" ry="24.24" stroke="#000" stroke-width="0.3mm" fill="none"/>
+</g>
 </g>
 </g>
 <g class="layer-title-block">
-<g class="title-block">
-<rect x="830" y="891.43" width="350" height="140" fill="white" stroke="#000" stroke-width="0.5"/>
-<line x1="830" y1="981.43" x2="1180" y2="981.43" stroke="#000" stroke-width="0.35"/>
-<text x="842" y="915.43" class="label" font-size="18" font-weight="bold">Multi-Room Floor Plan</text>
-<text x="842" y="937.43" class="label" font-size="13">456 Oak Avenue, Anytown, ST 12345</text>
-<text x="842" y="957.43" class="label" font-size="13">John Doe</text>
-<text x="842" y="1001.43" class="label" font-size="12">Sheet: A1</text>
-<text x="1015" y="1001.43" class="label" font-size="12">Date: 2026-02-11</text>
-<text x="842" y="1019.43" class="label" font-size="12">Scale: 1/4in = 1ft</text>
-<text x="1015" y="1019.43" class="label" font-size="10" fill="#666">FloorScript v0.1</text>
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="872.73" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="962.73" x2="1180" y2="962.73" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="896.73" font-size="18" font-weight="bold">Multi-Room Floor Plan</text>
+<text x="842" y="918.73" font-size="13">456 Oak Avenue, Anytown, ST 12345</text>
+<text x="842" y="938.73" font-size="13">John Doe</text>
+<text x="842" y="982.73" font-size="12">Sheet: A1</text>
+<text x="1015" y="982.73" font-size="12">Date: 2026-02-11</text>
+<text x="842" y="1000.73" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1000.73" fill="#666" font-size="10">FloorScript v0.1</text>
 </g>
 </g>
 </svg>

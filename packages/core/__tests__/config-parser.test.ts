@@ -132,4 +132,191 @@ plans:
     expect(config.units).toBe("metric");
     expect(config.plans[0].rooms[0].width).toBe("5m");
   });
+
+  it("parses valid electrical config", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Electrical Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+    electrical:
+      panel:
+        position: [0.5ft, 9ft]
+        amps: 200
+        label: "Main Panel"
+      outlets:
+        - type: duplex
+          position: [3ft, 0]
+          wall: r1.south
+          circuit: 1
+        - type: gfci
+          position: [4ft, 0]
+          wall: r1.south
+          circuit: 2
+      switches:
+        - type: single
+          position: [1ft, 0]
+          wall: r1.west
+          controls: [light-1]
+          circuit: 1
+      fixtures:
+        - id: light-1
+          type: recessed
+          position: [6ft, 5ft]
+          circuit: 1
+      smoke_detectors:
+        - position: [6ft, 5ft]
+          type: combo
+      runs:
+        - circuit: 1
+          path: [[0.5ft, 9ft], [6ft, 5ft]]
+          style: solid
+`;
+    const config = parseConfig(yaml);
+    expect(config.plans[0].electrical).toBeDefined();
+    expect(config.plans[0].electrical!.panel!.amps).toBe(200);
+    expect(config.plans[0].electrical!.outlets).toHaveLength(2);
+    expect(config.plans[0].electrical!.switches).toHaveLength(1);
+    expect(config.plans[0].electrical!.fixtures).toHaveLength(1);
+    expect(config.plans[0].electrical!.smoke_detectors).toHaveLength(1);
+    expect(config.plans[0].electrical!.runs).toHaveLength(1);
+  });
+
+  it("rejects invalid outlet type", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+    electrical:
+      outlets:
+        - type: invalid-outlet
+          position: [1ft, 0]
+          wall: r1.south
+`;
+    expect(() => parseConfig(yaml)).toThrow("Invalid FloorScript config");
+  });
+
+  it("parses valid plumbing config", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Plumbing Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 8ft
+        height: 6ft
+    plumbing:
+      fixtures:
+        - id: sink
+          type: kitchen-sink
+          position: [3ft, 5ft]
+          width: 33in
+          depth: 22in
+          supply: [hot, cold]
+          drain: true
+      supply_runs:
+        - type: hot
+          path: [[0ft, 3ft], [3ft, 5ft]]
+          size: "1/2in"
+      drain_runs:
+        - path: [[3ft, 5ft], [3ft, 0ft]]
+          size: "2in"
+          slope: "1/4in per ft"
+      valves:
+        - type: shutoff
+          position: [3ft, 4ft]
+          line: hot
+      water_heater:
+        position: [0.5ft, 0.5ft]
+        type: tank
+        capacity: "50gal"
+`;
+    const config = parseConfig(yaml);
+    expect(config.plans[0].plumbing).toBeDefined();
+    expect(config.plans[0].plumbing!.fixtures).toHaveLength(1);
+    expect(config.plans[0].plumbing!.supply_runs).toHaveLength(1);
+    expect(config.plans[0].plumbing!.drain_runs).toHaveLength(1);
+    expect(config.plans[0].plumbing!.valves).toHaveLength(1);
+    expect(config.plans[0].plumbing!.water_heater!.type).toBe("tank");
+  });
+
+  it("rejects invalid plumbing fixture type", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+    plumbing:
+      fixtures:
+        - type: hot-tub
+          position: [1ft, 1ft]
+`;
+    expect(() => parseConfig(yaml)).toThrow("Invalid FloorScript config");
+  });
+
+  it("parses layer visibility config", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Layer Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+    layers:
+      structural:
+        visible: true
+      electrical:
+        visible: true
+        color_override: null
+      plumbing:
+        visible: false
+`;
+    const config = parseConfig(yaml);
+    const layers = config.plans[0].layers;
+    expect(layers).toBeDefined();
+    expect(layers!.structural.visible).toBe(true);
+    expect(layers!.electrical.visible).toBe(true);
+    expect(layers!.plumbing.visible).toBe(false);
+  });
 });

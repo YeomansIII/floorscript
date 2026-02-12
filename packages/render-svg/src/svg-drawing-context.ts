@@ -40,6 +40,25 @@ export class SvgDrawingContext implements DrawingContext {
     );
   }
 
+  circle(cx: number, cy: number, r: number, opts?: StyleOpts): void {
+    this.parts.push(
+      `<circle cx="${n(cx)}" cy="${n(cy)}" r="${n(r)}"${styleAttrs(opts)}/>`,
+    );
+  }
+
+  polyline(points: { x: number; y: number }[], opts?: StyleOpts): void {
+    const pointsStr = points.map((p) => `${n(p.x)},${n(p.y)}`).join(" ");
+    this.parts.push(
+      `<polyline points="${pointsStr}"${styleAttrs(opts)}/>`,
+    );
+  }
+
+  ellipse(cx: number, cy: number, rx: number, ry: number, opts?: StyleOpts): void {
+    this.parts.push(
+      `<ellipse cx="${n(cx)}" cy="${n(cy)}" rx="${n(rx)}" ry="${n(ry)}"${styleAttrs(opts)}/>`,
+    );
+  }
+
   openGroup(attrs?: Record<string, string>): void {
     if (!attrs || Object.keys(attrs).length === 0) {
       this.parts.push("<g>");

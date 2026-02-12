@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { parseConfig, resolveLayout } from "@floorscript/core";
 import { renderSvg } from "../src/render-svg.js";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 const MINIMAL_YAML = `
 version: "0.1"
@@ -155,5 +157,68 @@ plans:
     const closes = (svg.match(/<\/g>/g) ?? []).length;
     expect(opens).toBe(closes);
     expect(opens).toBeGreaterThan(0);
+  });
+
+  it("renders electrical and plumbing layers from multi-room example", () => {
+    const yaml = readFileSync(resolve(__dirname, "../../../examples/multi-room.yaml"), "utf-8");
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved);
+
+    // Electrical layer present
+    expect(svg).toContain('class="layer-electrical"');
+    expect(svg).toContain('class="electrical"');
+
+    // Plumbing layer present
+    expect(svg).toContain('class="layer-plumbing"');
+    expect(svg).toContain('class="plumbing"');
+
+    // Specific electrical elements
+    expect(svg).toContain("outlet outlet-duplex");
+    expect(svg).toContain("outlet outlet-gfci");
+    expect(svg).toContain("switch switch-single");
+    expect(svg).toContain("switch switch-three-way");
+    expect(svg).toContain("light-fixture light-recessed");
+    expect(svg).toContain("light-fixture light-surface");
+    expect(svg).toContain("smoke-detector");
+    expect(svg).toContain("electrical-panel");
+
+    // Plumbing elements
+    expect(svg).toContain("fixture-toilet");
+    expect(svg).toContain("fixture-bath-sink");
+
+    // Polylines for runs
+    expect(svg).toContain("<polyline");
+
+    // Well-formed
+    const opens = (svg.match(/<g /g) ?? []).length;
+    const closes = (svg.match(/<\/g>/g) ?? []).length;
+    expect(opens).toBe(closes);
+  });
+
+  it("hides electrical layer when layer visibility is false", () => {
+    const yaml = readFileSync(resolve(__dirname, "../../../examples/multi-room.yaml"), "utf-8");
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved, {
+      layers: { electrical: { visible: false } },
+    });
+
+    expect(svg).not.toContain('class="layer-electrical"');
+    // Plumbing should still be visible
+    expect(svg).toContain('class="layer-plumbing"');
+  });
+
+  it("hides plumbing layer when layer visibility is false", () => {
+    const yaml = readFileSync(resolve(__dirname, "../../../examples/multi-room.yaml"), "utf-8");
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved, {
+      layers: { plumbing: { visible: false } },
+    });
+
+    expect(svg).not.toContain('class="layer-plumbing"');
+    // Electrical should still be visible
+    expect(svg).toContain('class="layer-electrical"');
   });
 });

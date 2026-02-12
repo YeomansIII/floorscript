@@ -115,6 +115,43 @@ export type { SvgRenderOptions } from "./render-svg.js";
 - **Renovation plans** — `before`/`after` plan IDs for demolition/construction diffing
 - **Unit system** — Imperial (feet/inches with fractions) or metric (meters/mm)
 
+## Visual Verification
+
+When modifying renderers, resolvers, or example YAML files, **always visually verify the output** before committing. This is critical for catching layout issues that tests alone cannot detect (clipped elements, overlapping text, mispositioned symbols, etc.).
+
+### Verification Workflow
+
+```bash
+# 1. Build all packages (required after any source change)
+pnpm build
+
+# 2. Render the YAML example to SVG
+node packages/cli/dist/index.js render examples/multi-room.yaml -o examples/multi-room.svg
+
+# 3. Convert SVG to PNG for visual inspection
+node scripts/svg-to-png.mjs examples/multi-room.svg examples/multi-room.png
+
+# 4. Inspect the PNG (agents: use the Read tool on the PNG file to view it)
+# Check for: clipped symbols, overlapping text, correct element placement,
+# proper layer rendering, symbol sizing, and wall-mounted element visibility
+```
+
+### What to Check
+
+- **Electrical symbols**: Panel text readable, outlets visible on walls (need white fill), switch labels sized correctly
+- **Plumbing fixtures**: Toilet/sink shapes properly oriented, supply runs color-coded (red=hot, blue=cold), drain runs in green
+- **Layer visibility**: All enabled layers render, disabled layers omitted
+- **Wall-mounted elements**: Outlets and switches not obscured by wall fill (require white background)
+- **Text overlaps**: Labels, dimensions, and symbols not colliding (especially in small rooms)
+- **Boundary clipping**: No symbols cut off at room edges or viewBox boundaries
+
+### Alternative PNG Generation
+
+If the `scripts/svg-to-png.mjs` script fails (missing sharp), use npx:
+```bash
+npx sharp-cli -i examples/multi-room.svg -o examples/multi-room.png
+```
+
 ## Working with This Repo
 
 - Always run `pnpm build` after modifying core or render-svg, since CLI depends on built output
