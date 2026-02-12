@@ -1,11 +1,19 @@
 import type { ResolvedDimension } from "@floorscript/core";
 import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
-import { escapeXml, n } from "../svg-document.js";
+import type { DrawingContext } from "../drawing-context.js";
+import { n } from "../utils.js";
 
 // Dimension element sizes in plan units (feet/meters)
 const TICK_SIZE_FT = 0.15;
 const TEXT_OFFSET_FT = 0.25;
 const FONT_SIZE_FT = 0.35;
+
+const DIM_TEXT_STYLE = {
+  fontFamily: "'Helvetica','Arial',sans-serif",
+  fill: "#000",
+  stroke: "none",
+  textAnchor: "middle" as const,
+};
 
 /**
  * Render a dimension with extension lines, tick marks, and text.
@@ -13,7 +21,8 @@ const FONT_SIZE_FT = 0.35;
 export function renderDimension(
   dim: ResolvedDimension,
   ctx: TransformContext,
-): string {
+  dc: DrawingContext,
+): void {
   const from = toSvg(dim.from, ctx);
   const to = toSvg(dim.to, ctx);
 
@@ -21,21 +30,19 @@ export function renderDimension(
   const textOffset = scaleValue(TEXT_OFFSET_FT, ctx);
   const fontSize = scaleValue(FONT_SIZE_FT, ctx);
 
-  const parts: string[] = [];
-  parts.push(`<g class="dimension">`);
+  dc.openGroup({ class: "dimension", stroke: "#555", "stroke-width": "0.18mm" });
 
   if (dim.orientation === "horizontal") {
-    renderHorizontalDimension(parts, from, to, dim, tickSize, textOffset, fontSize);
+    renderHorizontalDimension(dc, from, to, dim, tickSize, textOffset, fontSize);
   } else {
-    renderVerticalDimension(parts, from, to, dim, tickSize, textOffset, fontSize);
+    renderVerticalDimension(dc, from, to, dim, tickSize, textOffset, fontSize);
   }
 
-  parts.push("</g>");
-  return parts.join("\n");
+  dc.closeGroup();
 }
 
 function renderHorizontalDimension(
-  parts: string[],
+  dc: DrawingContext,
   from: { x: number; y: number },
   to: { x: number; y: number },
   dim: ResolvedDimension,
@@ -46,27 +53,19 @@ function renderHorizontalDimension(
   const y = from.y;
 
   // Dimension line
-  parts.push(
-    `<line x1="${n(from.x)}" y1="${n(y)}" x2="${n(to.x)}" y2="${n(y)}"/>`,
-  );
+  dc.line(from.x, y, to.x, y);
 
   // Tick marks (45-degree slashes)
-  parts.push(
-    `<line x1="${n(from.x - tickSize)}" y1="${n(y + tickSize)}" x2="${n(from.x + tickSize)}" y2="${n(y - tickSize)}"/>`,
-  );
-  parts.push(
-    `<line x1="${n(to.x - tickSize)}" y1="${n(y + tickSize)}" x2="${n(to.x + tickSize)}" y2="${n(y - tickSize)}"/>`,
-  );
+  dc.line(from.x - tickSize, y + tickSize, from.x + tickSize, y - tickSize);
+  dc.line(to.x - tickSize, y + tickSize, to.x + tickSize, y - tickSize);
 
   // Text centered above the dimension line
   const midX = (from.x + to.x) / 2;
-  parts.push(
-    `<text x="${n(midX)}" y="${n(y - textOffset)}" class="label" font-size="${n(fontSize)}" text-anchor="middle">${escapeXml(dim.label)}</text>`,
-  );
+  dc.text(midX, y - textOffset, dim.label, { ...DIM_TEXT_STYLE, fontSize });
 }
 
 function renderVerticalDimension(
-  parts: string[],
+  dc: DrawingContext,
   from: { x: number; y: number },
   to: { x: number; y: number },
   dim: ResolvedDimension,
@@ -77,21 +76,17 @@ function renderVerticalDimension(
   const x = from.x;
 
   // Dimension line
-  parts.push(
-    `<line x1="${n(x)}" y1="${n(from.y)}" x2="${n(x)}" y2="${n(to.y)}"/>`,
-  );
+  dc.line(x, from.y, x, to.y);
 
   // Tick marks (45-degree slashes)
-  parts.push(
-    `<line x1="${n(x - tickSize)}" y1="${n(from.y + tickSize)}" x2="${n(x + tickSize)}" y2="${n(from.y - tickSize)}"/>`,
-  );
-  parts.push(
-    `<line x1="${n(x - tickSize)}" y1="${n(to.y + tickSize)}" x2="${n(x + tickSize)}" y2="${n(to.y - tickSize)}"/>`,
-  );
+  dc.line(x - tickSize, from.y + tickSize, x + tickSize, from.y - tickSize);
+  dc.line(x - tickSize, to.y + tickSize, x + tickSize, to.y - tickSize);
 
   // Text centered beside the dimension line, rotated
   const midY = (from.y + to.y) / 2;
-  parts.push(
-    `<text x="${n(x - textOffset)}" y="${n(midY)}" class="label" font-size="${n(fontSize)}" text-anchor="middle" transform="rotate(-90, ${n(x - textOffset)}, ${n(midY)})">${escapeXml(dim.label)}</text>`,
-  );
+  dc.text(x - textOffset, midY, dim.label, {
+    ...DIM_TEXT_STYLE,
+    fontSize,
+    transform: `rotate(-90, ${n(x - textOffset)}, ${n(midY)})`,
+  });
 }

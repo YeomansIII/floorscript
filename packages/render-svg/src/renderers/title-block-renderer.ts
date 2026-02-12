@@ -1,81 +1,94 @@
 import type { ProjectConfig } from "@floorscript/core";
-import { escapeXml, n } from "../svg-document.js";
+import type { DrawingContext } from "../drawing-context.js";
 
-// Title block dimensions in SVG pixels
-const TB_WIDTH = 350;
-const TB_HEIGHT = 140;
-const TB_MARGIN = 20;
-const TB_DIVIDER_Y = 90;
+// Reference dimensions at 1200px SVG width
+const REFERENCE_WIDTH = 1200;
+const BASE_TB_WIDTH = 350;
+const BASE_TB_HEIGHT = 140;
+const BASE_TB_MARGIN = 20;
+const BASE_TB_DIVIDER_Y = 90;
 
 /**
  * Render a title block in the lower-right corner of the SVG.
+ * Dimensions scale proportionally with SVG width.
  */
 export function renderTitleBlock(
   project: ProjectConfig,
   svgWidth: number,
   svgHeight: number,
-): string {
-  const x = svgWidth - TB_WIDTH - TB_MARGIN;
-  const y = svgHeight - TB_HEIGHT - TB_MARGIN;
+  dc: DrawingContext,
+): void {
+  const s = svgWidth / REFERENCE_WIDTH;
 
-  const parts: string[] = [];
-  parts.push(`<g class="title-block">`);
+  const tbWidth = BASE_TB_WIDTH * s;
+  const tbHeight = BASE_TB_HEIGHT * s;
+  const tbMargin = BASE_TB_MARGIN * s;
+  const tbDividerY = BASE_TB_DIVIDER_Y * s;
+
+  const x = svgWidth - tbWidth - tbMargin;
+  const y = svgHeight - tbHeight - tbMargin;
+
+  dc.openGroup({
+    class: "title-block",
+    "font-family": "'Helvetica','Arial',sans-serif",
+    fill: "#000",
+  });
 
   // Border rectangle
-  parts.push(
-    `<rect x="${n(x)}" y="${n(y)}" width="${TB_WIDTH}" height="${TB_HEIGHT}" fill="white" stroke="#000" stroke-width="0.5"/>`,
-  );
+  dc.rect(x, y, tbWidth, tbHeight, {
+    fill: "white",
+    stroke: "#000",
+    strokeWidth: `${(0.5 * s).toFixed(2)}`,
+  });
 
   // Divider line
-  parts.push(
-    `<line x1="${n(x)}" y1="${n(y + TB_DIVIDER_Y)}" x2="${n(x + TB_WIDTH)}" y2="${n(y + TB_DIVIDER_Y)}" stroke="#000" stroke-width="0.35"/>`,
-  );
+  dc.line(x, y + tbDividerY, x + tbWidth, y + tbDividerY, {
+    stroke: "#000",
+    strokeWidth: `${(0.35 * s).toFixed(2)}`,
+  });
 
   // Top section: project info
-  let textY = y + 24;
-  parts.push(
-    `<text x="${n(x + 12)}" y="${n(textY)}" class="label" font-size="18" font-weight="bold">${escapeXml(project.title)}</text>`,
-  );
+  let textY = y + 24 * s;
+  dc.text(x + 12 * s, textY, project.title, {
+    fontSize: 18 * s,
+    fontWeight: "bold",
+  });
 
   if (project.address) {
-    textY += 22;
-    parts.push(
-      `<text x="${n(x + 12)}" y="${n(textY)}" class="label" font-size="13">${escapeXml(project.address)}</text>`,
-    );
+    textY += 22 * s;
+    dc.text(x + 12 * s, textY, project.address, { fontSize: 13 * s });
   }
 
   if (project.owner) {
-    textY += 20;
-    parts.push(
-      `<text x="${n(x + 12)}" y="${n(textY)}" class="label" font-size="13">${escapeXml(project.owner)}</text>`,
-    );
+    textY += 20 * s;
+    dc.text(x + 12 * s, textY, project.owner, { fontSize: 13 * s });
   }
 
   // Bottom section: sheet info
-  const bottomY = y + TB_DIVIDER_Y;
+  const bottomY = y + tbDividerY;
 
   if (project.sheet) {
-    parts.push(
-      `<text x="${n(x + 12)}" y="${n(bottomY + 20)}" class="label" font-size="12">Sheet: ${escapeXml(project.sheet)}</text>`,
-    );
+    dc.text(x + 12 * s, bottomY + 20 * s, `Sheet: ${project.sheet}`, {
+      fontSize: 12 * s,
+    });
   }
 
   if (project.date) {
-    parts.push(
-      `<text x="${n(x + 185)}" y="${n(bottomY + 20)}" class="label" font-size="12">Date: ${escapeXml(project.date)}</text>`,
-    );
+    dc.text(x + 185 * s, bottomY + 20 * s, `Date: ${project.date}`, {
+      fontSize: 12 * s,
+    });
   }
 
   if (project.scale) {
-    parts.push(
-      `<text x="${n(x + 12)}" y="${n(bottomY + 38)}" class="label" font-size="12">Scale: ${escapeXml(project.scale)}</text>`,
-    );
+    dc.text(x + 12 * s, bottomY + 38 * s, `Scale: ${project.scale}`, {
+      fontSize: 12 * s,
+    });
   }
 
-  parts.push(
-    `<text x="${n(x + 185)}" y="${n(bottomY + 38)}" class="label" font-size="10" fill="#666">FloorScript v0.1</text>`,
-  );
+  dc.text(x + 185 * s, bottomY + 38 * s, "FloorScript v0.1", {
+    fontSize: 10 * s,
+    fill: "#666",
+  });
 
-  parts.push("</g>");
-  return parts.join("\n");
+  dc.closeGroup();
 }

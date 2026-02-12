@@ -1,6 +1,6 @@
 import type { ResolvedRoom } from "@floorscript/core";
 import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
-import { escapeXml, n } from "../svg-document.js";
+import type { DrawingContext } from "../drawing-context.js";
 
 // Room label font size in plan units (feet or meters)
 const LABEL_SIZE_FT = 0.5;
@@ -11,9 +11,17 @@ const LABEL_SIZE_FT = 0.5;
 export function renderLabel(
   room: ResolvedRoom,
   ctx: TransformContext,
-): string {
+  dc: DrawingContext,
+): void {
   const pos = toSvg(room.labelPosition, ctx);
   const fontSize = scaleValue(LABEL_SIZE_FT, ctx);
 
-  return `<text x="${n(pos.x)}" y="${n(pos.y)}" class="label" font-size="${n(fontSize)}" font-weight="500" text-anchor="middle" dominant-baseline="central">${escapeXml(room.label)}</text>`;
+  dc.text(pos.x, pos.y, room.label, {
+    fontFamily: "'Helvetica','Arial',sans-serif",
+    fill: "#000",
+    fontSize,
+    fontWeight: "500",
+    textAnchor: "middle",
+    dominantBaseline: "central",
+  });
 }

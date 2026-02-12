@@ -56,6 +56,7 @@ export interface ResolvedWall {
   innerEdge: LineSegment;
   rect: Rect;
   openings: ResolvedOpening[];
+  segments: Rect[];
 }
 
 export interface ResolvedOpening {
@@ -68,6 +69,7 @@ export interface ResolvedOpening {
   swing?: SwingDirection;
   gapStart: Point;
   gapEnd: Point;
+  centerline: LineSegment;
 }
 
 export interface ResolvedDimension {

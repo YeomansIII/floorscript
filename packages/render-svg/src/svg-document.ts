@@ -1,3 +1,5 @@
+import { n } from "./utils.js";
+
 /**
  * Lightweight SVG document builder. No DOM dependency.
  */
@@ -68,20 +70,4 @@ export class SvgDocument {
   }
 }
 
-/** Round number for clean SVG output */
-function n(value: number): string {
-  return Number(value.toFixed(2)).toString();
-}
-
-/** Escape XML special characters in text content */
-export function escapeXml(text: string): string {
-  return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
-}
-
-/** Round a number for SVG attribute output */
-export { n };
+export { n, escapeXml } from "./utils.js";

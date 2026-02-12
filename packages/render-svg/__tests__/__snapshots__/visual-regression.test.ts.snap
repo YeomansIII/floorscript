@@ -1,0 +1,453 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`visual regression > kitchen-reno existing plan renders consistently 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1226.67" width="1200" height="1226.67">
+<rect x="0" y="0" width="1200" height="1226.67" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-kitchen">
+<g class="walls">
+<rect x="200" y="200" width="800" height="33.33" stroke="none" fill="#000"/>
+<rect x="200" y="841.67" width="800" height="25" stroke="none" fill="#333"/>
+<rect x="975" y="200" width="25" height="666.67" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="200" y="666.67" width="33.33" height="200"/>
+<rect x="200" y="200" width="33.33" height="200"/>
+</g>
+</g>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="208.33" y1="666.67" x2="208.33" y2="400"/>
+<line x1="225" y1="666.67" x2="225" y2="400"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="600" y="533.33" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="33.33" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="200" y1="1000" x2="1000" y2="1000"/>
+<line x1="190" y1="1010" x2="210" y2="990"/>
+<line x1="990" y1="1010" x2="1010" y2="990"/>
+<text x="600" y="983.33" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="23.33" text-anchor="middle">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="66.67" y1="866.67" x2="66.67" y2="200"/>
+<line x1="56.67" y1="876.67" x2="76.67" y2="856.67"/>
+<line x1="56.67" y1="210" x2="76.67" y2="190"/>
+<text x="50" y="533.33" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="23.33" text-anchor="middle" transform="rotate(-90, 50, 533.33)">10&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="1066.67" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="1156.67" x2="1180" y2="1156.67" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="1090.67" font-size="18" font-weight="bold">Kitchen Renovation - 123 Main St</text>
+<text x="842" y="1112.67" font-size="13">123 Main Street, Anytown, ST 12345</text>
+<text x="842" y="1132.67" font-size="13">Jane Smith</text>
+<text x="842" y="1176.67" font-size="12">Sheet: A1</text>
+<text x="1015" y="1176.67" font-size="12">Date: 2026-02-11</text>
+<text x="842" y="1194.67" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1194.67" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>"
+`;
+
+exports[`visual regression > kitchen-reno proposed plan renders consistently 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1226.67" width="1200" height="1226.67">
+<rect x="0" y="0" width="1200" height="1226.67" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-kitchen">
+<g class="walls">
+<rect x="200" y="200" width="800" height="33.33" stroke="none" fill="#000"/>
+<rect x="200" y="841.67" width="800" height="25" stroke="none" fill="#333"/>
+<rect x="975" y="733.33" width="25" height="133.33" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="200" y="666.67" width="33.33" height="200"/>
+<rect x="200" y="200" width="33.33" height="200"/>
+</g>
+</g>
+</g>
+<g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="962.5" y1="733.33" x2="987.5" y2="733.33"/>
+<line x1="962.5" y1="200" x2="987.5" y2="200"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="208.33" y1="666.67" x2="208.33" y2="400"/>
+<line x1="225" y1="666.67" x2="225" y2="400"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="600" y="533.33" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="33.33" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="200" y1="1000" x2="1000" y2="1000"/>
+<line x1="190" y1="1010" x2="210" y2="990"/>
+<line x1="990" y1="1010" x2="1010" y2="990"/>
+<text x="600" y="983.33" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="23.33" text-anchor="middle">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="66.67" y1="866.67" x2="66.67" y2="200"/>
+<line x1="56.67" y1="876.67" x2="76.67" y2="856.67"/>
+<line x1="56.67" y1="210" x2="76.67" y2="190"/>
+<text x="50" y="533.33" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="23.33" text-anchor="middle" transform="rotate(-90, 50, 533.33)">10&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="1066.67" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="1156.67" x2="1180" y2="1156.67" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="1090.67" font-size="18" font-weight="bold">Kitchen Renovation - 123 Main St</text>
+<text x="842" y="1112.67" font-size="13">123 Main Street, Anytown, ST 12345</text>
+<text x="842" y="1132.67" font-size="13">Jane Smith</text>
+<text x="842" y="1176.67" font-size="12">Sheet: A1</text>
+<text x="1015" y="1176.67" font-size="12">Date: 2026-02-11</text>
+<text x="842" y="1194.67" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1194.67" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>"
+`;
+
+exports[`visual regression > multi-room renders consistently 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1032.73" width="1200" height="1032.73">
+<rect x="0" y="0" width="1200" height="1032.73" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-living">
+<g class="walls">
+<rect x="109.09" y="109.09" width="545.45" height="18.18" stroke="none" fill="#000"/>
+<rect x="109.09" y="527.27" width="545.45" height="18.18" stroke="none" fill="#000"/>
+<rect x="640.91" y="109.09" width="13.64" height="436.36" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="109.09" y="400" width="18.18" height="145.45"/>
+<rect x="109.09" y="109.09" width="18.18" height="181.82"/>
+</g>
+</g>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="109.09" y1="290.91" x2="218.18" y2="290.91"/>
+<path d="M 218.18,290.91 A 109.09,109.09 0 0,1 109.09,400"/>
+</g>
+<g class="room" id="room-kitchen">
+<g class="walls">
+<rect x="654.55" y="109.09" width="436.36" height="18.18" stroke="none" fill="#000"/>
+<rect x="654.55" y="459.09" width="436.36" height="13.64" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="1072.73" y="363.64" width="18.18" height="109.09"/>
+<rect x="1072.73" y="109.09" width="18.18" height="109.09"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="654.55" y="436.36" width="13.64" height="36.36"/>
+<rect x="654.55" y="109.09" width="13.64" height="109.09"/>
+</g>
+</g>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1077.27" y1="363.64" x2="1077.27" y2="218.18"/>
+<line x1="1086.36" y1="363.64" x2="1086.36" y2="218.18"/>
+</g>
+<g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="647.73" y1="436.36" x2="661.36" y2="436.36"/>
+<line x1="647.73" y1="218.18" x2="661.36" y2="218.18"/>
+</g>
+<g class="room" id="room-hallway">
+<g class="walls">
+<rect x="654.55" y="472.73" width="363.64" height="13.64" stroke="none" fill="#333"/>
+<rect x="654.55" y="568.18" width="363.64" height="13.64" stroke="none" fill="#333"/>
+<rect x="1004.55" y="472.73" width="13.64" height="109.09" stroke="none" fill="#333"/>
+<rect x="654.55" y="472.73" width="13.64" height="109.09" stroke="none" fill="#333"/>
+</g>
+</g>
+<g class="room" id="room-bathroom">
+<g class="walls">
+<g fill="#333" stroke="none">
+<rect x="109.09" y="545.45" width="72.73" height="13.64"/>
+<rect x="272.73" y="545.45" width="127.27" height="13.64"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="109.09" y="745.45" width="72.73" height="18.18"/>
+<rect x="290.91" y="745.45" width="109.09" height="18.18"/>
+</g>
+<rect x="386.36" y="545.45" width="13.64" height="218.18" stroke="none" fill="#333"/>
+<rect x="109.09" y="545.45" width="18.18" height="218.18" stroke="none" fill="#000"/>
+</g>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="181.82" y1="559.09" x2="181.82" y2="650"/>
+<path d="M 181.82,650 A 90.91,90.91 0 0,1 272.73,559.09"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="181.82" y1="750" x2="290.91" y2="750"/>
+<line x1="181.82" y1="759.09" x2="290.91" y2="759.09"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="381.82" y="327.27" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
+<text x="872.73" y="290.91" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
+<text x="836.36" y="527.27" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
+<text x="254.55" y="654.55" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="18.18" font-weight="500" text-anchor="middle" dominant-baseline="central">Bathroom</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="109.09" y1="618.18" x2="654.55" y2="618.18"/>
+<line x1="103.64" y1="623.64" x2="114.55" y2="612.73"/>
+<line x1="649.09" y1="623.64" x2="660" y2="612.73"/>
+<text x="381.82" y="609.09" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">15&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="36.36" y1="545.45" x2="36.36" y2="109.09"/>
+<line x1="30.91" y1="550.91" x2="41.82" y2="540"/>
+<line x1="30.91" y1="114.55" x2="41.82" y2="103.64"/>
+<text x="27.27" y="327.27" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 27.27, 327.27)">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="654.55" y1="545.45" x2="1090.91" y2="545.45"/>
+<line x1="649.09" y1="550.91" x2="660" y2="540"/>
+<line x1="1085.45" y1="550.91" x2="1096.36" y2="540"/>
+<text x="872.73" y="536.36" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="581.82" y1="472.73" x2="581.82" y2="109.09"/>
+<line x1="576.36" y1="478.18" x2="587.27" y2="467.27"/>
+<line x1="576.36" y1="114.55" x2="587.27" y2="103.64"/>
+<text x="572.73" y="290.91" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 572.73, 290.91)">10&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="654.55" y1="654.55" x2="1018.18" y2="654.55"/>
+<line x1="649.09" y1="660" x2="660" y2="649.09"/>
+<line x1="1012.73" y1="660" x2="1023.64" y2="649.09"/>
+<text x="836.36" y="645.45" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">10&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="581.82" y1="581.82" x2="581.82" y2="472.73"/>
+<line x1="576.36" y1="587.27" x2="587.27" y2="576.36"/>
+<line x1="576.36" y1="478.18" x2="587.27" y2="467.27"/>
+<text x="572.73" y="527.27" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 572.73, 527.27)">3&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="109.09" y1="836.36" x2="400" y2="836.36"/>
+<line x1="103.64" y1="841.82" x2="114.55" y2="830.91"/>
+<line x1="394.55" y1="841.82" x2="405.45" y2="830.91"/>
+<text x="254.55" y="827.27" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle">8&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="36.36" y1="763.64" x2="36.36" y2="545.45"/>
+<line x1="30.91" y1="769.09" x2="41.82" y2="758.18"/>
+<line x1="30.91" y1="550.91" x2="41.82" y2="540"/>
+<text x="27.27" y="654.55" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.73" text-anchor="middle" transform="rotate(-90, 27.27, 654.55)">6&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="872.73" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="962.73" x2="1180" y2="962.73" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="896.73" font-size="18" font-weight="bold">Multi-Room Floor Plan</text>
+<text x="842" y="918.73" font-size="13">456 Oak Avenue, Anytown, ST 12345</text>
+<text x="842" y="938.73" font-size="13">John Doe</text>
+<text x="842" y="982.73" font-size="12">Sheet: A1</text>
+<text x="1015" y="982.73" font-size="12">Date: 2026-02-11</text>
+<text x="842" y="1000.73" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1000.73" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>"
+`;
+
+exports[`visual regression > renders consistently with options disabled 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1028.57" width="1200" height="1028.57">
+<rect x="0" y="0" width="1200" height="1028.57" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-room1">
+<g class="walls">
+<rect x="171.43" y="171.43" width="857.14" height="28.57" stroke="none" fill="#000"/>
+<rect x="171.43" y="828.57" width="857.14" height="28.57" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="1000" y="685.71" width="28.57" height="171.43"/>
+<rect x="1000" y="171.43" width="28.57" height="171.43"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="171.43" y="628.57" width="28.57" height="228.57"/>
+<rect x="171.43" y="171.43" width="28.57" height="285.71"/>
+</g>
+</g>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1007.14" y1="685.71" x2="1007.14" y2="342.86"/>
+<line x1="1021.43" y1="685.71" x2="1021.43" y2="342.86"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="171.43" y1="457.14" x2="342.86" y2="457.14"/>
+<path d="M 342.86,457.14 A 171.43,171.43 0 0,1 171.43,628.57"/>
+</g>
+</g>
+</svg>"
+`;
+
+exports[`visual regression > single-room renders consistently 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1188.57" width="1200" height="1188.57">
+<rect x="0" y="0" width="1200" height="1188.57" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-room1">
+<g class="walls">
+<rect x="171.43" y="171.43" width="857.14" height="28.57" stroke="none" fill="#000"/>
+<rect x="171.43" y="828.57" width="857.14" height="28.57" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="1000" y="685.71" width="28.57" height="171.43"/>
+<rect x="1000" y="171.43" width="28.57" height="171.43"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="171.43" y="628.57" width="28.57" height="228.57"/>
+<rect x="171.43" y="171.43" width="28.57" height="285.71"/>
+</g>
+</g>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1007.14" y1="685.71" x2="1007.14" y2="342.86"/>
+<line x1="1021.43" y1="685.71" x2="1021.43" y2="342.86"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="171.43" y1="457.14" x2="342.86" y2="457.14"/>
+<path d="M 342.86,457.14 A 171.43,171.43 0 0,1 171.43,628.57"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="600" y="514.29" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="28.57" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="171.43" y1="971.43" x2="1028.57" y2="971.43"/>
+<line x1="162.86" y1="980" x2="180" y2="962.86"/>
+<line x1="1020" y1="980" x2="1037.14" y2="962.86"/>
+<text x="600" y="957.14" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="20" text-anchor="middle">15&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="57.14" y1="857.14" x2="57.14" y2="171.43"/>
+<line x1="48.57" y1="865.71" x2="65.71" y2="848.57"/>
+<line x1="48.57" y1="180" x2="65.71" y2="162.86"/>
+<text x="42.86" y="514.29" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="20" text-anchor="middle" transform="rotate(-90, 42.86, 514.29)">12&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="1028.57" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="1118.57" x2="1180" y2="1118.57" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="1052.57" font-size="18" font-weight="bold">Single Room</text>
+<text x="842" y="1156.57" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1156.57" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>"
+`;
+
+exports[`visual regression > single-room renders consistently at different widths 1`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 594.29" width="600" height="594.29">
+<rect x="0" y="0" width="600" height="594.29" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-room1">
+<g class="walls">
+<rect x="85.71" y="85.71" width="428.57" height="14.29" stroke="none" fill="#000"/>
+<rect x="85.71" y="414.29" width="428.57" height="14.29" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="500" y="342.86" width="14.29" height="85.71"/>
+<rect x="500" y="85.71" width="14.29" height="85.71"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="85.71" y="314.29" width="14.29" height="114.29"/>
+<rect x="85.71" y="85.71" width="14.29" height="142.86"/>
+</g>
+</g>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="503.57" y1="342.86" x2="503.57" y2="171.43"/>
+<line x1="510.71" y1="342.86" x2="510.71" y2="171.43"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="85.71" y1="228.57" x2="171.43" y2="228.57"/>
+<path d="M 171.43,228.57 A 85.71,85.71 0 0,1 85.71,314.29"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="300" y="257.14" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="14.29" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="85.71" y1="485.71" x2="514.29" y2="485.71"/>
+<line x1="81.43" y1="490" x2="90" y2="481.43"/>
+<line x1="510" y1="490" x2="518.57" y2="481.43"/>
+<text x="300" y="478.57" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10" text-anchor="middle">15&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="28.57" y1="428.57" x2="28.57" y2="85.71"/>
+<line x1="24.29" y1="432.86" x2="32.86" y2="424.29"/>
+<line x1="24.29" y1="90" x2="32.86" y2="81.43"/>
+<text x="21.43" y="257.14" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10" text-anchor="middle" transform="rotate(-90, 21.43, 257.14)">12&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="415" y="514.29" width="175" height="70" stroke="#000" stroke-width="0.25" fill="white"/>
+<line x1="415" y1="559.29" x2="590" y2="559.29" stroke="#000" stroke-width="0.17"/>
+<text x="421" y="526.29" font-size="9" font-weight="bold">Single Room</text>
+<text x="421" y="578.29" font-size="6">Scale: 1/4in = 1ft</text>
+<text x="507.5" y="578.29" fill="#666" font-size="5">FloorScript v0.1</text>
+</g>
+</g>
+</svg>"
+`;
+
+exports[`visual regression > single-room renders consistently at different widths 2`] = `
+"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 2377.14" width="2400" height="2377.14">
+<rect x="0" y="0" width="2400" height="2377.14" fill="white"/>
+<g class="layer-structural">
+<g class="room" id="room-room1">
+<g class="walls">
+<rect x="342.86" y="342.86" width="1714.29" height="57.14" stroke="none" fill="#000"/>
+<rect x="342.86" y="1657.14" width="1714.29" height="57.14" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="2000" y="1371.43" width="57.14" height="342.86"/>
+<rect x="2000" y="342.86" width="57.14" height="342.86"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="342.86" y="1257.14" width="57.14" height="457.14"/>
+<rect x="342.86" y="342.86" width="57.14" height="571.43"/>
+</g>
+</g>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="2014.29" y1="1371.43" x2="2014.29" y2="685.71"/>
+<line x1="2042.86" y1="1371.43" x2="2042.86" y2="685.71"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="342.86" y1="914.29" x2="685.71" y2="914.29"/>
+<path d="M 685.71,914.29 A 342.86,342.86 0 0,1 342.86,1257.14"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="1200" y="1028.57" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="57.14" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="342.86" y1="1942.86" x2="2057.14" y2="1942.86"/>
+<line x1="325.71" y1="1960" x2="360" y2="1925.71"/>
+<line x1="2040" y1="1960" x2="2074.29" y2="1925.71"/>
+<text x="1200" y="1914.29" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="40" text-anchor="middle">15&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="114.29" y1="1714.29" x2="114.29" y2="342.86"/>
+<line x1="97.14" y1="1731.43" x2="131.43" y2="1697.14"/>
+<line x1="97.14" y1="360" x2="131.43" y2="325.71"/>
+<text x="85.71" y="1028.57" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="40" text-anchor="middle" transform="rotate(-90, 85.71, 1028.57)">12&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="1660" y="2057.14" width="700" height="280" stroke="#000" stroke-width="1.00" fill="white"/>
+<line x1="1660" y1="2237.14" x2="2360" y2="2237.14" stroke="#000" stroke-width="0.70"/>
+<text x="1684" y="2105.14" font-size="36" font-weight="bold">Single Room</text>
+<text x="1684" y="2313.14" font-size="24">Scale: 1/4in = 1ft</text>
+<text x="2030" y="2313.14" fill="#666" font-size="20">FloorScript v0.1</text>
+</g>
+</g>
+</svg>"
+`;
