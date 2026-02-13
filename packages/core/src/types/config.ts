@@ -61,6 +61,12 @@ export type SwingDirection =
   | "outward-left"
   | "outward-right";
 
+export type CornerPosition =
+  | "northwest"
+  | "northeast"
+  | "southwest"
+  | "southeast";
+
 // ---- Config interfaces ----
 
 export interface FloorPlanConfig {
@@ -110,6 +116,8 @@ export interface RoomConfig {
   width: Dimension;
   height: Dimension;
   walls?: WallsConfig;
+  extensions?: ExtensionConfig[];
+  enclosures?: EnclosureConfig[];
 }
 
 export interface AdjacencyConfig {
@@ -145,7 +153,9 @@ export interface WallConfig {
 
 export interface OpeningConfig {
   type: OpeningType;
-  position: Dimension;
+  position?: Dimension | "center";
+  from?: CardinalDirection;
+  offset?: Dimension;
   width: Dimension;
   style?: DoorStyle;
   swing?: SwingDirection;
@@ -339,12 +349,21 @@ const ElementStatusSchema = z
   .enum(["existing", "demolish", "new"])
   .describe("Renovation status: existing (keep), demolish (remove), new (add)");
 
+const CardinalDirectionSchema = z.enum(["north", "south", "east", "west"]);
+
 const OpeningSchema = z
   .object({
     type: z.enum(["door", "window"]).describe("Opening type"),
-    position: DimensionSchema.describe(
-      "Offset along the wall from the wall's start point",
-    ),
+    position: z
+      .union([DimensionSchema, z.literal("center")])
+      .describe("Offset along the wall, or 'center' to auto-center")
+      .optional(),
+    from: CardinalDirectionSchema.describe(
+      "Reference wall to measure offset from",
+    ).optional(),
+    offset: DimensionSchema.describe(
+      "Distance from reference wall to near edge of opening",
+    ).optional(),
     width: DimensionSchema,
     style: z
       .enum([
@@ -366,6 +385,13 @@ const OpeningSchema = z
     sill_height: DimensionSchema.optional(),
     status: ElementStatusSchema.optional(),
   })
+  .refine(
+    (d) => d.position != null || (d.from != null && d.offset != null),
+    {
+      message:
+        "Opening must specify either 'position' (or 'center') or both 'from' and 'offset'",
+    },
+  )
   .describe("A door or window opening placed on a wall");
 
 const StudSizeSchema = z.enum(["2x4", "2x6", "2x8"]);
@@ -391,6 +417,49 @@ const WallsSchema = z.object({
   east: WallSchema.optional(),
   west: WallSchema.optional(),
 });
+
+// ---- Enclosure & Extension Zod schemas ----
+
+const CornerPositionSchema = z.enum([
+  "northwest",
+  "northeast",
+  "southwest",
+  "southeast",
+]);
+
+const EnclosureSchema = z
+  .object({
+    id: z.string(),
+    label: z.string(),
+    corner: CornerPositionSchema.optional(),
+    wall: CardinalDirectionSchema.optional(),
+    facing: CardinalDirectionSchema.optional(),
+    length: z
+      .union([DimensionSchema, z.literal("full")])
+      .describe("Along wall (corner) or wall span; 'full' for entire wall"),
+    depth: DimensionSchema,
+    from: CardinalDirectionSchema.optional(),
+    offset: DimensionSchema.optional(),
+    walls: WallsSchema.optional(),
+  })
+  .refine((d) => (d.corner != null) !== (d.wall != null), {
+    message: "Enclosure must specify either 'corner' or 'wall', not both",
+  });
+
+export type EnclosureConfig = z.infer<typeof EnclosureSchema>;
+
+const ExtensionSchema = z.object({
+  id: z.string(),
+  label: z.string(),
+  wall: CardinalDirectionSchema,
+  from: CardinalDirectionSchema,
+  offset: DimensionSchema,
+  width: DimensionSchema,
+  depth: DimensionSchema,
+  walls: WallsSchema.optional(),
+});
+
+export type ExtensionConfig = z.infer<typeof ExtensionSchema>;
 
 const AdjacencySchema = z
   .object({
@@ -418,6 +487,8 @@ const RoomSchema = z
     width: DimensionSchema,
     height: DimensionSchema,
     walls: WallsSchema.optional(),
+    extensions: z.array(ExtensionSchema).optional(),
+    enclosures: z.array(EnclosureSchema).optional(),
   })
   .describe("A room with dimensions, position, and optional wall overrides");
 

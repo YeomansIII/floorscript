@@ -23,6 +23,8 @@ export function validatePlan(plan: ResolvedPlan): ValidationResult {
   if (plan.wallGraph) {
     checkRunsThroughWalls(plan, warnings);
   }
+  checkOpeningInExtensionGap(plan, warnings);
+  checkSealedEnclosures(plan, warnings);
 
   return { errors, warnings };
 }
@@ -256,6 +258,90 @@ function checkRunsThroughWalls(
               "Route the run through an opening or add a wall penetration",
           });
         }
+      }
+    }
+  }
+}
+
+/**
+ * Check for openings on parent walls that overlap with extension gaps.
+ * FR-030: An opening placed on a wall segment removed by an extension gap is invalid.
+ */
+function checkOpeningInExtensionGap(
+  plan: ResolvedPlan,
+  warnings: ValidationIssue[],
+): void {
+  for (const room of plan.rooms) {
+    if (!room.extensions || room.extensions.length === 0) continue;
+
+    for (const wall of room.walls) {
+      // Find extensions on this wall
+      const wallExts = room.extensions.filter(
+        (ext) => ext.parentWall === wall.direction,
+      );
+      if (wallExts.length === 0) continue;
+
+      for (const opening of wall.openings) {
+        const isHorizontal =
+          wall.direction === "north" || wall.direction === "south";
+
+        for (const ext of wallExts) {
+          const gapStart = isHorizontal ? ext.bounds.x : ext.bounds.y;
+          const gapEnd = isHorizontal
+            ? ext.bounds.x + ext.bounds.width
+            : ext.bounds.y + ext.bounds.height;
+
+          const openStart = isHorizontal
+            ? opening.gapStart.x
+            : opening.gapStart.y;
+          const openEnd = isHorizontal
+            ? opening.gapEnd.x
+            : opening.gapEnd.y;
+
+          // Check overlap between opening and extension gap
+          if (openEnd > gapStart + 0.001 && openStart < gapEnd - 0.001) {
+            warnings.push({
+              code: "opening-in-extension-gap",
+              severity: "warning",
+              message:
+                `Opening on wall "${wall.id}" overlaps with extension "${ext.id}" gap ` +
+                `on room "${room.id}". The opening falls within the wall segment removed by the extension.`,
+              roomId: room.id,
+              wallId: wall.id,
+              elementId: ext.id,
+              suggestion:
+                `Move the opening away from the extension gap, or place it on the extension's own walls instead.`,
+            });
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Check that enclosures have at least one opening (door) for accessibility.
+ */
+function checkSealedEnclosures(
+  plan: ResolvedPlan,
+  warnings: ValidationIssue[],
+): void {
+  for (const room of plan.rooms) {
+    if (!room.enclosures) continue;
+
+    for (const enc of room.enclosures) {
+      const hasOpening = enc.walls.some((w) => w.openings.length > 0);
+      if (!hasOpening) {
+        warnings.push({
+          code: "sealed-enclosure",
+          severity: "warning",
+          message: `Enclosure "${enc.id}" in room "${room.id}" has no door or opening`,
+          roomId: room.id,
+          wallId: null,
+          elementId: enc.id,
+          suggestion:
+            `Add a door to one of the enclosure's interior walls (e.g., the "${enc.facing}" wall)`,
+        });
       }
     }
   }

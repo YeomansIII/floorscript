@@ -5,6 +5,7 @@ import type {
   WallsConfig,
 } from "../types/config.js";
 import type { Rect, ResolvedWall } from "../types/geometry.js";
+import type { WallModification } from "./enclosure-resolver.js";
 import { resolveWallComposition } from "./shared-wall-resolver.js";
 
 const LINE_WEIGHTS: Record<string, number> = {
@@ -13,17 +14,27 @@ const LINE_WEIGHTS: Record<string, number> = {
   "load-bearing": 0.5,
 };
 
+export interface WallGap {
+  gapStart: number;
+  gapEnd: number;
+}
+
 /**
  * Resolve walls for a room given its bounding rectangle.
  * Room bounds represent interior clear space (sheetrock to sheetrock).
  * Walls extend OUTSIDE the room bounds as additional material.
  * Horizontal walls (north/south) extend through corners; vertical walls (east/west) butt in.
+ *
+ * Optionally accepts wall modifications (from enclosures) and wall gaps (from extensions)
+ * to adjust parent wall geometry.
  */
 export function resolveWalls(
   wallsConfig: WallsConfig | undefined,
   roomId: string,
   roomBounds: Rect,
   units: UnitSystem,
+  wallModifications?: Map<CardinalDirection, WallModification>,
+  wallGaps?: Map<CardinalDirection, WallGap[]>,
 ): ResolvedWall[] {
   const walls: ResolvedWall[] = [];
   const directions: CardinalDirection[] = ["north", "south", "east", "west"];
@@ -42,6 +53,9 @@ export function resolveWalls(
     const wallType = wallConfig?.type ?? "interior";
     const composition = resolveWallComposition(wallConfig, wallType, units);
 
+    const mod = wallModifications?.get(dir);
+    const gaps = wallGaps?.get(dir);
+
     const wall = resolveWallGeometry(
       roomId,
       dir,
@@ -50,6 +64,8 @@ export function resolveWalls(
       roomBounds,
       thicknesses.get("west")!,
       thicknesses.get("east")!,
+      mod,
+      gaps,
     );
     walls.push(wall);
   }
@@ -62,6 +78,9 @@ export function resolveWalls(
  * Inner edge = room boundary. Outer edge = room boundary + thickness outward.
  * Horizontal walls (north/south) extend to cover corner squares.
  * Vertical walls (east/west) butt into horizontal walls.
+ *
+ * Wall modifications shorten walls from start/end (for enclosures).
+ * Wall gaps remove segments entirely (for extensions).
  */
 function resolveWallGeometry(
   roomId: string,
@@ -71,8 +90,12 @@ function resolveWallGeometry(
   bounds: Rect,
   westThickness: number,
   eastThickness: number,
+  modification?: WallModification,
+  gaps?: WallGap[],
 ): ResolvedWall {
   const { x, y, width, height } = bounds;
+  const shortenStart = modification?.shortenFromStart ?? 0;
+  const shortenEnd = modification?.shortenFromEnd ?? 0;
 
   let rect: Rect;
   let outerStart: { x: number; y: number };
@@ -82,52 +105,69 @@ function resolveWallGeometry(
   let interiorStartOffset: number;
 
   switch (direction) {
-    case "south":
-      // Horizontal wall extends through corners
+    case "south": {
+      // Horizontal wall extends through corners, adjusted for enclosure shortening
+      const startX = x - westThickness + shortenStart;
+      const endX = x + width + eastThickness - shortenEnd;
       rect = {
-        x: x - westThickness,
+        x: startX,
         y: y - thickness,
-        width: width + westThickness + eastThickness,
+        width: endX - startX,
         height: thickness,
       };
-      outerStart = { x: x - westThickness, y: y - thickness };
-      outerEnd = { x: x + width + eastThickness, y: y - thickness };
-      innerStart = { x: x - westThickness, y };
-      innerEnd = { x: x + width + eastThickness, y };
-      interiorStartOffset = westThickness;
+      outerStart = { x: startX, y: y - thickness };
+      outerEnd = { x: endX, y: y - thickness };
+      innerStart = { x: startX, y };
+      innerEnd = { x: endX, y };
+      interiorStartOffset = Math.max(0, westThickness - shortenStart);
       break;
-    case "north":
-      // Horizontal wall extends through corners
+    }
+    case "north": {
+      const startX = x - westThickness + shortenStart;
+      const endX = x + width + eastThickness - shortenEnd;
       rect = {
-        x: x - westThickness,
+        x: startX,
         y: y + height,
-        width: width + westThickness + eastThickness,
+        width: endX - startX,
         height: thickness,
       };
-      outerStart = { x: x - westThickness, y: y + height + thickness };
-      outerEnd = { x: x + width + eastThickness, y: y + height + thickness };
-      innerStart = { x: x - westThickness, y: y + height };
-      innerEnd = { x: x + width + eastThickness, y: y + height };
-      interiorStartOffset = westThickness;
+      outerStart = { x: startX, y: y + height + thickness };
+      outerEnd = { x: endX, y: y + height + thickness };
+      innerStart = { x: startX, y: y + height };
+      innerEnd = { x: endX, y: y + height };
+      interiorStartOffset = Math.max(0, westThickness - shortenStart);
       break;
-    case "west":
-      // Vertical wall butts into horizontal walls (no corner extension)
-      rect = { x: x - thickness, y, width: thickness, height };
-      outerStart = { x: x - thickness, y };
-      outerEnd = { x: x - thickness, y: y + height };
-      innerStart = { x, y };
-      innerEnd = { x, y: y + height };
+    }
+    case "west": {
+      const startY = y + shortenStart;
+      const endY = y + height - shortenEnd;
+      rect = { x: x - thickness, y: startY, width: thickness, height: endY - startY };
+      outerStart = { x: x - thickness, y: startY };
+      outerEnd = { x: x - thickness, y: endY };
+      innerStart = { x, y: startY };
+      innerEnd = { x, y: endY };
       interiorStartOffset = 0;
       break;
-    case "east":
-      // Vertical wall butts into horizontal walls (no corner extension)
-      rect = { x: x + width, y, width: thickness, height };
-      outerStart = { x: x + width + thickness, y };
-      outerEnd = { x: x + width + thickness, y: y + height };
-      innerStart = { x: x + width, y };
-      innerEnd = { x: x + width, y: y + height };
+    }
+    case "east": {
+      const startY = y + shortenStart;
+      const endY = y + height - shortenEnd;
+      rect = { x: x + width, y: startY, width: thickness, height: endY - startY };
+      outerStart = { x: x + width + thickness, y: startY };
+      outerEnd = { x: x + width + thickness, y: endY };
+      innerStart = { x: x + width, y: startY };
+      innerEnd = { x: x + width, y: endY };
       interiorStartOffset = 0;
       break;
+    }
+  }
+
+  // Compute segments: start with full wall rect, then split by gaps
+  let segments: Rect[];
+  if (gaps && gaps.length > 0) {
+    segments = splitWallByGaps(rect, direction, gaps);
+  } else {
+    segments = [rect];
   }
 
   return {
@@ -140,7 +180,71 @@ function resolveWallGeometry(
     innerEdge: { start: innerStart, end: innerEnd },
     rect,
     openings: [],
-    segments: [rect],
+    segments,
     interiorStartOffset,
   };
+}
+
+/**
+ * Split a wall rect into segments by removing gap regions.
+ * Gaps are defined along the wall's primary axis.
+ */
+function splitWallByGaps(
+  wallRect: Rect,
+  direction: CardinalDirection,
+  gaps: WallGap[],
+): Rect[] {
+  const isHorizontal = direction === "north" || direction === "south";
+  const segments: Rect[] = [];
+
+  // Sort gaps by start position
+  const sorted = [...gaps].sort((a, b) => a.gapStart - b.gapStart);
+
+  if (isHorizontal) {
+    let currentX = wallRect.x;
+    for (const gap of sorted) {
+      if (gap.gapStart > currentX + 0.001) {
+        segments.push({
+          x: currentX,
+          y: wallRect.y,
+          width: gap.gapStart - currentX,
+          height: wallRect.height,
+        });
+      }
+      currentX = gap.gapEnd;
+    }
+    const endX = wallRect.x + wallRect.width;
+    if (endX > currentX + 0.001) {
+      segments.push({
+        x: currentX,
+        y: wallRect.y,
+        width: endX - currentX,
+        height: wallRect.height,
+      });
+    }
+  } else {
+    let currentY = wallRect.y;
+    for (const gap of sorted) {
+      if (gap.gapStart > currentY + 0.001) {
+        segments.push({
+          x: wallRect.x,
+          y: currentY,
+          width: wallRect.width,
+          height: gap.gapStart - currentY,
+        });
+      }
+      currentY = gap.gapEnd;
+    }
+    const endY = wallRect.y + wallRect.height;
+    if (endY > currentY + 0.001) {
+      segments.push({
+        x: wallRect.x,
+        y: currentY,
+        width: wallRect.width,
+        height: endY - currentY,
+      });
+    }
+  }
+
+  return segments.length > 0 ? segments : [wallRect];
 }

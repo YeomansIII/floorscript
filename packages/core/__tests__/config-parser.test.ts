@@ -410,4 +410,229 @@ plans:
     expect(shared![0].openings).toHaveLength(1);
     expect(shared![0].openings![0].style).toBe("cased-opening");
   });
+
+  it("parses room with enclosures", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Enclosure Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bedroom1
+        label: "Bedroom"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        enclosures:
+          - id: closet
+            label: "Closet"
+            corner: northwest
+            facing: east
+            length: 6ft
+            depth: 2ft 4in
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    position: 1ft
+                    width: 2ft 6in
+                    style: bifold
+`;
+    const config = parseConfig(yaml);
+    const room = config.plans[0].rooms[0];
+    expect(room.enclosures).toHaveLength(1);
+    expect(room.enclosures![0].id).toBe("closet");
+    expect(room.enclosures![0].label).toBe("Closet");
+    expect(room.enclosures![0].corner).toBe("northwest");
+    expect(room.enclosures![0].facing).toBe("east");
+    expect(room.enclosures![0].length).toBe("6ft");
+    expect(room.enclosures![0].depth).toBe("2ft 4in");
+    expect(room.enclosures![0].walls?.east?.openings).toHaveLength(1);
+  });
+
+  it("parses room with extensions", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Extension Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bedroom1
+        label: "Bedroom"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        extensions:
+          - id: window-nook
+            label: "Window Nook"
+            wall: north
+            from: east
+            offset: 4ft 8in
+            width: 3ft 9in
+            depth: 5ft 4in
+            walls:
+              north:
+                type: exterior
+                openings:
+                  - type: window
+                    position: 6in
+                    width: 2ft 9in
+`;
+    const config = parseConfig(yaml);
+    const room = config.plans[0].rooms[0];
+    expect(room.extensions).toHaveLength(1);
+    expect(room.extensions![0].id).toBe("window-nook");
+    expect(room.extensions![0].wall).toBe("north");
+    expect(room.extensions![0].from).toBe("east");
+    expect(room.extensions![0].offset).toBe("4ft 8in");
+    expect(room.extensions![0].width).toBe("3ft 9in");
+    expect(room.extensions![0].depth).toBe("5ft 4in");
+  });
+
+  it("parses openings with from/offset", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "From/Offset Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: room1
+        label: "Room"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        walls:
+          west:
+            type: exterior
+            openings:
+              - type: door
+                from: south
+                offset: 2ft 7in
+                width: 3ft
+                swing: inward-right
+`;
+    const config = parseConfig(yaml);
+    const opening = config.plans[0].rooms[0].walls?.west?.openings?.[0];
+    expect(opening?.from).toBe("south");
+    expect(opening?.offset).toBe("2ft 7in");
+    expect(opening?.position).toBeUndefined();
+    expect(opening?.width).toBe("3ft");
+  });
+
+  it("rejects enclosure with both corner and wall", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+        enclosures:
+          - id: closet
+            label: "Closet"
+            corner: northwest
+            wall: north
+            length: 6ft
+            depth: 2ft
+`;
+    expect(() => parseConfig(yaml)).toThrow("Invalid FloorScript config");
+  });
+
+  it("rejects opening with neither position nor from/offset", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: door
+                width: 3ft
+`;
+    expect(() => parseConfig(yaml)).toThrow("Invalid FloorScript config");
+  });
+
+  it("parses opening with position: center", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Center Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 4ft
+`;
+    const config = parseConfig(yaml);
+    const opening = config.plans[0].rooms[0].walls?.north?.openings?.[0];
+    expect(opening?.position).toBe("center");
+  });
+
+  it("parses enclosure with length: full", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Full Length Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+        enclosures:
+          - id: closet
+            label: "Closet"
+            wall: north
+            length: full
+            depth: 2ft
+`;
+    const config = parseConfig(yaml);
+    const enc = config.plans[0].rooms[0].enclosures![0];
+    expect(enc.length).toBe("full");
+    expect(enc.wall).toBe("north");
+  });
 });

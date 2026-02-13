@@ -1,0 +1,67 @@
+version: "0.1"
+project:
+  title: "Bedroom with Closet and Window Nook"
+  scale: "1/4in = 1ft"
+units: imperial
+
+plans:
+  - id: main
+    title: "Bedroom Floor Plan"
+    rooms:
+      - id: bedroom
+        label: "Primary Bedroom"
+        position: [0, 0]
+        width: 14ft
+        height: 12ft
+        walls:
+          north: { type: exterior }
+          south:
+            type: exterior
+            openings:
+              - type: door
+                from: west
+                offset: 2ft
+                width: 3ft
+                swing: inward-right
+          east:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 4ft
+                sill_height: 3ft
+          west: { type: exterior }
+        enclosures:
+          - id: closet
+            label: "Walk-in Closet"
+            corner: northwest
+            facing: east
+            length: 6ft
+            depth: 4ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    from: south
+                    offset: 1ft
+                    width: 2ft 6in
+                    swing: inward-left
+        extensions:
+          - id: window-nook
+            label: "Window Nook"
+            wall: north
+            from: east
+            offset: 2ft
+            width: 5ft
+            depth: 3ft
+            walls:
+              north:
+                type: exterior
+                openings:
+                  - type: window
+                    position: center
+                    width: 4ft
+                    sill_height: 2ft 6in
+              east: { type: exterior }
+              west: { type: exterior }

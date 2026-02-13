@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1246.17" width="1200" height="1246.17">
+<rect x="0" y="0" width="1200" height="1246.17" fill="white"/>
+<g class="layer-structural">
+<g class="walls">
+<rect x="170.75" y="170.75" width="858.5" height="30.83" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="170.75" y="884.58" width="315.42" height="30.83"/>
+<rect x="656.92" y="884.58" width="372.33" height="30.83"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="998.42" y="656.92" width="30.83" height="227.67"/>
+<rect x="998.42" y="201.58" width="30.83" height="227.67"/>
+</g>
+<rect x="170.75" y="201.58" width="30.83" height="683" stroke="none" fill="#000"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="656.92" y1="915.42" x2="656.92" y2="744.66"/>
+<path d="M 656.92,744.66 A 170.75,170.75 0 0,0 486.17,915.42"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1006.13" y1="656.92" x2="1006.13" y2="429.25"/>
+<line x1="1021.54" y1="656.92" x2="1021.54" y2="429.25"/>
+</g>
+<g class="enclosure-walls" id="enclosure-closet">
+<g fill="#333" stroke="none">
+<rect x="407.91" y="486.17" width="21.34" height="56.92"/>
+<rect x="407.91" y="201.58" width="21.34" height="142.29"/>
+</g>
+<rect x="201.58" y="521.74" width="227.67" height="21.34" stroke="none" fill="#333"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="407.91" y1="486.17" x2="265.61" y2="486.17"/>
+<path d="M 265.61,486.17 A 142.29,142.29 0 0,1 407.91,343.87"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="600" y="543.08" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="28.46" font-weight="500" text-anchor="middle" dominant-baseline="central">Primary Bedroom</text>
+<text x="315.42" y="372.33" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="28.46" font-weight="500" text-anchor="middle" dominant-baseline="central">Walk-in Closet</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="201.58" y1="998.42" x2="998.42" y2="998.42"/>
+<line x1="193.04" y1="1006.96" x2="210.12" y2="989.88"/>
+<line x1="989.88" y1="1006.96" x2="1006.96" y2="989.88"/>
+<text x="600" y="984.19" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="19.92" text-anchor="middle">14&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="87.75" y1="884.58" x2="87.75" y2="201.58"/>
+<line x1="79.21" y1="893.12" x2="96.28" y2="876.05"/>
+<line x1="79.21" y1="210.12" x2="96.28" y2="193.04"/>
+<text x="73.52" y="543.08" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="19.92" text-anchor="middle" transform="rotate(-90, 73.52, 543.08)">12&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="1086.17" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="1176.17" x2="1180" y2="1176.17" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="1110.17" font-size="18" font-weight="bold">Bedroom with Closet</text>
+<text x="842" y="1214.17" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1214.17" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>

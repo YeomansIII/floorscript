@@ -7,9 +7,18 @@ import type {
   UnitSystem,
   WallsConfig,
 } from "../types/config.js";
-import type { Rect, ResolvedPlan, ResolvedRoom } from "../types/geometry.js";
+import type {
+  Rect,
+  ResolvedEnclosure,
+  ResolvedExtension,
+  ResolvedPlan,
+  ResolvedRoom,
+} from "../types/geometry.js";
+import { computeCompositeOutline } from "./composite-outline.js";
 import { generateDimensions } from "./dimension-resolver.js";
 import { resolveElectrical } from "./electrical-resolver.js";
+import { resolveEnclosures } from "./enclosure-resolver.js";
+import { resolveExtensions } from "./extension-resolver.js";
 import { resolveOpenings } from "./opening-resolver.js";
 import { resolvePlumbing } from "./plumbing-resolver.js";
 import { resolveWallSegments } from "./segment-resolver.js";
@@ -147,34 +156,150 @@ function resolveRoom(
 
   const bounds: Rect = { x, y, width, height };
 
-  // Resolve walls
-  const walls = resolveWalls(config.walls, config.id, bounds, units);
+  // Resolve enclosures and extensions (before wall generation)
+  let enclosures: ResolvedEnclosure[] | undefined;
+  let extensions: ResolvedExtension[] | undefined;
+  let wallModifications:
+    | Map<CardinalDirection, { shortenFromStart?: number; shortenFromEnd?: number }>
+    | undefined;
+  let wallGaps:
+    | Map<CardinalDirection, Array<{ gapStart: number; gapEnd: number }>>
+    | undefined;
+
+  if (config.enclosures && config.enclosures.length > 0) {
+    const encResult = resolveEnclosures(
+      config.enclosures,
+      bounds,
+      units,
+      config.id,
+    );
+    enclosures = encResult.enclosures;
+    wallModifications = encResult.wallModifications;
+  }
+
+  if (config.extensions && config.extensions.length > 0) {
+    const extResult = resolveExtensions(
+      config.extensions,
+      bounds,
+      units,
+      config.id,
+    );
+    extensions = extResult.extensions;
+    wallGaps = extResult.wallGaps;
+  }
+
+  // Resolve walls (with optional modifications from enclosures/extensions)
+  const walls = resolveWalls(
+    config.walls,
+    config.id,
+    bounds,
+    units,
+    wallModifications,
+    wallGaps,
+  );
 
   // Resolve openings on each wall, then compute wall segments
   for (const wall of walls) {
     const wallDir = wall.direction;
     const wallConfig = config.walls?.[wallDir];
     if (wallConfig?.openings && wallConfig.openings.length > 0) {
+      // Wall interior length = room dimension along the wall axis
+      const wallInteriorLength =
+        wallDir === "north" || wallDir === "south" ? width : height;
       wall.openings = resolveOpenings(
         wall,
         wallConfig.openings,
         units,
         config.id,
+        wallInteriorLength,
       );
+      // Re-split segments by openings (segments already account for extension gaps)
+      wall.segments = resolveWallSegments(wall);
     }
-    wall.segments = resolveWallSegments(wall);
+    // When no openings, keep existing segments from wall resolver (may include extension gaps)
+  }
+
+  // Compute composite outline when room has extensions or enclosures
+  let compositeOutline: import("../types/geometry.js").Point[] | undefined;
+  let labelPosition: import("../types/geometry.js").Point;
+
+  const hasComposite =
+    (enclosures && enclosures.length > 0) ||
+    (extensions && extensions.length > 0);
+
+  if (hasComposite) {
+    const extRects = extensions?.map((e) => e.bounds) ?? [];
+    const encRects = enclosures?.map((e) => e.bounds) ?? [];
+    compositeOutline = computeCompositeOutline(bounds, extRects, encRects);
+    // Place label at centroid of the parent rect minus enclosures (largest open area)
+    labelPosition = computeCompositeLabelPosition(bounds, encRects);
+  } else {
+    labelPosition = { x: x + width / 2, y: y + height / 2 };
   }
 
   return {
     id: config.id,
     label: config.label,
     bounds,
-    labelPosition: {
-      x: x + width / 2,
-      y: y + height / 2,
-    },
+    labelPosition,
     walls,
+    compositeOutline,
+    enclosures,
+    extensions,
   };
+}
+
+/**
+ * Compute label position for composite rooms.
+ * Uses the centroid of the parent rect minus enclosures to find
+ * the largest open area for the label.
+ */
+function computeCompositeLabelPosition(
+  parentBounds: Rect,
+  enclosureRects: Rect[],
+): { x: number; y: number } {
+  if (enclosureRects.length === 0) {
+    return {
+      x: parentBounds.x + parentBounds.width / 2,
+      y: parentBounds.y + parentBounds.height / 2,
+    };
+  }
+
+  // Compute the area-weighted centroid of the parent minus enclosures
+  // Simple approach: shift center away from enclosure corners
+  const cx = parentBounds.x + parentBounds.width / 2;
+  const cy = parentBounds.y + parentBounds.height / 2;
+
+  // Check if center is inside an enclosure; if so, shift
+  for (const enc of enclosureRects) {
+    if (
+      cx >= enc.x &&
+      cx <= enc.x + enc.width &&
+      cy >= enc.y &&
+      cy <= enc.y + enc.height
+    ) {
+      // Center falls in enclosure — use parent center shifted to open area
+      // Find the largest axis-aligned open rectangle (simplified: use area-weighted center)
+      const parentArea = parentBounds.width * parentBounds.height;
+      const encArea = enclosureRects.reduce(
+        (sum, r) => sum + r.width * r.height,
+        0,
+      );
+      const openArea = parentArea - encArea;
+      if (openArea > 0) {
+        // Weighted: parent center × parent area - enclosure centers × their areas
+        let wx = cx * parentArea;
+        let wy = cy * parentArea;
+        for (const e of enclosureRects) {
+          wx -= (e.x + e.width / 2) * (e.width * e.height);
+          wy -= (e.y + e.height / 2) * (e.width * e.height);
+        }
+        return { x: wx / openArea, y: wy / openArea };
+      }
+    }
+  }
+
+  return { x: cx, y: cy };
 }
 
 function alignPosition(

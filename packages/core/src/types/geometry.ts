@@ -1,5 +1,6 @@
 import type {
   CardinalDirection,
+  CornerPosition,
   DetectorType,
   DoorStyle,
   FacingDirection,
@@ -53,12 +54,33 @@ export interface ResolvedPlan {
   layers?: LayersConfig;
 }
 
+export interface ResolvedEnclosure {
+  id: string;
+  label: string;
+  parentRoomId: string;
+  bounds: Rect;
+  facing: CardinalDirection;
+  walls: ResolvedWall[];
+}
+
+export interface ResolvedExtension {
+  id: string;
+  label: string;
+  parentRoomId: string;
+  bounds: Rect;
+  parentWall: CardinalDirection;
+  walls: ResolvedWall[];
+}
+
 export interface ResolvedRoom {
   id: string;
   label: string;
   bounds: Rect;
   labelPosition: Point;
   walls: ResolvedWall[];
+  compositeOutline?: Point[];
+  enclosures?: ResolvedEnclosure[];
+  extensions?: ResolvedExtension[];
 }
 
 export interface ResolvedWall {

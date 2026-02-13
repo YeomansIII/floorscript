@@ -266,6 +266,53 @@ plans:
     expect(svg).toContain("<path");
   });
 
+  it("renders enclosure interior walls and sub-space labels", () => {
+    const yaml = readFileSync(
+      resolve(__dirname, "../../../examples/bedroom-closet.yaml"),
+      "utf-8",
+    );
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved);
+
+    // Enclosure interior walls present
+    expect(svg).toContain("enclosure-walls");
+    expect(svg).toContain('id="enclosure-closet"');
+
+    // Sub-space label
+    expect(svg).toContain("Walk-in Closet");
+    // Parent room label
+    expect(svg).toContain("Primary Bedroom");
+
+    // Door on enclosure wall
+    expect(svg).toContain("opening door");
+  });
+
+  it("renders extension exterior walls and sub-space labels", () => {
+    const yaml = readFileSync(
+      resolve(__dirname, "../../../examples/bedroom-nook.yaml"),
+      "utf-8",
+    );
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved);
+
+    // Extension exterior walls present
+    expect(svg).toContain("extension-walls");
+    expect(svg).toContain('id="extension-window-nook"');
+
+    // Sub-space labels
+    expect(svg).toContain("Window Nook");
+    expect(svg).toContain("Walk-in Closet");
+    expect(svg).toContain("Primary Bedroom");
+
+    // Window on extension wall
+    expect(svg).toContain("opening window");
+
+    // Enclosure also present
+    expect(svg).toContain("enclosure-walls");
+  });
+
   it("hides plumbing layer when layer visibility is false", () => {
     const yaml = readFileSync(
       resolve(__dirname, "../../../examples/multi-room.yaml"),

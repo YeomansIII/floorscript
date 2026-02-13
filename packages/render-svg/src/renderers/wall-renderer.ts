@@ -1,5 +1,7 @@
 import type {
   PlanWall,
+  ResolvedEnclosure,
+  ResolvedExtension,
   ResolvedRoom,
   ResolvedWall,
   WallGraph,
@@ -76,6 +78,40 @@ function renderPlanWall(
   }
 
   dc.closeGroup();
+}
+
+/**
+ * Render enclosure interior walls for a room.
+ */
+export function renderEnclosureWalls(
+  enclosures: ResolvedEnclosure[],
+  ctx: TransformContext,
+  dc: DrawingContext,
+): void {
+  for (const enc of enclosures) {
+    dc.openGroup({ class: "enclosure-walls", id: `enclosure-${enc.id}` });
+    for (const wall of enc.walls) {
+      renderWall(wall, ctx, dc);
+    }
+    dc.closeGroup();
+  }
+}
+
+/**
+ * Render extension exterior walls for a room.
+ */
+export function renderExtensionWalls(
+  extensions: ResolvedExtension[],
+  ctx: TransformContext,
+  dc: DrawingContext,
+): void {
+  for (const ext of extensions) {
+    dc.openGroup({ class: "extension-walls", id: `extension-${ext.id}` });
+    for (const wall of ext.walls) {
+      renderWall(wall, ctx, dc);
+    }
+    dc.closeGroup();
+  }
 }
 
 function renderWall(

@@ -1,9 +1,9 @@
 version: "0.1"
 project:
-  title: "Multi-Room Floor Plan"
+  title: "Small Two-Bedroom House"
   address: "456 Oak Avenue, Anytown, ST 12345"
   owner: "John Doe"
-  date: "2026-02-11"
+  date: "2026-02-13"
   sheet: "A1"
   scale: "1/4in = 1ft"
 units: imperial
@@ -12,173 +12,436 @@ plans:
   - id: main
     title: "Floor Plan"
     rooms:
+      # ── Row 1 (south): Living Room + Kitchen ──────────────
       - id: living
         label: "Living Room"
         position: [0, 0]
-        width: 15ft
-        height: 12ft
+        width: 18ft
+        height: 14ft
         walls:
-          north: { type: exterior }
-          south: { type: exterior }
+          north: { type: interior }
+          south:
+            type: exterior
+            openings:
+              - type: door
+                from: west
+                offset: 6ft
+                width: 3ft
+                swing: inward-right
+              - type: window
+                from: east
+                offset: 3ft
+                width: 4ft
           east: { type: interior }
           west:
             type: exterior
             openings:
-              - type: door
-                position: 4ft
-                width: 3ft
-                swing: inward-right
+              - type: window
+                from: south
+                offset: 4ft
+                width: 5ft
 
       - id: kitchen
         label: "Kitchen"
         adjacent_to:
           room: living
           wall: east
-          alignment: end
-        width: 12ft
-        height: 10ft
+          alignment: start
+        width: 10ft
+        height: 14ft
         walls:
-          north: { type: exterior }
-          south: { type: interior }
-          east:
+          north: { type: interior }
+          south:
             type: exterior
             openings:
               - type: window
-                position: 3ft
+                position: center
                 width: 4ft
+          east: { type: exterior }
           west:
             type: interior
             openings:
               - type: door
                 style: cased-opening
-                position: 1ft
+                from: south
+                offset: 4ft
                 width: 6ft
+        extensions:
+          - id: bay-window
+            label: "Bay Window"
+            wall: east
+            from: south
+            offset: 4ft
+            width: 5ft
+            depth: 2ft 6in
+            walls:
+              east:
+                type: exterior
+                openings:
+                  - type: window
+                    position: center
+                    width: 4ft
+              north: { type: exterior }
+              south: { type: exterior }
 
+      # ── Row 2 (center): Hallway ───────────────────────────
       - id: hallway
-        label: "Hallway"
+        label: "Hall"
         adjacent_to:
           room: living
-          wall: south
+          wall: north
           alignment: end
-        width: 6.5ft
-        height: 10ft
+        width: 6ft
+        height: 3ft
         walls:
           north: { type: interior }
-          south: { type: interior }
+          south:
+            type: interior
+            openings:
+              - type: door
+                style: cased-opening
+                position: center
+                width: 4ft
           east: { type: interior }
           west: { type: interior }
 
-      - id: bathroom
-        label: "Bathroom"
+      # ── Row 3 (north): Bedrooms + Full Bath ───────────────
+      - id: bedroom1
+        label: "Bedroom 1"
+        adjacent_to:
+          room: hallway
+          wall: west
+          alignment: start
+        width: 12ft
+        height: 10ft
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                from: east
+                offset: 2ft
+                width: 4ft
+          south: { type: interior }
+          east:
+            type: interior
+            openings:
+              - type: door
+                from: south
+                offset: 0ft
+                width: 2ft 6in
+                swing: inward-right
+          west:
+            type: exterior
+            openings:
+              - type: window
+                from: south
+                offset: 0ft 6in
+                width: 3ft
+        enclosures:
+          - id: closet1
+            label: "Walk-in Closet"
+            corner: northwest
+            facing: east
+            length: 6ft
+            depth: 4ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    from: north
+                    offset: 1ft
+                    width: 2ft 6in
+                    swing: inward-left
+
+      - id: bath
+        label: "Full Bath"
+        adjacent_to:
+          room: hallway
+          wall: north
+          alignment: start
+        width: 6ft
+        height: 7ft
+        walls:
+          north: { type: exterior }
+          south:
+            type: interior
+            openings:
+              - type: door
+                from: west
+                offset: 1ft
+                width: 2ft 6in
+                swing: inward-left
+          east: { type: interior }
+          west: { type: interior }
+
+      - id: bedroom2
+        label: "Bedroom 2"
+        adjacent_to:
+          room: hallway
+          wall: east
+          alignment: start
+        width: 10ft
+        height: 10ft
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                from: west
+                offset: 1ft
+                width: 4ft
+          south: { type: interior }
+          east:
+            type: exterior
+            openings:
+              - type: window
+                from: south
+                offset: 1ft
+                width: 3ft
+          west:
+            type: interior
+            openings:
+              - type: door
+                from: south
+                offset: 0ft
+                width: 2ft 6in
+                swing: inward-right
+        enclosures:
+          - id: closet2
+            label: "Closet"
+            corner: northeast
+            facing: west
+            length: 5ft
+            depth: 3ft 6in
+            walls:
+              west:
+                type: interior
+                openings:
+                  - type: door
+                    style: bifold
+                    from: north
+                    offset: 6in
+                    width: 3ft
+
+      # ── Half Bath (below living room, near front entry) ───
+      - id: halfbath
+        label: "Half Bath"
         adjacent_to:
           room: living
           wall: south
           alignment: start
-        width: 8ft
-        height: 6ft
+        width: 5ft
+        height: 5ft
         walls:
           north:
             type: interior
             openings:
               - type: door
-                position: 2ft
+                from: west
+                offset: 1ft
                 width: 2ft 6in
                 swing: inward-left
-          south:
-            type: exterior
-            openings:
-              - type: window
-                position: 2ft
-                width: 3ft
+          south: { type: exterior }
           east: { type: interior }
           west: { type: exterior }
 
     electrical:
       panel:
-        position: [2ft, 10ft]
+        position: [19ft, 1ft]
         amps: 200
         label: "Main Panel"
       outlets:
         - id: lr-out-1
           type: duplex
-          position: [5ft, 0]
+          position: [10ft, 0]
           wall: living.south
+          circuit: 1
+        - id: lr-out-2
+          type: duplex
+          position: [9ft, 0]
+          wall: living.west
           circuit: 1
         - id: k-out-1
           type: gfci
-          position: [4ft, 0]
+          position: [3ft, 0]
           wall: kitchen.south
           circuit: 2
+        - id: k-out-2
+          type: gfci
+          position: [5ft, 0]
+          wall: kitchen.north
+          circuit: 2
+        - id: bed1-out-1
+          type: duplex
+          position: [6ft, 0]
+          wall: bedroom1.north
+          circuit: 3
+        - id: bed1-out-2
+          type: duplex
+          position: [2ft, 0]
+          wall: bedroom1.west
+          circuit: 3
+        - id: bed2-out-1
+          type: duplex
+          position: [5ft, 0]
+          wall: bedroom2.north
+          circuit: 4
+        - id: bed2-out-2
+          type: duplex
+          position: [3ft, 0]
+          wall: bedroom2.east
+          circuit: 4
         - id: bath-out-1
           type: gfci
           position: [3ft, 0]
-          wall: bathroom.west
-          circuit: 3
+          wall: bath.east
+          circuit: 5
+        - id: hb-out-1
+          type: gfci
+          position: [2ft, 0]
+          wall: halfbath.east
+          circuit: 5
       switches:
         - type: single
-          position: [8ft, 0]
-          wall: living.west
+          position: [4ft, 0]
+          wall: living.south
           controls: [lr-light-1]
           circuit: 1
-        - type: three-way
-          position: [8ft, 0]
-          wall: kitchen.south
+        - type: single
+          position: [2ft, 0]
+          wall: kitchen.west
           controls: [k-light-1]
           circuit: 2
+        - type: single
+          position: [11ft, 0]
+          wall: bedroom1.south
+          controls: [bed1-light-1]
+          circuit: 3
+        - type: single
+          position: [1ft, 0]
+          wall: bedroom2.south
+          controls: [bed2-light-1]
+          circuit: 4
+        - type: single
+          position: [4ft 6in, 0]
+          wall: bath.south
+          controls: [bath-light-1]
+          circuit: 5
       fixtures:
         - id: lr-light-1
           type: recessed
-          position: [7.5ft, 6ft]
+          position: [9ft, 7ft]
           circuit: 1
         - id: k-light-1
           type: surface
-          position: [21ft, 7ft]
+          position: [23ft, 7ft]
           circuit: 2
+        - id: bed1-light-1
+          type: surface
+          position: [6ft, 19ft]
+          circuit: 3
+        - id: bed2-light-1
+          type: surface
+          position: [23ft, 19ft]
+          circuit: 4
+        - id: bath-light-1
+          type: surface
+          position: [15ft, 20ft]
+          circuit: 5
       smoke_detectors:
-        - position: [7.5ft, 10ft]
+        - position: [9ft, 10ft]
+          type: combo
+        - position: [6ft, 19ft]
           type: combo
       runs:
         - circuit: 1
-          path: [[2ft, 10ft], [2ft, 6ft], [7.5ft, 6ft]]
+          path: [[19ft, 1ft], [9ft, 1ft], [9ft, 7ft]]
           style: solid
         - circuit: 2
-          path: [[2ft, 10ft], [15ft, 10ft], [21ft, 10ft], [21ft, 7ft]]
+          path: [[19ft, 1ft], [23ft, 1ft], [23ft, 7ft]]
           style: solid
 
     plumbing:
       fixtures:
+        - id: k-sink
+          type: kitchen-sink
+          wall: kitchen.north
+          position: 3ft
+          offset: 0in
+          width: 33in
+          depth: 22in
+        - id: bath-tub
+          type: bathtub
+          wall: bath.north
+          position: 0ft 6in
+          offset: 0in
+          width: 5ft
+          depth: 30in
         - id: bath-toilet
           type: toilet
-          wall: bathroom.south
-          position: 2ft
+          wall: bath.east
+          position: 1ft
           offset: 0in
           width: 18in
           depth: 28in
         - id: bath-sink
           type: bath-sink
-          wall: bathroom.south
-          position: 5ft
+          wall: bath.east
+          position: 4ft
           offset: 0in
           width: 20in
           depth: 16in
+        - id: hb-sink
+          type: bath-sink
+          wall: halfbath.south
+          position: 1ft
+          offset: 0in
+          width: 20in
+          depth: 16in
+        - id: hb-toilet
+          type: toilet
+          wall: halfbath.south
+          position: 3ft
+          offset: 0in
+          width: 18in
+          depth: 28in
       supply_runs:
+        - type: cold
+          from: k-sink
+          to:
+            wall: kitchen.north
+            position: 2.5ft
+          size: "1/2in"
+        - type: hot
+          from: k-sink
+          to:
+            wall: kitchen.north
+            position: 3.5ft
+          size: "1/2in"
         - type: cold
           from: bath-sink
           to:
-            wall: bathroom.south
-            position: 4.5ft
+            wall: bath.east
+            position: 3.5ft
           size: "1/2in"
         - type: hot
           from: bath-sink
           to:
-            wall: bathroom.south
-            position: 5.5ft
+            wall: bath.east
+            position: 4.5ft
           size: "1/2in"
       drain_runs:
         - from: bath-toilet
           to:
-            wall: bathroom.south
-            position: 2ft
+            wall: bath.east
+            position: 1ft
+          size: "3in"
+        - from: hb-toilet
+          to:
+            wall: halfbath.south
+            position: 1ft
           size: "3in"
 
     layers:

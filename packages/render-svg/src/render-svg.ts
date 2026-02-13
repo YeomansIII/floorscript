@@ -6,7 +6,12 @@ import { renderElectrical } from "./renderers/electrical-renderer.js";
 import { renderLabel } from "./renderers/label-renderer.js";
 import { renderPlumbing } from "./renderers/plumbing-renderer.js";
 import { renderTitleBlock } from "./renderers/title-block-renderer.js";
-import { renderWallGraph, renderWalls } from "./renderers/wall-renderer.js";
+import {
+  renderEnclosureWalls,
+  renderExtensionWalls,
+  renderWallGraph,
+  renderWalls,
+} from "./renderers/wall-renderer.js";
 import { renderWindow } from "./renderers/window-renderer.js";
 import { SvgDocument } from "./svg-document.js";
 import { SvgDrawingContext } from "./svg-drawing-context.js";
@@ -114,6 +119,51 @@ export function renderSvg(
         }
       }
     }
+
+    // Render enclosure/extension walls and their openings
+    for (const room of plan.rooms) {
+      if (room.enclosures && room.enclosures.length > 0) {
+        const dc = new SvgDrawingContext();
+        renderEnclosureWalls(room.enclosures, ctx, dc);
+        doc.addToLayer("structural", dc.getOutput());
+
+        // Render openings on enclosure walls
+        for (const enc of room.enclosures) {
+          for (const wall of enc.walls) {
+            for (const opening of wall.openings) {
+              const openingDc = new SvgDrawingContext();
+              if (opening.type === "door") {
+                renderDoor(opening, ctx, openingDc);
+              } else if (opening.type === "window") {
+                renderWindow(opening, ctx, openingDc);
+              }
+              doc.addToLayer("structural", openingDc.getOutput());
+            }
+          }
+        }
+      }
+
+      if (room.extensions && room.extensions.length > 0) {
+        const dc = new SvgDrawingContext();
+        renderExtensionWalls(room.extensions, ctx, dc);
+        doc.addToLayer("structural", dc.getOutput());
+
+        // Render openings on extension walls
+        for (const ext of room.extensions) {
+          for (const wall of ext.walls) {
+            for (const opening of wall.openings) {
+              const openingDc = new SvgDrawingContext();
+              if (opening.type === "door") {
+                renderDoor(opening, ctx, openingDc);
+              } else if (opening.type === "window") {
+                renderWindow(opening, ctx, openingDc);
+              }
+              doc.addToLayer("structural", openingDc.getOutput());
+            }
+          }
+        }
+      }
+    }
   }
 
   // Labels
@@ -122,6 +172,48 @@ export function renderSvg(
       const dc = new SvgDrawingContext();
       renderLabel(room, ctx, dc);
       doc.addToLayer("labels", dc.getOutput());
+
+      // Sub-space labels for enclosures and extensions
+      if (room.enclosures) {
+        for (const enc of room.enclosures) {
+          const subDc = new SvgDrawingContext();
+          renderLabel(
+            {
+              id: enc.id,
+              label: enc.label,
+              bounds: enc.bounds,
+              labelPosition: {
+                x: enc.bounds.x + enc.bounds.width / 2,
+                y: enc.bounds.y + enc.bounds.height / 2,
+              },
+              walls: [],
+            },
+            ctx,
+            subDc,
+          );
+          doc.addToLayer("labels", subDc.getOutput());
+        }
+      }
+      if (room.extensions) {
+        for (const ext of room.extensions) {
+          const subDc = new SvgDrawingContext();
+          renderLabel(
+            {
+              id: ext.id,
+              label: ext.label,
+              bounds: ext.bounds,
+              labelPosition: {
+                x: ext.bounds.x + ext.bounds.width / 2,
+                y: ext.bounds.y + ext.bounds.height / 2,
+              },
+              walls: [],
+            },
+            ctx,
+            subDc,
+          );
+          doc.addToLayer("labels", subDc.getOutput());
+        }
+      }
     }
   }
 

@@ -47,11 +47,62 @@ If the user provides a description as `$ARGUMENTS`, use that. Otherwise, ask wha
 
 ### Openings (Doors and Windows)
 
-- Place openings on the wall they belong to, using `position` as the offset from the wall's start (left for horizontal walls, bottom for vertical walls).
-- Every opening needs `type`, `position`, and `width`.
+- Place openings on the wall they belong to using one of these positioning methods:
+  - `position: 3ft` — numeric offset from the wall's start (left for horizontal walls, bottom for vertical walls)
+  - `position: center` — automatically centers the opening on the wall
+  - `from`/`offset` pair — human-natural positioning: `from: south, offset: 2ft 7in` means "2ft 7in from the south end of the wall"
+- Every opening needs `type`, `width`, and one of the positioning methods above.
+- Prefer `from`/`offset` when the user describes placement relative to a landmark (e.g., "door 2 feet from the left wall").
+- Use `position: center` for centered windows.
 - Doors: add `swing` (e.g. `inward-right`) for standard doors. Use `style: cased-opening` for open pass-throughs, `style: sliding` for sliders.
 - Windows: typically on exterior walls. Omit `swing` and `style`.
 - Ensure the opening fits within the wall: `position + width < wall length`.
+
+### Enclosures and Extensions
+
+- **Enclosure** = a sub-space carved from within a room (closets, pantries, storage). Use when the space is interior to the room.
+- **Extension** = a sub-space projecting outward from a room wall (window nooks, bay windows, bump-outs). Use when the space extends beyond the room rectangle.
+
+**Decision rules**: closet/pantry/storage → enclosure. Window nook/bay window/bump-out → extension.
+
+**Corner enclosure** (most common for closets):
+```yaml
+enclosures:
+  - id: closet
+    label: "Walk-in Closet"
+    corner: northwest
+    facing: east           # which direction the closet opens toward
+    length: 6ft            # along the wall (perpendicular to facing)
+    depth: 4ft             # into the room (parallel to facing)
+    walls:
+      east:
+        type: interior
+        openings:
+          - type: door
+            position: 1ft
+            width: 2ft 6in
+```
+
+**Wall-based enclosure** (for mid-wall closets): use `wall: north` + `from`/`offset` instead of `corner`.
+
+**Extension** (bump-outs):
+```yaml
+extensions:
+  - id: window-nook
+    label: "Window Nook"
+    wall: north
+    from: east
+    offset: 2ft
+    width: 5ft
+    depth: 3ft
+    walls:
+      north:
+        type: exterior
+        openings:
+          - type: window
+            position: center
+            width: 4ft
+```
 
 ### Electrical (only if requested)
 

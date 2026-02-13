@@ -103,6 +103,16 @@ describe("visual regression", () => {
     expect(svg).toMatchSnapshot();
   });
 
+  it("bedroom-closet renders consistently", () => {
+    const svg = loadAndRender("bedroom-closet.yaml");
+    expect(svg).toMatchSnapshot();
+  });
+
+  it("bedroom-nook renders consistently", () => {
+    const svg = loadAndRender("bedroom-nook.yaml");
+    expect(svg).toMatchSnapshot();
+  });
+
   it("multi-room with plumbing hidden renders consistently", () => {
     const yaml = readFileSync(
       resolve(EXAMPLES_DIR, "multi-room.yaml"),
