@@ -1,15 +1,15 @@
 import type { ResolvedPlan } from "@floorscript/core";
-import { SvgDocument } from "./svg-document.js";
 import { createTransform } from "./coordinate-transform.js";
-import { SvgDrawingContext } from "./svg-drawing-context.js";
-import { renderWalls, renderWallGraph } from "./renderers/wall-renderer.js";
-import { renderDoor } from "./renderers/door-renderer.js";
-import { renderWindow } from "./renderers/window-renderer.js";
-import { renderLabel } from "./renderers/label-renderer.js";
 import { renderDimension } from "./renderers/dimension-renderer.js";
-import { renderTitleBlock } from "./renderers/title-block-renderer.js";
+import { renderDoor } from "./renderers/door-renderer.js";
 import { renderElectrical } from "./renderers/electrical-renderer.js";
+import { renderLabel } from "./renderers/label-renderer.js";
 import { renderPlumbing } from "./renderers/plumbing-renderer.js";
+import { renderTitleBlock } from "./renderers/title-block-renderer.js";
+import { renderWallGraph, renderWalls } from "./renderers/wall-renderer.js";
+import { renderWindow } from "./renderers/window-renderer.js";
+import { SvgDocument } from "./svg-document.js";
+import { SvgDrawingContext } from "./svg-drawing-context.js";
 
 export interface SvgRenderOptions {
   width?: number;
@@ -63,7 +63,8 @@ export function renderSvg(
   const ctx = createTransform(plan, opts.width, margin);
 
   // Reserve extra height for the title block, scaled proportionally
-  const titleBlockReserve = BASE_TITLE_BLOCK_RESERVE * (ctx.svgWidth / REFERENCE_WIDTH);
+  const titleBlockReserve =
+    BASE_TITLE_BLOCK_RESERVE * (ctx.svgWidth / REFERENCE_WIDTH);
   const totalHeight = opts.showTitleBlock
     ? ctx.svgHeight + titleBlockReserve
     : ctx.svgHeight;

@@ -1,5 +1,9 @@
 import type { ResolvedOpening } from "@floorscript/core";
-import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
+import {
+  scaleValue,
+  type TransformContext,
+  toSvg,
+} from "../coordinate-transform.js";
 import type { DrawingContext } from "../drawing-context.js";
 
 /**
@@ -15,7 +19,12 @@ export function renderWindow(
   const wallThick = scaleValue(opening.wallThickness, ctx);
   const lineOffset = wallThick * 0.25;
 
-  dc.openGroup({ class: "opening window", stroke: "#000", "stroke-width": "0.35mm", fill: "none" });
+  dc.openGroup({
+    class: "opening window",
+    stroke: "#000",
+    "stroke-width": "0.35mm",
+    fill: "none",
+  });
 
   const dir = opening.wallDirection;
 

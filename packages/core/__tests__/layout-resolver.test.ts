@@ -101,7 +101,10 @@ describe("resolveLayout", () => {
     // South wall extends below room and through corners
     expect(south.rect.x).toBeCloseTo(-west.thickness, 4);
     expect(south.rect.y).toBeCloseTo(-EXT_THICK, 4);
-    expect(south.rect.width).toBeCloseTo(15 + west.thickness + east.thickness, 4);
+    expect(south.rect.width).toBeCloseTo(
+      15 + west.thickness + east.thickness,
+      4,
+    );
     expect(south.rect.height).toBeCloseTo(EXT_THICK, 4);
     expect(south.interiorStartOffset).toBeCloseTo(west.thickness, 4);
     // Outer edge at y = -thickness, inner edge at y = 0
@@ -120,7 +123,10 @@ describe("resolveLayout", () => {
     // North wall extends above room and through corners
     expect(north.rect.x).toBeCloseTo(-west.thickness, 4);
     expect(north.rect.y).toBe(12);
-    expect(north.rect.width).toBeCloseTo(15 + west.thickness + east.thickness, 4);
+    expect(north.rect.width).toBeCloseTo(
+      15 + west.thickness + east.thickness,
+      4,
+    );
     expect(north.rect.height).toBeCloseTo(EXT_THICK, 4);
     expect(north.interiorStartOffset).toBeCloseTo(west.thickness, 4);
   });
@@ -236,7 +242,7 @@ plans:
 
     expect(plan.rooms).toHaveLength(2);
 
-    const kitchen = plan.rooms.find((r) => r.id === "kitchen")!;
+    const _kitchen = plan.rooms.find((r) => r.id === "kitchen")!;
     const dining = plan.rooms.find((r) => r.id === "dining")!;
 
     // Dining placed to the east of kitchen with a gap for the shared wall

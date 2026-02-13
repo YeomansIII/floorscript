@@ -84,7 +84,12 @@ function resolveWallGeometry(
   switch (direction) {
     case "south":
       // Horizontal wall extends through corners
-      rect = { x: x - westThickness, y: y - thickness, width: width + westThickness + eastThickness, height: thickness };
+      rect = {
+        x: x - westThickness,
+        y: y - thickness,
+        width: width + westThickness + eastThickness,
+        height: thickness,
+      };
       outerStart = { x: x - westThickness, y: y - thickness };
       outerEnd = { x: x + width + eastThickness, y: y - thickness };
       innerStart = { x: x - westThickness, y };
@@ -93,7 +98,12 @@ function resolveWallGeometry(
       break;
     case "north":
       // Horizontal wall extends through corners
-      rect = { x: x - westThickness, y: y + height, width: width + westThickness + eastThickness, height: thickness };
+      rect = {
+        x: x - westThickness,
+        y: y + height,
+        width: width + westThickness + eastThickness,
+        height: thickness,
+      };
       outerStart = { x: x - westThickness, y: y + height + thickness };
       outerEnd = { x: x + width + eastThickness, y: y + height + thickness };
       innerStart = { x: x - westThickness, y: y + height };

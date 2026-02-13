@@ -11,14 +11,23 @@ export type UnitSystem = "imperial" | "metric";
 export type CardinalDirection = "north" | "south" | "east" | "west";
 export type WallType = "exterior" | "interior" | "load-bearing";
 export type StudSize = "2x4" | "2x6" | "2x8";
-export type FacingDirection = "facing-north" | "facing-south" | "facing-east" | "facing-west";
+export type FacingDirection =
+  | "facing-north"
+  | "facing-south"
+  | "facing-east"
+  | "facing-west";
 export type ElementStatus = "existing" | "demolish" | "new";
 export type OpeningType = "door" | "window";
 
 // Electrical enums
 export type OutletType = "duplex" | "gfci" | "240v" | "dedicated" | "floor";
 export type SwitchType = "single" | "three-way" | "four-way" | "dimmer";
-export type LightFixtureType = "recessed" | "surface" | "pendant" | "under-cabinet" | "fan";
+export type LightFixtureType =
+  | "recessed"
+  | "surface"
+  | "pendant"
+  | "under-cabinet"
+  | "fan";
 export type DetectorType = "smoke" | "co" | "combo";
 
 // Plumbing enums
@@ -318,43 +327,63 @@ export interface DiffConfig {
 
 // ---- Zod schemas for runtime validation ----
 
-const DimensionSchema = z.union([z.string(), z.number()]);
-const DimensionTupleSchema = z.tuple([DimensionSchema, DimensionSchema]);
-const ElementStatusSchema = z.enum(["existing", "demolish", "new"]);
+const DimensionSchema = z
+  .union([z.string(), z.number()])
+  .describe(
+    "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system",
+  );
+const DimensionTupleSchema = z
+  .tuple([DimensionSchema, DimensionSchema])
+  .describe("An [x, y] coordinate pair");
+const ElementStatusSchema = z
+  .enum(["existing", "demolish", "new"])
+  .describe("Renovation status: existing (keep), demolish (remove), new (add)");
 
-const OpeningSchema = z.object({
-  type: z.enum(["door", "window"]),
-  position: DimensionSchema,
-  width: DimensionSchema,
-  style: z
-    .enum([
-      "standard",
-      "double",
-      "sliding",
-      "pocket",
-      "bifold",
-      "barn",
-      "french",
-      "cased-opening",
-    ])
-    .optional(),
-  swing: z
-    .enum(["inward-left", "inward-right", "outward-left", "outward-right"])
-    .optional(),
-  sill_height: DimensionSchema.optional(),
-  status: ElementStatusSchema.optional(),
-});
+const OpeningSchema = z
+  .object({
+    type: z.enum(["door", "window"]).describe("Opening type"),
+    position: DimensionSchema.describe(
+      "Offset along the wall from the wall's start point",
+    ),
+    width: DimensionSchema,
+    style: z
+      .enum([
+        "standard",
+        "double",
+        "sliding",
+        "pocket",
+        "bifold",
+        "barn",
+        "french",
+        "cased-opening",
+      ])
+      .describe("Door style; ignored for windows")
+      .optional(),
+    swing: z
+      .enum(["inward-left", "inward-right", "outward-left", "outward-right"])
+      .describe("Door swing direction relative to the room")
+      .optional(),
+    sill_height: DimensionSchema.optional(),
+    status: ElementStatusSchema.optional(),
+  })
+  .describe("A door or window opening placed on a wall");
 
 const StudSizeSchema = z.enum(["2x4", "2x6", "2x8"]);
 
-const WallSchema = z.object({
-  type: z.enum(["exterior", "interior", "load-bearing"]),
-  thickness: DimensionSchema.optional(),
-  stud: StudSizeSchema.optional(),
-  finish: DimensionSchema.optional(),
-  openings: z.array(OpeningSchema).optional(),
-  status: ElementStatusSchema.optional(),
-});
+const WallSchema = z
+  .object({
+    type: z
+      .enum(["exterior", "interior", "load-bearing"])
+      .describe("Wall structural classification"),
+    thickness: DimensionSchema.optional(),
+    stud: StudSizeSchema.describe("Lumber stud size").optional(),
+    finish: DimensionSchema.describe(
+      "Finish thickness per side (e.g. drywall)",
+    ).optional(),
+    openings: z.array(OpeningSchema).optional(),
+    status: ElementStatusSchema.optional(),
+  })
+  .describe("Configuration for a single wall segment");
 
 const WallsSchema = z.object({
   north: WallSchema.optional(),
@@ -363,22 +392,34 @@ const WallsSchema = z.object({
   west: WallSchema.optional(),
 });
 
-const AdjacencySchema = z.object({
-  room: z.string(),
-  wall: z.enum(["north", "south", "east", "west"]),
-  alignment: z.enum(["start", "center", "end"]).optional(),
-  offset: DimensionSchema.optional(),
-});
+const AdjacencySchema = z
+  .object({
+    room: z.string().describe("ID of the room to attach to"),
+    wall: z
+      .enum(["north", "south", "east", "west"])
+      .describe("Which wall of the target room to attach to"),
+    alignment: z.enum(["start", "center", "end"]).optional(),
+    offset: DimensionSchema.optional(),
+  })
+  .describe("Place this room adjacent to another room's wall");
 
-const RoomSchema = z.object({
-  id: z.string(),
-  label: z.string(),
-  position: DimensionTupleSchema.optional(),
-  adjacent_to: AdjacencySchema.optional(),
-  width: DimensionSchema,
-  height: DimensionSchema,
-  walls: WallsSchema.optional(),
-});
+const RoomSchema = z
+  .object({
+    id: z
+      .string()
+      .describe(
+        "Unique room identifier, referenced by adjacency and shared walls",
+      ),
+    label: z.string().describe("Display label rendered inside the room"),
+    position: DimensionTupleSchema.describe(
+      "Absolute [x, y] position; omit if using adjacent_to",
+    ).optional(),
+    adjacent_to: AdjacencySchema.optional(),
+    width: DimensionSchema,
+    height: DimensionSchema,
+    walls: WallsSchema.optional(),
+  })
+  .describe("A room with dimensions, position, and optional wall overrides");
 
 const ProjectSchema = z.object({
   title: z.string(),
@@ -438,18 +479,27 @@ const ElectricalRunSchema = z.object({
   style: z.enum(["solid", "dashed"]).optional(),
 });
 
-const ElectricalSchema = z.object({
-  panel: ElectricalPanelSchema.optional(),
-  outlets: z.array(OutletSchema).optional(),
-  switches: z.array(SwitchSchema).optional(),
-  fixtures: z.array(ElectricalFixtureSchema).optional(),
-  smoke_detectors: z.array(SmokeDetectorSchema).optional(),
-  runs: z.array(ElectricalRunSchema).optional(),
-});
+const ElectricalSchema = z
+  .object({
+    panel: ElectricalPanelSchema.optional(),
+    outlets: z.array(OutletSchema).optional(),
+    switches: z.array(SwitchSchema).optional(),
+    fixtures: z.array(ElectricalFixtureSchema).optional(),
+    smoke_detectors: z.array(SmokeDetectorSchema).optional(),
+    runs: z.array(ElectricalRunSchema).optional(),
+  })
+  .describe(
+    "Electrical system: panel, outlets, switches, light fixtures, detectors, and circuit runs",
+  );
 
 // ---- Plumbing Zod schemas ----
 
-const FacingDirectionSchema = z.enum(["facing-north", "facing-south", "facing-east", "facing-west"]);
+const FacingDirectionSchema = z.enum([
+  "facing-north",
+  "facing-south",
+  "facing-east",
+  "facing-west",
+]);
 
 const PlumbingFixtureSchema = z.object({
   id: z.string().optional(),
@@ -509,13 +559,17 @@ const WaterHeaterSchema = z.object({
   capacity: z.string().optional(),
 });
 
-const PlumbingSchema = z.object({
-  fixtures: z.array(PlumbingFixtureSchema).optional(),
-  supply_runs: z.array(SupplyRunSchema).optional(),
-  drain_runs: z.array(DrainRunSchema).optional(),
-  valves: z.array(ValveSchema).optional(),
-  water_heater: WaterHeaterSchema.optional(),
-});
+const PlumbingSchema = z
+  .object({
+    fixtures: z.array(PlumbingFixtureSchema).optional(),
+    supply_runs: z.array(SupplyRunSchema).optional(),
+    drain_runs: z.array(DrainRunSchema).optional(),
+    valves: z.array(ValveSchema).optional(),
+    water_heater: WaterHeaterSchema.optional(),
+  })
+  .describe(
+    "Plumbing system: fixtures, supply/drain runs, valves, and water heater",
+  );
 
 // ---- Layer Zod schema ----
 
@@ -528,28 +582,36 @@ const LayersSchema = z.record(z.string(), LayerSchema);
 
 // ---- Shared wall Zod schema ----
 
-const SharedWallSchema = z.object({
-  rooms: z.tuple([z.string(), z.string()]),
-  wall: z.string(),
-  thickness: DimensionSchema.optional(),
-  openings: z.array(OpeningSchema).optional(),
-});
+const SharedWallSchema = z
+  .object({
+    rooms: z
+      .tuple([z.string(), z.string()])
+      .describe("Pair of room IDs that share this wall"),
+    wall: z
+      .string()
+      .describe("Wall identifier, e.g. 'room1.south' or cardinal direction"),
+    thickness: DimensionSchema.optional(),
+    openings: z.array(OpeningSchema).optional(),
+  })
+  .describe("A wall shared between two adjacent rooms, with optional openings");
 
 // ---- Plan and top-level schemas ----
 
-const PlanSchema = z.object({
-  id: z.string(),
-  title: z.string(),
-  rooms: z.array(RoomSchema),
-  shared_walls: z.array(SharedWallSchema).optional(),
-  elements: z.array(z.record(z.unknown())).optional(),
-  layers: LayersSchema.optional(),
-  electrical: ElectricalSchema.optional(),
-  plumbing: PlumbingSchema.optional(),
-  fixtures: z.array(z.record(z.unknown())).optional(),
-  dimensions: z.array(z.record(z.unknown())).optional(),
-  annotations: z.array(z.record(z.unknown())).optional(),
-});
+const PlanSchema = z
+  .object({
+    id: z.string().describe("Unique plan identifier, referenced by diffs"),
+    title: z.string().describe("Plan title shown in the title block"),
+    rooms: z.array(RoomSchema),
+    shared_walls: z.array(SharedWallSchema).optional(),
+    elements: z.array(z.record(z.string(), z.unknown())).optional(),
+    layers: LayersSchema.optional(),
+    electrical: ElectricalSchema.optional(),
+    plumbing: PlumbingSchema.optional(),
+    fixtures: z.array(z.record(z.string(), z.unknown())).optional(),
+    dimensions: z.array(z.record(z.string(), z.unknown())).optional(),
+    annotations: z.array(z.record(z.string(), z.unknown())).optional(),
+  })
+  .describe("A single floor plan containing rooms, systems, and annotations");
 
 const DiffSchema = z.object({
   before: z.string(),
@@ -558,11 +620,17 @@ const DiffSchema = z.object({
   outputs: z.array(z.string()).optional(),
 });
 
-export const FloorPlanConfigSchema = z.object({
-  version: z.string(),
-  project: ProjectSchema,
-  units: z.enum(["imperial", "metric"]),
-  plans: z.array(PlanSchema),
-  definitions: z.record(z.unknown()).optional(),
-  diffs: z.array(DiffSchema).optional(),
-});
+export const FloorPlanConfigSchema = z
+  .object({
+    version: z.string().describe("Schema version, currently '1.0'"),
+    project: ProjectSchema,
+    units: z
+      .enum(["imperial", "metric"])
+      .describe("Unit system for all dimensions in this file"),
+    plans: z.array(PlanSchema),
+    definitions: z.record(z.string(), z.unknown()).optional(),
+    diffs: z.array(DiffSchema).optional(),
+  })
+  .describe(
+    "FloorScript floor plan configuration — the top-level document schema",
+  );

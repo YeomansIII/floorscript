@@ -17,7 +17,12 @@ export function findWallById(
   wallRef: string,
   rooms: ResolvedRoom[],
   wallGraph?: WallGraph,
-): { room: ResolvedRoom; wall: ResolvedWall; planWall?: PlanWall; direction: CardinalDirection } {
+): {
+  room: ResolvedRoom;
+  wall: ResolvedWall;
+  planWall?: PlanWall;
+  direction: CardinalDirection;
+} {
   const dotIndex = wallRef.lastIndexOf(".");
   if (dotIndex === -1) {
     throw new Error(
@@ -50,9 +55,7 @@ export function findWallById(
 
   const wall = room.walls.find((w) => w.direction === direction);
   if (!wall) {
-    throw new Error(
-      `Wall "${direction}" not found on room "${roomId}"`,
-    );
+    throw new Error(`Wall "${direction}" not found on room "${roomId}"`);
   }
 
   // Also look up the PlanWall from the graph if available

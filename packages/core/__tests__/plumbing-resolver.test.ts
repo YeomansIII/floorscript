@@ -8,7 +8,12 @@ describe("plumbing resolver", () => {
     const result = resolvePlumbing(
       {
         fixtures: [
-          { type: "toilet", position: ["2ft", "3ft"], width: "18in", depth: "28in" },
+          {
+            type: "toilet",
+            position: ["2ft", "3ft"],
+            width: "18in",
+            depth: "28in",
+          },
         ],
       },
       "imperial",
@@ -24,7 +29,12 @@ describe("plumbing resolver", () => {
     const result = resolvePlumbing(
       {
         fixtures: [
-          { type: "kitchen-sink", position: ["6ft", "9ft"], width: "33in", depth: "22in" },
+          {
+            type: "kitchen-sink",
+            position: ["6ft", "9ft"],
+            width: "33in",
+            depth: "22in",
+          },
         ],
       },
       "imperial",
@@ -61,7 +71,11 @@ describe("plumbing resolver", () => {
         supply_runs: [
           {
             type: "hot",
-            path: [["0ft", "5ft"], ["6ft", "5ft"], ["6ft", "9ft"]],
+            path: [
+              ["0ft", "5ft"],
+              ["6ft", "5ft"],
+              ["6ft", "9ft"],
+            ],
             size: "1/2in",
           },
         ],
@@ -85,7 +99,10 @@ describe("plumbing resolver", () => {
       {
         drain_runs: [
           {
-            path: [["6ft", "9ft"], ["6ft", "0ft"]],
+            path: [
+              ["6ft", "9ft"],
+              ["6ft", "0ft"],
+            ],
             size: "2in",
             slope: "1/4in per ft",
           },
@@ -107,9 +124,7 @@ describe("plumbing resolver", () => {
   it("resolves valve position", () => {
     const result = resolvePlumbing(
       {
-        valves: [
-          { type: "shutoff", position: ["6ft", "9ft"], line: "hot" },
-        ],
+        valves: [{ type: "shutoff", position: ["6ft", "9ft"], line: "hot" }],
       },
       "imperial",
     );
@@ -150,7 +165,7 @@ describe("plumbing resolver", () => {
 });
 
 describe("wall-relative plumbing positioning", () => {
-  it("resolves fixture with wall reference", () => {
+  it("resolves fixture with wall reference and flush offset", () => {
     const yaml = `
 version: "0.1"
 project:
@@ -182,10 +197,84 @@ plans:
 
     const fixture = plan.plumbing!.fixtures[0];
     expect(fixture.fixtureType).toBe("toilet");
-    // Wall-relative: 2ft along south wall inner face, 0 offset into room
-    // South wall inner face is at y=0, fixture at x=2, y=0
+    // Wall-relative: 2ft along south wall, 0 user offset
+    // Flush offset adds depth/2: 28in = 2.333ft, half = 1.1667ft
+    // South wall inner face is at y=0, fixture center at y = 0 + depth/2
     expect(fixture.position.x).toBe(2);
-    expect(fixture.position.y).toBe(0);
+    expect(fixture.position.y).toBeCloseTo(28 / 12 / 2, 3); // ~1.167
+    // Orientation auto-inferred from south wall → facing-north
+    expect(fixture.orientation).toBe("facing-north");
+  });
+
+  it("auto-infers orientation from wall direction", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bath
+        label: "Bathroom"
+        position: [0, 0]
+        width: 8ft
+        height: 6ft
+        walls:
+          north: { type: exterior }
+    plumbing:
+      fixtures:
+        - id: sink
+          type: bath-sink
+          wall: bath.north
+          position: 3ft
+          offset: 0in
+          width: 20in
+          depth: 16in
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    const fixture = plan.plumbing!.fixtures[0];
+    // North wall → fixture faces south (into room)
+    expect(fixture.orientation).toBe("facing-south");
+  });
+
+  it("respects explicit orientation override", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bath
+        label: "Bathroom"
+        position: [0, 0]
+        width: 8ft
+        height: 6ft
+        walls:
+          south: { type: exterior }
+    plumbing:
+      fixtures:
+        - id: toilet
+          type: toilet
+          wall: bath.south
+          position: 2ft
+          offset: 0in
+          orientation: facing-east
+          width: 18in
+          depth: 28in
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    const fixture = plan.plumbing!.fixtures[0];
+    // Explicit orientation overrides auto-inference
+    expect(fixture.orientation).toBe("facing-east");
   });
 
   it("resolves supply run with fixture ID reference", () => {

@@ -1,4 +1,9 @@
-import type { PlanWall, ResolvedRoom, ResolvedWall, WallGraph } from "@floorscript/core";
+import type {
+  PlanWall,
+  ResolvedRoom,
+  ResolvedWall,
+  WallGraph,
+} from "@floorscript/core";
 import { rectToSvg, type TransformContext } from "../coordinate-transform.js";
 import type { DrawingContext } from "../drawing-context.js";
 
@@ -45,12 +50,19 @@ export function renderWalls(
   dc.closeGroup();
 }
 
-function renderPlanWall(wall: PlanWall, ctx: TransformContext, dc: DrawingContext): void {
+function renderPlanWall(
+  wall: PlanWall,
+  ctx: TransformContext,
+  dc: DrawingContext,
+): void {
   const fill = WALL_FILLS[wall.type] ?? "#333";
 
   if (wall.segments.length === 1) {
     const svgRect = rectToSvg(wall.segments[0], ctx);
-    dc.rect(svgRect.x, svgRect.y, svgRect.width, svgRect.height, { fill, stroke: "none" });
+    dc.rect(svgRect.x, svgRect.y, svgRect.width, svgRect.height, {
+      fill,
+      stroke: "none",
+    });
     return;
   }
 
@@ -66,12 +78,19 @@ function renderPlanWall(wall: PlanWall, ctx: TransformContext, dc: DrawingContex
   dc.closeGroup();
 }
 
-function renderWall(wall: ResolvedWall, ctx: TransformContext, dc: DrawingContext): void {
+function renderWall(
+  wall: ResolvedWall,
+  ctx: TransformContext,
+  dc: DrawingContext,
+): void {
   const fill = WALL_FILLS[wall.type] ?? "#333";
 
   if (wall.segments.length === 1) {
     const svgRect = rectToSvg(wall.segments[0], ctx);
-    dc.rect(svgRect.x, svgRect.y, svgRect.width, svgRect.height, { fill, stroke: "none" });
+    dc.rect(svgRect.x, svgRect.y, svgRect.width, svgRect.height, {
+      fill,
+      stroke: "none",
+    });
     return;
   }
 

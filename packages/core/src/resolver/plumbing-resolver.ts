@@ -1,4 +1,9 @@
-import type { PlumbingConfig, UnitSystem } from "../types/config.js";
+import { parseDimension } from "../parser/dimension.js";
+import type {
+  FacingDirection,
+  PlumbingConfig,
+  UnitSystem,
+} from "../types/config.js";
 import type {
   Point,
   ResolvedDrainRun,
@@ -10,7 +15,6 @@ import type {
   ResolvedWaterHeater,
   WallGraph,
 } from "../types/geometry.js";
-import { parseDimension } from "../parser/dimension.js";
 import { findWallById } from "./wall-utils.js";
 
 /**
@@ -52,6 +56,33 @@ export function resolvePlumbing(
   return { fixtures, supplyRuns, drainRuns, valves, waterHeater };
 }
 
+/**
+ * Infer fixture orientation from wall direction.
+ * Fixture faces into the room (away from the wall).
+ */
+function inferOrientationFromWall(wallDirection: string): FacingDirection {
+  switch (wallDirection) {
+    case "south":
+      return "facing-north";
+    case "north":
+      return "facing-south";
+    case "west":
+      return "facing-east";
+    case "east":
+      return "facing-west";
+    default:
+      return "facing-north";
+  }
+}
+
+/**
+ * Get the default depth for a fixture when not specified.
+ * Matches the renderer defaults: defaultSize * 0.7 where defaultSize = 1.5ft / 0.45m.
+ */
+function getDefaultDepth(units: UnitSystem): number {
+  return units === "imperial" ? 1.5 * 0.7 : 0.45 * 0.7;
+}
+
 function resolveFixture(
   config: NonNullable<PlumbingConfig["fixtures"]>[number],
   units: UnitSystem,
@@ -59,6 +90,11 @@ function resolveFixture(
   wallGraph?: WallGraph,
 ): ResolvedPlumbingFixture {
   let position: Point;
+  let orientation: FacingDirection | undefined = config.orientation;
+
+  const resolvedDepth = config.depth
+    ? parseDimension(config.depth, units)
+    : undefined;
 
   if (config.wall && rooms) {
     // Wall-relative positioning
@@ -66,12 +102,24 @@ function resolveFixture(
     const alongWall = Array.isArray(config.position)
       ? parseDimension(config.position[0], units)
       : parseDimension(config.position, units);
-    const offset = config.offset ? parseDimension(config.offset, units) : 0;
+    const userOffset = config.offset ? parseDimension(config.offset, units) : 0;
 
-    position = computeWallRelativePosition(wall, alongWall, offset);
+    // Add depth/2 so the fixture edge (not center) sits at the wall face + userOffset
+    const fixtureDepth = resolvedDepth ?? getDefaultDepth(units);
+    const flushOffset = userOffset + fixtureDepth / 2;
+
+    position = computeWallRelativePosition(wall, alongWall, flushOffset);
+
+    // Auto-infer orientation from wall if not explicitly set
+    if (!orientation) {
+      orientation = inferOrientationFromWall(wall.direction);
+    }
   } else if (Array.isArray(config.position)) {
     // Legacy absolute positioning
-    position = parseDimensionTuple(config.position as [string | number, string | number], units);
+    position = parseDimensionTuple(
+      config.position as [string | number, string | number],
+      units,
+    );
   } else {
     // Single dimension with wall reference missing — treat as x=value, y=0
     position = { x: parseDimension(config.position, units), y: 0 };
@@ -82,7 +130,8 @@ function resolveFixture(
     fixtureType: config.type,
     position,
     width: config.width ? parseDimension(config.width, units) : undefined,
-    depth: config.depth ? parseDimension(config.depth, units) : undefined,
+    depth: resolvedDepth,
+    orientation,
     supply: config.supply,
     drain: config.drain,
   };
@@ -94,7 +143,13 @@ function resolveFixture(
  * offset = distance from the inner wall face into the room
  */
 function computeWallRelativePosition(
-  wall: { direction: string; rect: { x: number; y: number; width: number; height: number }; thickness: number; innerEdge: { start: Point; end: Point }; interiorStartOffset: number },
+  wall: {
+    direction: string;
+    rect: { x: number; y: number; width: number; height: number };
+    thickness: number;
+    innerEdge: { start: Point; end: Point };
+    interiorStartOffset: number;
+  },
   alongWall: number,
   offset: number,
 ): Point {
@@ -126,7 +181,15 @@ function resolveSupplyRun(
   rooms?: ResolvedRoom[],
   wallGraph?: WallGraph,
 ): ResolvedSupplyRun {
-  const path = resolveRunPath(config.path, config.from, config.to, units, fixturePositions, rooms, wallGraph);
+  const path = resolveRunPath(
+    config.path,
+    config.from,
+    config.to,
+    units,
+    fixturePositions,
+    rooms,
+    wallGraph,
+  );
   return {
     supplyType: config.type,
     path,
@@ -141,7 +204,15 @@ function resolveDrainRun(
   rooms?: ResolvedRoom[],
   wallGraph?: WallGraph,
 ): ResolvedDrainRun {
-  const path = resolveRunPath(config.path, config.from, config.to, units, fixturePositions, rooms, wallGraph);
+  const path = resolveRunPath(
+    config.path,
+    config.from,
+    config.to,
+    units,
+    fixturePositions,
+    rooms,
+    wallGraph,
+  );
   return {
     path,
     size: config.size,
@@ -172,7 +243,9 @@ function resolveRunPath(
   const points: Point[] = [];
 
   if (from) {
-    points.push(resolveEndpoint(from, units, fixturePositions, rooms, wallGraph));
+    points.push(
+      resolveEndpoint(from, units, fixturePositions, rooms, wallGraph),
+    );
   }
   if (to) {
     points.push(resolveEndpoint(to, units, fixturePositions, rooms, wallGraph));
@@ -192,7 +265,9 @@ function resolveEndpoint(
     // Fixture ID reference
     const pos = fixturePositions.get(ref);
     if (!pos) {
-      throw new Error(`Fixture "${ref}" not found for supply/drain run endpoint`);
+      throw new Error(
+        `Fixture "${ref}" not found for supply/drain run endpoint`,
+      );
     }
     return pos;
   }

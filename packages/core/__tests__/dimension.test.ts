@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDimension, formatDimension } from "../src/parser/dimension.js";
+import { formatDimension, parseDimension } from "../src/parser/dimension.js";
 
 describe("parseDimension", () => {
   describe("imperial", () => {

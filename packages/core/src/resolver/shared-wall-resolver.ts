@@ -1,3 +1,4 @@
+import { parseDimension } from "../parser/dimension.js";
 import type {
   CardinalDirection,
   SharedWallConfig,
@@ -15,7 +16,6 @@ import type {
   ResolvedRoom,
   WallGraph,
 } from "../types/geometry.js";
-import { parseDimension } from "../parser/dimension.js";
 import { resolveWallSegments } from "./segment-resolver.js";
 
 // Stud nominal widths in inches
@@ -71,7 +71,8 @@ export function resolveWallComposition(
   }
 
   // Default based on wall type
-  const defaultStud: StudSize = wallType === "exterior" || wallType === "load-bearing" ? "2x6" : "2x4";
+  const defaultStud: StudSize =
+    wallType === "exterior" || wallType === "load-bearing" ? "2x6" : "2x4";
   const studWidthInches = STUD_WIDTH_INCHES[defaultStud];
   const studWidthFt = studWidthInches / 12;
   const finishPerSide = DEFAULT_FINISH_INCHES / 12;
@@ -103,12 +104,16 @@ const EPSILON = 0.001;
 /**
  * Detect which direction is the opposite of a given cardinal direction.
  */
-function oppositeDirection(dir: CardinalDirection): CardinalDirection {
+function _oppositeDirection(dir: CardinalDirection): CardinalDirection {
   switch (dir) {
-    case "north": return "south";
-    case "south": return "north";
-    case "east": return "west";
-    case "west": return "east";
+    case "north":
+      return "south";
+    case "south":
+      return "north";
+    case "east":
+      return "west";
+    case "west":
+      return "east";
   }
 }
 
@@ -139,7 +144,11 @@ export function buildWallGraph(
     consumedRanges.get(wallKey)!.push([start, end]);
   }
 
-  function isOverlapConsumed(wallKey: string, start: number, end: number): boolean {
+  function isOverlapConsumed(
+    wallKey: string,
+    start: number,
+    end: number,
+  ): boolean {
     const ranges = consumedRanges.get(wallKey);
     if (!ranges) return false;
     for (const [s, e] of ranges) {
@@ -164,8 +173,10 @@ export function buildWallGraph(
       const [overlapStart, overlapEnd] = getOverlapRange(roomA, roomB, dirInA);
 
       // Skip if this specific overlap range is already consumed
-      if (isOverlapConsumed(wallKeyA, overlapStart, overlapEnd) ||
-          isOverlapConsumed(wallKeyB, overlapStart, overlapEnd)) {
+      if (
+        isOverlapConsumed(wallKeyA, overlapStart, overlapEnd) ||
+        isOverlapConsumed(wallKeyB, overlapStart, overlapEnd)
+      ) {
         continue;
       }
 
@@ -183,16 +194,32 @@ export function buildWallGraph(
 
       // Compute shared wall geometry — centered between the two rooms
       const geometry = computeSharedWallGeometry(
-        roomA, roomB, dirInA, dirInB, thickness,
+        roomA,
+        roomB,
+        dirInA,
+        dirInB,
+        thickness,
       );
 
       // Merge openings from both rooms and realign to shared wall position
       const mergedOpenings = [
         ...wallA.openings.map((o) =>
-          realignOpeningToSharedWall({ ...o, ownerRoomId: roomA.id }, wallA.rect, geometry.rect, dirInA, thickness),
+          realignOpeningToSharedWall(
+            { ...o, ownerRoomId: roomA.id },
+            wallA.rect,
+            geometry.rect,
+            dirInA,
+            thickness,
+          ),
         ),
         ...wallB.openings.map((o) =>
-          realignOpeningToSharedWall({ ...o, ownerRoomId: roomB.id }, wallB.rect, geometry.rect, dirInB, thickness),
+          realignOpeningToSharedWall(
+            { ...o, ownerRoomId: roomB.id },
+            wallB.rect,
+            geometry.rect,
+            dirInB,
+            thickness,
+          ),
         ),
       ];
 
@@ -251,11 +278,22 @@ export function buildWallGraph(
       if (!ranges || ranges.length === 0) continue;
 
       const wallRange = getWallRange(room, wall.direction);
-      const uncovered = computeUncoveredRanges(wallRange[0], wallRange[1], ranges);
+      const uncovered = computeUncoveredRanges(
+        wallRange[0],
+        wallRange[1],
+        ranges,
+      );
 
       for (const [start, end] of uncovered) {
         const side = start <= wallRange[0] + EPSILON ? "before" : "after";
-        const remainder = buildRemainderPlanWall(room, wall, wall.direction, start, end, side);
+        const remainder = buildRemainderPlanWall(
+          room,
+          wall,
+          wall.direction,
+          start,
+          end,
+          side,
+        );
         walls.push(remainder);
       }
     }
@@ -315,9 +353,8 @@ export function buildWallGraph(
     if (!room) continue;
 
     // The inner X position of this vertical wall (room boundary edge)
-    const wallInnerX = dir === "east"
-      ? room.bounds.x + room.bounds.width
-      : room.bounds.x;
+    const wallInnerX =
+      dir === "east" ? room.bounds.x + room.bounds.width : room.bounds.x;
 
     let yMin = pw.rect.y;
     let yMax = pw.rect.y + pw.rect.height;
@@ -335,12 +372,13 @@ export function buildWallGraph(
         // Only extend if the wall starts at the room's south boundary
         if (Math.abs(pw.rect.y - room.bounds.y) < EPSILON) {
           // Does the adjacent room have a wall on this same face?
-          const hasOpposingWall = dir === "east"
-            ? (other.bounds.x + other.bounds.width >= wallInnerX - EPSILON)
-            : (other.bounds.x <= wallInnerX + EPSILON);
+          const hasOpposingWall =
+            dir === "east"
+              ? other.bounds.x + other.bounds.width >= wallInnerX - EPSILON
+              : other.bounds.x <= wallInnerX + EPSILON;
           const targetY = hasOpposingWall
-            ? room.bounds.y - southGap / 2  // Meet at centerline
-            : room.bounds.y - southGap;      // Extend to full far edge
+            ? room.bounds.y - southGap / 2 // Meet at centerline
+            : room.bounds.y - southGap; // Extend to full far edge
           if (targetY < yMin - EPSILON) {
             yMin = targetY;
             modified = true;
@@ -352,13 +390,18 @@ export function buildWallGraph(
       const northGap = other.bounds.y - (room.bounds.y + room.bounds.height);
       if (northGap > EPSILON && northGap <= MAX_SHARED_GAP) {
         // Only extend if the wall ends at the room's north boundary
-        if (Math.abs((pw.rect.y + pw.rect.height) - (room.bounds.y + room.bounds.height)) < EPSILON) {
-          const hasOpposingWall = dir === "east"
-            ? (other.bounds.x + other.bounds.width >= wallInnerX - EPSILON)
-            : (other.bounds.x <= wallInnerX + EPSILON);
+        if (
+          Math.abs(
+            pw.rect.y + pw.rect.height - (room.bounds.y + room.bounds.height),
+          ) < EPSILON
+        ) {
+          const hasOpposingWall =
+            dir === "east"
+              ? other.bounds.x + other.bounds.width >= wallInnerX - EPSILON
+              : other.bounds.x <= wallInnerX + EPSILON;
           const targetY = hasOpposingWall
-            ? room.bounds.y + room.bounds.height + northGap / 2  // Meet at centerline
-            : room.bounds.y + room.bounds.height + northGap;      // Extend to full far edge
+            ? room.bounds.y + room.bounds.height + northGap / 2 // Meet at centerline
+            : room.bounds.y + room.bounds.height + northGap; // Extend to full far edge
           if (targetY > yMax + EPSILON) {
             yMax = targetY;
             modified = true;
@@ -378,7 +421,13 @@ export function buildWallGraph(
         end: { x: pw.innerEdge.end.x, y: yMax },
       };
       pw.centerline = computeCenterline(pw.outerEdge, pw.innerEdge);
-      pw.segments = [pw.rect];
+      // Recompute segments around any existing openings (don't discard them)
+      pw.segments = resolveWallSegments({
+        ...pw,
+        id: pw.id,
+        direction: dir!,
+        interiorStartOffset: 0,
+      });
     }
   }
 
@@ -509,7 +558,8 @@ function findSharedWallOverride(
 function chooseWallType(typeA: WallType, typeB: WallType): WallType {
   // Shared walls between two rooms are interior by definition.
   // Load-bearing is a structural classification independent of adjacency.
-  if (typeA === "load-bearing" || typeB === "load-bearing") return "load-bearing";
+  if (typeA === "load-bearing" || typeB === "load-bearing")
+    return "load-bearing";
   return "interior";
 }
 
@@ -520,7 +570,7 @@ function chooseWallType(typeA: WallType, typeB: WallType): WallType {
  */
 function realignOpeningToSharedWall(
   opening: ResolvedOpening,
-  originalRect: Rect,
+  _originalRect: Rect,
   sharedRect: Rect,
   direction: CardinalDirection,
   sharedThickness: number,
@@ -560,7 +610,12 @@ function realignOpeningToSharedWall(
 
 function buildRemainderPlanWall(
   room: ResolvedRoom,
-  wall: { type: WallType; thickness: number; lineWeight: number; direction: CardinalDirection },
+  wall: {
+    type: WallType;
+    thickness: number;
+    lineWeight: number;
+    direction: CardinalDirection;
+  },
   direction: CardinalDirection,
   start: number,
   end: number,
@@ -581,34 +636,80 @@ function buildRemainderPlanWall(
   switch (direction) {
     case "south": {
       const boundaryY = b.y;
-      rect = { x: start, y: boundaryY - thickness, width: end - start, height: thickness };
-      centerline = { start: { x: start, y: boundaryY - halfThick }, end: { x: end, y: boundaryY - halfThick } };
-      outerEdge = { start: { x: start, y: boundaryY - thickness }, end: { x: end, y: boundaryY - thickness } };
-      innerEdge = { start: { x: start, y: boundaryY }, end: { x: end, y: boundaryY } };
+      rect = {
+        x: start,
+        y: boundaryY - thickness,
+        width: end - start,
+        height: thickness,
+      };
+      centerline = {
+        start: { x: start, y: boundaryY - halfThick },
+        end: { x: end, y: boundaryY - halfThick },
+      };
+      outerEdge = {
+        start: { x: start, y: boundaryY - thickness },
+        end: { x: end, y: boundaryY - thickness },
+      };
+      innerEdge = {
+        start: { x: start, y: boundaryY },
+        end: { x: end, y: boundaryY },
+      };
       break;
     }
     case "north": {
       const boundaryY = b.y + b.height;
       rect = { x: start, y: boundaryY, width: end - start, height: thickness };
-      centerline = { start: { x: start, y: boundaryY + halfThick }, end: { x: end, y: boundaryY + halfThick } };
-      outerEdge = { start: { x: start, y: boundaryY + thickness }, end: { x: end, y: boundaryY + thickness } };
-      innerEdge = { start: { x: start, y: boundaryY }, end: { x: end, y: boundaryY } };
+      centerline = {
+        start: { x: start, y: boundaryY + halfThick },
+        end: { x: end, y: boundaryY + halfThick },
+      };
+      outerEdge = {
+        start: { x: start, y: boundaryY + thickness },
+        end: { x: end, y: boundaryY + thickness },
+      };
+      innerEdge = {
+        start: { x: start, y: boundaryY },
+        end: { x: end, y: boundaryY },
+      };
       break;
     }
     case "west": {
       const boundaryX = b.x;
-      rect = { x: boundaryX - thickness, y: start, width: thickness, height: end - start };
-      centerline = { start: { x: boundaryX - halfThick, y: start }, end: { x: boundaryX - halfThick, y: end } };
-      outerEdge = { start: { x: boundaryX - thickness, y: start }, end: { x: boundaryX - thickness, y: end } };
-      innerEdge = { start: { x: boundaryX, y: start }, end: { x: boundaryX, y: end } };
+      rect = {
+        x: boundaryX - thickness,
+        y: start,
+        width: thickness,
+        height: end - start,
+      };
+      centerline = {
+        start: { x: boundaryX - halfThick, y: start },
+        end: { x: boundaryX - halfThick, y: end },
+      };
+      outerEdge = {
+        start: { x: boundaryX - thickness, y: start },
+        end: { x: boundaryX - thickness, y: end },
+      };
+      innerEdge = {
+        start: { x: boundaryX, y: start },
+        end: { x: boundaryX, y: end },
+      };
       break;
     }
     case "east": {
       const boundaryX = b.x + b.width;
       rect = { x: boundaryX, y: start, width: thickness, height: end - start };
-      centerline = { start: { x: boundaryX + halfThick, y: start }, end: { x: boundaryX + halfThick, y: end } };
-      outerEdge = { start: { x: boundaryX + thickness, y: start }, end: { x: boundaryX + thickness, y: end } };
-      innerEdge = { start: { x: boundaryX, y: start }, end: { x: boundaryX, y: end } };
+      centerline = {
+        start: { x: boundaryX + halfThick, y: start },
+        end: { x: boundaryX + halfThick, y: end },
+      };
+      outerEdge = {
+        start: { x: boundaryX + thickness, y: start },
+        end: { x: boundaryX + thickness, y: end },
+      };
+      innerEdge = {
+        start: { x: boundaryX, y: start },
+        end: { x: boundaryX, y: end },
+      };
       break;
     }
   }
@@ -620,7 +721,13 @@ function buildRemainderPlanWall(
     directionInA: direction,
     directionInB: null,
     type: wall.type,
-    composition: { stud: null, studWidthFt: 0, finishA: 0, finishB: 0, totalThickness: thickness },
+    composition: {
+      stud: null,
+      studWidthFt: 0,
+      finishA: 0,
+      finishB: 0,
+      totalThickness: thickness,
+    },
     thickness,
     lineWeight: wall.lineWeight,
     centerline,
@@ -660,8 +767,8 @@ function computeSharedWallGeometry(
 
   switch (dirInA) {
     case "east": {
-      const gapStart = a.x + a.width;    // Room A's right edge
-      const gapEnd = b.x;                 // Room B's left edge
+      const gapStart = a.x + a.width; // Room A's right edge
+      const gapEnd = b.x; // Room B's left edge
       const gap = gapEnd - gapStart;
       const wallX = gapStart + (gap - thickness) / 2;
       const gapCenterX = gapStart + gap / 2;
@@ -670,15 +777,22 @@ function computeSharedWallGeometry(
       const wallLength = maxY - minY;
       return {
         rect: { x: wallX, y: minY, width: thickness, height: wallLength },
-        centerline: { start: { x: gapCenterX, y: minY }, end: { x: gapCenterX, y: maxY } },
+        centerline: {
+          start: { x: gapCenterX, y: minY },
+          end: { x: gapCenterX, y: maxY },
+        },
         outerEdge: { start: { x: wallX, y: minY }, end: { x: wallX, y: maxY } },
-        innerEdge: { start: { x: wallX + thickness, y: minY }, end: { x: wallX + thickness, y: maxY } },
-        overlapStart: minY, overlapEnd: maxY,
+        innerEdge: {
+          start: { x: wallX + thickness, y: minY },
+          end: { x: wallX + thickness, y: maxY },
+        },
+        overlapStart: minY,
+        overlapEnd: maxY,
       };
     }
     case "west": {
-      const gapStart = b.x + b.width;    // Room B's right edge
-      const gapEnd = a.x;                 // Room A's left edge
+      const gapStart = b.x + b.width; // Room B's right edge
+      const gapEnd = a.x; // Room A's left edge
       const gap = gapEnd - gapStart;
       const wallX = gapStart + (gap - thickness) / 2;
       const gapCenterX = gapStart + gap / 2;
@@ -687,15 +801,22 @@ function computeSharedWallGeometry(
       const wallLength = maxY - minY;
       return {
         rect: { x: wallX, y: minY, width: thickness, height: wallLength },
-        centerline: { start: { x: gapCenterX, y: minY }, end: { x: gapCenterX, y: maxY } },
-        outerEdge: { start: { x: wallX + thickness, y: minY }, end: { x: wallX + thickness, y: maxY } },
+        centerline: {
+          start: { x: gapCenterX, y: minY },
+          end: { x: gapCenterX, y: maxY },
+        },
+        outerEdge: {
+          start: { x: wallX + thickness, y: minY },
+          end: { x: wallX + thickness, y: maxY },
+        },
         innerEdge: { start: { x: wallX, y: minY }, end: { x: wallX, y: maxY } },
-        overlapStart: minY, overlapEnd: maxY,
+        overlapStart: minY,
+        overlapEnd: maxY,
       };
     }
     case "north": {
-      const gapStart = a.y + a.height;   // Room A's top edge
-      const gapEnd = b.y;                 // Room B's bottom edge
+      const gapStart = a.y + a.height; // Room A's top edge
+      const gapEnd = b.y; // Room B's bottom edge
       const gap = gapEnd - gapStart;
       const wallY = gapStart + (gap - thickness) / 2;
       const gapCenterY = gapStart + gap / 2;
@@ -704,15 +825,22 @@ function computeSharedWallGeometry(
       const wallLength = maxX - minX;
       return {
         rect: { x: minX, y: wallY, width: wallLength, height: thickness },
-        centerline: { start: { x: minX, y: gapCenterY }, end: { x: maxX, y: gapCenterY } },
-        outerEdge: { start: { x: minX, y: wallY + thickness }, end: { x: maxX, y: wallY + thickness } },
+        centerline: {
+          start: { x: minX, y: gapCenterY },
+          end: { x: maxX, y: gapCenterY },
+        },
+        outerEdge: {
+          start: { x: minX, y: wallY + thickness },
+          end: { x: maxX, y: wallY + thickness },
+        },
         innerEdge: { start: { x: minX, y: wallY }, end: { x: maxX, y: wallY } },
-        overlapStart: minX, overlapEnd: maxX,
+        overlapStart: minX,
+        overlapEnd: maxX,
       };
     }
     case "south": {
-      const gapStart = b.y + b.height;   // Room B's top edge
-      const gapEnd = a.y;                 // Room A's bottom edge
+      const gapStart = b.y + b.height; // Room B's top edge
+      const gapEnd = a.y; // Room A's bottom edge
       const gap = gapEnd - gapStart;
       const wallY = gapStart + (gap - thickness) / 2;
       const gapCenterY = gapStart + gap / 2;
@@ -721,16 +849,26 @@ function computeSharedWallGeometry(
       const wallLength = maxX - minX;
       return {
         rect: { x: minX, y: wallY, width: wallLength, height: thickness },
-        centerline: { start: { x: minX, y: gapCenterY }, end: { x: maxX, y: gapCenterY } },
+        centerline: {
+          start: { x: minX, y: gapCenterY },
+          end: { x: maxX, y: gapCenterY },
+        },
         outerEdge: { start: { x: minX, y: wallY }, end: { x: maxX, y: wallY } },
-        innerEdge: { start: { x: minX, y: wallY + thickness }, end: { x: maxX, y: wallY + thickness } },
-        overlapStart: minX, overlapEnd: maxX,
+        innerEdge: {
+          start: { x: minX, y: wallY + thickness },
+          end: { x: maxX, y: wallY + thickness },
+        },
+        overlapStart: minX,
+        overlapEnd: maxX,
       };
     }
   }
 }
 
-function computeCenterline(outer: LineSegment, inner: LineSegment): LineSegment {
+function computeCenterline(
+  outer: LineSegment,
+  inner: LineSegment,
+): LineSegment {
   return {
     start: {
       x: (outer.start.x + inner.start.x) / 2,

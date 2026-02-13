@@ -6,12 +6,24 @@ import type {
   ResolvedValve,
   ResolvedWaterHeater,
 } from "@floorscript/core";
-import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
+import {
+  scaleValue,
+  type TransformContext,
+  toSvg,
+} from "../coordinate-transform.js";
 import type { DrawingContext } from "../drawing-context.js";
 
 const FIXTURE_STYLE = { stroke: "#000", strokeWidth: "0.3mm", fill: "none" };
-const SUPPLY_HOT_STYLE = { stroke: "#CC0000", strokeWidth: "0.4mm", fill: "none" };
-const SUPPLY_COLD_STYLE = { stroke: "#0000CC", strokeWidth: "0.4mm", fill: "none" };
+const SUPPLY_HOT_STYLE = {
+  stroke: "#CC0000",
+  strokeWidth: "0.4mm",
+  fill: "none",
+};
+const SUPPLY_COLD_STYLE = {
+  stroke: "#0000CC",
+  strokeWidth: "0.4mm",
+  fill: "none",
+};
 const DRAIN_STYLE = { stroke: "#006600", strokeWidth: "0.5mm", fill: "none" };
 
 /**
@@ -50,6 +62,26 @@ export function renderPlumbing(
   dc.closeGroup();
 }
 
+/**
+ * Get SVG rotation angle for a fixture based on its plan orientation.
+ * Default drawing orientation is "facing-south" in plan coordinates:
+ *   tank at pos.y - d/2 (smaller SVG Y = north in plan),
+ *   bowl at pos.y + d*0.1 (larger SVG Y = south in plan).
+ * So facing-north needs 180° to flip the drawing.
+ */
+function getRotationAngle(orientation?: string): number {
+  switch (orientation) {
+    case "facing-north":
+      return 180;
+    case "facing-east":
+      return 90;
+    case "facing-west":
+      return -90;
+    default:
+      return 0;
+  }
+}
+
 function renderPlumbingFixture(
   fixture: ResolvedPlumbingFixture,
   ctx: TransformContext,
@@ -60,7 +92,14 @@ function renderPlumbingFixture(
   const w = fixture.width ? scaleValue(fixture.width, ctx) : defaultSize;
   const d = fixture.depth ? scaleValue(fixture.depth, ctx) : defaultSize * 0.7;
 
-  dc.openGroup({ class: `plumbing-fixture fixture-${fixture.fixtureType}` });
+  const rotation = getRotationAngle(fixture.orientation);
+  const groupAttrs: Record<string, string> = {
+    class: `plumbing-fixture fixture-${fixture.fixtureType}`,
+  };
+  if (rotation !== 0) {
+    groupAttrs.transform = `rotate(${rotation}, ${pos.x}, ${pos.y})`;
+  }
+  dc.openGroup(groupAttrs);
 
   switch (fixture.fixtureType) {
     case "kitchen-sink": {
@@ -80,7 +119,13 @@ function renderPlumbingFixture(
       const bowlRy = d * 0.4;
       const tankH = d * 0.25;
       // Tank at top
-      dc.rect(pos.x - bowlRx * 0.8, pos.y - d / 2, bowlRx * 1.6, tankH, FIXTURE_STYLE);
+      dc.rect(
+        pos.x - bowlRx * 0.8,
+        pos.y - d / 2,
+        bowlRx * 1.6,
+        tankH,
+        FIXTURE_STYLE,
+      );
       // Bowl below tank
       dc.ellipse(pos.x, pos.y + d * 0.1, bowlRx, bowlRy, FIXTURE_STYLE);
       break;
@@ -97,15 +142,29 @@ function renderPlumbingFixture(
       dc.rect(pos.x - w / 2, pos.y - d / 2, w, d - arcR, FIXTURE_STYLE);
       // Rounded bottom end
       dc.arc(
-        pos.x - w / 2, pos.y + d / 2 - arcR,
+        pos.x - w / 2,
+        pos.y + d / 2 - arcR,
         arcR,
-        pos.x + w / 2, pos.y + d / 2 - arcR,
+        pos.x + w / 2,
+        pos.y + d / 2 - arcR,
         1,
         FIXTURE_STYLE,
       );
       // Connect sides to arc
-      dc.line(pos.x - w / 2, pos.y - d / 2, pos.x - w / 2, pos.y + d / 2 - arcR, FIXTURE_STYLE);
-      dc.line(pos.x + w / 2, pos.y - d / 2, pos.x + w / 2, pos.y + d / 2 - arcR, FIXTURE_STYLE);
+      dc.line(
+        pos.x - w / 2,
+        pos.y - d / 2,
+        pos.x - w / 2,
+        pos.y + d / 2 - arcR,
+        FIXTURE_STYLE,
+      );
+      dc.line(
+        pos.x + w / 2,
+        pos.y - d / 2,
+        pos.x + w / 2,
+        pos.y + d / 2 - arcR,
+        FIXTURE_STYLE,
+      );
       break;
     }
     case "dishwasher": {
@@ -137,12 +196,15 @@ function renderPlumbingFixture(
     case "hose-bib": {
       // Triangle with "HB" text
       const r = w / 2;
-      dc.polyline([
-        { x: pos.x, y: pos.y - r },
-        { x: pos.x + r, y: pos.y + r * 0.7 },
-        { x: pos.x - r, y: pos.y + r * 0.7 },
-        { x: pos.x, y: pos.y - r },
-      ], FIXTURE_STYLE);
+      dc.polyline(
+        [
+          { x: pos.x, y: pos.y - r },
+          { x: pos.x + r, y: pos.y + r * 0.7 },
+          { x: pos.x - r, y: pos.y + r * 0.7 },
+          { x: pos.x, y: pos.y - r },
+        ],
+        FIXTURE_STYLE,
+      );
       dc.text(pos.x, pos.y + r * 0.15, "HB", {
         fontSize: r * 0.7,
         textAnchor: "middle",
@@ -161,7 +223,7 @@ function renderLabeledSquare(
   pos: { x: number; y: number },
   size: number,
   label: string,
-  ctx: TransformContext,
+  _ctx: TransformContext,
   dc: DrawingContext,
 ): void {
   dc.rect(pos.x - size / 2, pos.y - size / 2, size, size, FIXTURE_STYLE);
@@ -255,17 +317,20 @@ function renderValve(
   dc.openGroup({ class: `valve valve-${valve.valveType}` });
 
   // Diamond shape (rotated square)
-  dc.polyline([
-    { x: pos.x, y: pos.y - size },
-    { x: pos.x + size, y: pos.y },
-    { x: pos.x, y: pos.y + size },
-    { x: pos.x - size, y: pos.y },
-    { x: pos.x, y: pos.y - size },
-  ], {
-    stroke: "#000",
-    strokeWidth: "0.3mm",
-    fill: valve.valveType === "shutoff" ? "#000" : "none",
-  });
+  dc.polyline(
+    [
+      { x: pos.x, y: pos.y - size },
+      { x: pos.x + size, y: pos.y },
+      { x: pos.x, y: pos.y + size },
+      { x: pos.x - size, y: pos.y },
+      { x: pos.x, y: pos.y - size },
+    ],
+    {
+      stroke: "#000",
+      strokeWidth: "0.3mm",
+      fill: valve.valveType === "shutoff" ? "#000" : "none",
+    },
+  );
 
   if (valve.valveType === "pressure-regulator") {
     dc.text(pos.x, pos.y, "PR", {
@@ -277,11 +342,14 @@ function renderValve(
     });
   } else if (valve.valveType === "check") {
     // Arrow pointing right inside diamond
-    dc.polyline([
-      { x: pos.x - size * 0.3, y: pos.y - size * 0.3 },
-      { x: pos.x + size * 0.3, y: pos.y },
-      { x: pos.x - size * 0.3, y: pos.y + size * 0.3 },
-    ], { stroke: "#000", strokeWidth: "0.2mm", fill: "none" });
+    dc.polyline(
+      [
+        { x: pos.x - size * 0.3, y: pos.y - size * 0.3 },
+        { x: pos.x + size * 0.3, y: pos.y },
+        { x: pos.x - size * 0.3, y: pos.y + size * 0.3 },
+      ],
+      { stroke: "#000", strokeWidth: "0.2mm", fill: "none" },
+    );
   }
 
   dc.closeGroup();

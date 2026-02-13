@@ -7,7 +7,11 @@ import type {
   ResolvedSmokeDetector,
   ResolvedSwitch,
 } from "@floorscript/core";
-import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
+import {
+  scaleValue,
+  type TransformContext,
+  toSvg,
+} from "../coordinate-transform.js";
 import type { DrawingContext } from "../drawing-context.js";
 
 // Symbol size in plan units (feet). ~4 inches radius = 0.35ft.
@@ -70,8 +74,20 @@ function renderOutlet(
     case "duplex": {
       // Two short horizontal lines through the circle
       const lineLen = r * 0.7;
-      dc.line(pos.x - lineLen, pos.y - r * 0.35, pos.x + lineLen, pos.y - r * 0.35, ELECTRICAL_STYLE);
-      dc.line(pos.x - lineLen, pos.y + r * 0.35, pos.x + lineLen, pos.y + r * 0.35, ELECTRICAL_STYLE);
+      dc.line(
+        pos.x - lineLen,
+        pos.y - r * 0.35,
+        pos.x + lineLen,
+        pos.y - r * 0.35,
+        ELECTRICAL_STYLE,
+      );
+      dc.line(
+        pos.x - lineLen,
+        pos.y + r * 0.35,
+        pos.x + lineLen,
+        pos.y + r * 0.35,
+        ELECTRICAL_STYLE,
+      );
       break;
     }
     case "gfci": {
@@ -95,11 +111,14 @@ function renderOutlet(
     case "dedicated": {
       // Small triangle mark inside upper part of circle
       const t = r * 0.4;
-      dc.polyline([
-        { x: pos.x - t, y: pos.y },
-        { x: pos.x, y: pos.y - t * 1.2 },
-        { x: pos.x + t, y: pos.y },
-      ], ELECTRICAL_STYLE);
+      dc.polyline(
+        [
+          { x: pos.x - t, y: pos.y },
+          { x: pos.x, y: pos.y - t * 1.2 },
+          { x: pos.x + t, y: pos.y },
+        ],
+        ELECTRICAL_STYLE,
+      );
       break;
     }
     case "floor": {
@@ -140,7 +159,11 @@ function renderSwitch(
   }
 
   // White background circle so switch label is visible on walls
-  dc.circle(pos.x, pos.y, r, { stroke: "#000", strokeWidth: "0.3mm", fill: "#fff" });
+  dc.circle(pos.x, pos.y, r, {
+    stroke: "#000",
+    strokeWidth: "0.3mm",
+    fill: "#fff",
+  });
 
   dc.text(pos.x, pos.y, label, {
     fontSize: r * 1.1,
@@ -177,10 +200,34 @@ function renderLightFixture(
       dc.circle(pos.x, pos.y, r, ELECTRICAL_STYLE);
       const ray = r * 1.5;
       const d = ray * Math.SQRT1_2;
-      dc.line(pos.x - d, pos.y - d, pos.x - r * Math.SQRT1_2, pos.y - r * Math.SQRT1_2, ELECTRICAL_STYLE);
-      dc.line(pos.x + d, pos.y - d, pos.x + r * Math.SQRT1_2, pos.y - r * Math.SQRT1_2, ELECTRICAL_STYLE);
-      dc.line(pos.x - d, pos.y + d, pos.x - r * Math.SQRT1_2, pos.y + r * Math.SQRT1_2, ELECTRICAL_STYLE);
-      dc.line(pos.x + d, pos.y + d, pos.x + r * Math.SQRT1_2, pos.y + r * Math.SQRT1_2, ELECTRICAL_STYLE);
+      dc.line(
+        pos.x - d,
+        pos.y - d,
+        pos.x - r * Math.SQRT1_2,
+        pos.y - r * Math.SQRT1_2,
+        ELECTRICAL_STYLE,
+      );
+      dc.line(
+        pos.x + d,
+        pos.y - d,
+        pos.x + r * Math.SQRT1_2,
+        pos.y - r * Math.SQRT1_2,
+        ELECTRICAL_STYLE,
+      );
+      dc.line(
+        pos.x - d,
+        pos.y + d,
+        pos.x - r * Math.SQRT1_2,
+        pos.y + r * Math.SQRT1_2,
+        ELECTRICAL_STYLE,
+      );
+      dc.line(
+        pos.x + d,
+        pos.y + d,
+        pos.x + r * Math.SQRT1_2,
+        pos.y + r * Math.SQRT1_2,
+        ELECTRICAL_STYLE,
+      );
       break;
     }
     case "pendant": {
@@ -191,7 +238,9 @@ function renderLightFixture(
     }
     case "under-cabinet": {
       // Dashed line of specified width
-      const w = fixture.width ? scaleValue(fixture.width, ctx) : scaleValue(2, ctx);
+      const w = fixture.width
+        ? scaleValue(fixture.width, ctx)
+        : scaleValue(2, ctx);
       dc.line(pos.x - w / 2, pos.y, pos.x + w / 2, pos.y, {
         ...ELECTRICAL_STYLE,
         strokeDasharray: "4 2",
@@ -205,7 +254,13 @@ function renderLightFixture(
         const angle = (i * 2 * Math.PI) / 3 - Math.PI / 2;
         const bx = pos.x + Math.cos(angle) * r * 1.6;
         const by = pos.y + Math.sin(angle) * r * 1.6;
-        dc.line(pos.x + Math.cos(angle) * r, pos.y + Math.sin(angle) * r, bx, by, ELECTRICAL_STYLE);
+        dc.line(
+          pos.x + Math.cos(angle) * r,
+          pos.y + Math.sin(angle) * r,
+          bx,
+          by,
+          ELECTRICAL_STYLE,
+        );
       }
       break;
     }

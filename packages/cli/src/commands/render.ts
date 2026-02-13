@@ -29,9 +29,7 @@ export function renderCommand(input: string, options: RenderOptions): void {
     writeFileSync(outputPath, svg, "utf-8");
     console.log(`Rendered: ${outputPath}`);
   } catch (err) {
-    console.error(
-      `Error: ${err instanceof Error ? err.message : String(err)}`,
-    );
+    console.error(`Error: ${err instanceof Error ? err.message : String(err)}`);
     process.exit(1);
   }
 }

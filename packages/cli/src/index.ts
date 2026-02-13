@@ -1,6 +1,6 @@
 import { Command } from "commander";
-import { renderCommand } from "./commands/render.js";
 import { initCommand } from "./commands/init.js";
+import { renderCommand } from "./commands/render.js";
 import { validateCommand } from "./commands/validate.js";
 
 const program = new Command();

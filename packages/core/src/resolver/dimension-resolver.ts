@@ -1,6 +1,11 @@
-import type { UnitSystem } from "../types/config.js";
-import type { Rect, ResolvedDimension, ResolvedRoom, WallGraph } from "../types/geometry.js";
 import { formatDimension } from "../parser/dimension.js";
+import type { UnitSystem } from "../types/config.js";
+import type {
+  Rect,
+  ResolvedDimension,
+  ResolvedRoom,
+  WallGraph,
+} from "../types/geometry.js";
 
 const DIMENSION_OFFSET_FT = 2;
 const DIMENSION_OFFSET_M = 0.6;
@@ -16,10 +21,11 @@ const EPSILON = 0.01;
 export function generateDimensions(
   rooms: ResolvedRoom[],
   units: UnitSystem,
-  wallGraph?: WallGraph,
+  _wallGraph?: WallGraph,
 ): ResolvedDimension[] {
-  const baseOffset = units === "imperial" ? DIMENSION_OFFSET_FT : DIMENSION_OFFSET_M;
-  const laneSpacing = units === "imperial" ? LANE_SPACING_FT : LANE_SPACING_M;
+  const baseOffset =
+    units === "imperial" ? DIMENSION_OFFSET_FT : DIMENSION_OFFSET_M;
+  const _laneSpacing = units === "imperial" ? LANE_SPACING_FT : LANE_SPACING_M;
   const dimensions: ResolvedDimension[] = [];
 
   // Track which edges have been dimensioned to avoid duplicates on shared walls
@@ -30,17 +36,15 @@ export function generateDimensions(
 
     // Determine neighbors
     const hasNeighborSouth = hasNeighborInDirection(room, rooms, "south");
-    const hasNeighborNorth = hasNeighborInDirection(room, rooms, "north");
+    const _hasNeighborNorth = hasNeighborInDirection(room, rooms, "north");
     const hasNeighborWest = hasNeighborInDirection(room, rooms, "west");
-    const hasNeighborEast = hasNeighborInDirection(room, rooms, "east");
+    const _hasNeighborEast = hasNeighborInDirection(room, rooms, "east");
 
     // Width dimension (horizontal)
     const widthEdgeKey = makeEdgeKey(x, x + width, "horizontal", y);
     if (!dimensionedEdges.has(widthEdgeKey)) {
       // Prefer south side; if neighbor south, use north side
-      const dimY = hasNeighborSouth
-        ? y + height + baseOffset
-        : y - baseOffset;
+      const dimY = hasNeighborSouth ? y + height + baseOffset : y - baseOffset;
 
       dimensions.push({
         from: { x, y: dimY },
@@ -56,9 +60,7 @@ export function generateDimensions(
     const heightEdgeKey = makeEdgeKey(y, y + height, "vertical", x);
     if (!dimensionedEdges.has(heightEdgeKey)) {
       // Prefer west side; if neighbor west, use east side
-      const dimX = hasNeighborWest
-        ? x + width + baseOffset
-        : x - baseOffset;
+      const dimX = hasNeighborWest ? x + width + baseOffset : x - baseOffset;
 
       dimensions.push({
         from: { x: dimX, y },
@@ -126,7 +128,12 @@ function hasYOverlap(a: Rect, b: Rect): boolean {
   return a.y < b.y + b.height + EPSILON && b.y < a.y + a.height + EPSILON;
 }
 
-function makeEdgeKey(start: number, end: number, orientation: string, perpendicular: number): string {
+function makeEdgeKey(
+  start: number,
+  end: number,
+  orientation: string,
+  perpendicular: number,
+): string {
   const s = Math.round(start * 1000) / 1000;
   const e = Math.round(end * 1000) / 1000;
   const p = Math.round(perpendicular * 1000) / 1000;

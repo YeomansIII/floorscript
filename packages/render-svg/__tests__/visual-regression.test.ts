@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { parseConfig, resolveLayout } from "@floorscript/core";
-import { renderSvg } from "../src/render-svg.js";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseConfig, resolveLayout } from "@floorscript/core";
+import { describe, expect, it } from "vitest";
+import { renderSvg } from "../src/render-svg.js";
 
 const EXAMPLES_DIR = resolve(__dirname, "../../../examples");
 
@@ -28,7 +28,10 @@ describe("visual regression", () => {
   });
 
   it("kitchen-reno existing plan renders consistently", () => {
-    const yaml = readFileSync(resolve(EXAMPLES_DIR, "kitchen-reno.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(EXAMPLES_DIR, "kitchen-reno.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config, "existing");
     const svg = renderSvg(resolved);
@@ -36,7 +39,10 @@ describe("visual regression", () => {
   });
 
   it("kitchen-reno proposed plan renders consistently", () => {
-    const yaml = readFileSync(resolve(EXAMPLES_DIR, "kitchen-reno.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(EXAMPLES_DIR, "kitchen-reno.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config, "proposed");
     const svg = renderSvg(resolved);
@@ -49,7 +55,10 @@ describe("visual regression", () => {
   });
 
   it("single-room renders consistently at different widths", () => {
-    const yaml = readFileSync(resolve(EXAMPLES_DIR, "single-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(EXAMPLES_DIR, "single-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
 
@@ -61,7 +70,10 @@ describe("visual regression", () => {
   });
 
   it("renders consistently with options disabled", () => {
-    const yaml = readFileSync(resolve(EXAMPLES_DIR, "single-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(EXAMPLES_DIR, "single-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
 
@@ -75,7 +87,10 @@ describe("visual regression", () => {
   });
 
   it("multi-room with electrical hidden renders consistently", () => {
-    const yaml = readFileSync(resolve(EXAMPLES_DIR, "multi-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(EXAMPLES_DIR, "multi-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
 
@@ -89,7 +104,10 @@ describe("visual regression", () => {
   });
 
   it("multi-room with plumbing hidden renders consistently", () => {
-    const yaml = readFileSync(resolve(EXAMPLES_DIR, "multi-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(EXAMPLES_DIR, "multi-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
 

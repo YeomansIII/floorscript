@@ -1,8 +1,8 @@
-import { describe, expect, it } from "vitest";
-import { parseConfig, resolveLayout } from "@floorscript/core";
-import { renderSvg } from "../src/render-svg.js";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parseConfig, resolveLayout } from "@floorscript/core";
+import { describe, expect, it } from "vitest";
+import { renderSvg } from "../src/render-svg.js";
 
 const MINIMAL_YAML = `
 version: "0.1"
@@ -159,7 +159,10 @@ plans:
   });
 
   it("renders electrical and plumbing layers from multi-room example", () => {
-    const yaml = readFileSync(resolve(__dirname, "../../../examples/multi-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(__dirname, "../../../examples/multi-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
     const svg = renderSvg(resolved);
@@ -196,7 +199,10 @@ plans:
   });
 
   it("hides electrical layer when layer visibility is false", () => {
-    const yaml = readFileSync(resolve(__dirname, "../../../examples/multi-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(__dirname, "../../../examples/multi-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
     const svg = renderSvg(resolved, {
@@ -261,7 +267,10 @@ plans:
   });
 
   it("hides plumbing layer when layer visibility is false", () => {
-    const yaml = readFileSync(resolve(__dirname, "../../../examples/multi-room.yaml"), "utf-8");
+    const yaml = readFileSync(
+      resolve(__dirname, "../../../examples/multi-room.yaml"),
+      "utf-8",
+    );
     const config = parseConfig(yaml);
     const resolved = resolveLayout(config);
     const svg = renderSvg(resolved, {

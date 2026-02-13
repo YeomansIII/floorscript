@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { parseConfig } from "../src/parser/config-parser.js";
-import { resolveLayout } from "../src/resolver/layout-resolver.js";
 import { resolveElectrical } from "../src/resolver/electrical-resolver.js";
+import { resolveLayout } from "../src/resolver/layout-resolver.js";
+import { resolveWalls } from "../src/resolver/wall-resolver.js";
 import { findWallById } from "../src/resolver/wall-utils.js";
 import type { ResolvedRoom } from "../src/types/geometry.js";
-import { resolveWalls } from "../src/resolver/wall-resolver.js";
 
 // Helper: build a minimal resolved room for testing
 function makeRoom(
@@ -26,7 +26,7 @@ function makeRoom(
 }
 
 // Default interior thickness: 2x4 (3.5") + 0.5" × 2 = 4.5" = 0.375ft
-const INT_THICK = 4.5 / 12;
+const _INT_THICK = 4.5 / 12;
 
 describe("electrical resolver", () => {
   const rooms = [
@@ -51,7 +51,12 @@ describe("electrical resolver", () => {
     const result = resolveElectrical(
       {
         outlets: [
-          { type: "duplex", position: ["3ft", "0"], wall: "kitchen.south", circuit: 1 },
+          {
+            type: "duplex",
+            position: ["3ft", "0"],
+            wall: "kitchen.south",
+            circuit: 1,
+          },
         ],
       },
       rooms,
@@ -67,14 +72,22 @@ describe("electrical resolver", () => {
     // Offset 3ft along x, centerline at y = rect.y + thickness/2
     expect(outlet.position.x).toBe(3);
     const southWall = rooms[0].walls.find((w) => w.direction === "south")!;
-    expect(outlet.position.y).toBeCloseTo(southWall.rect.y + southWall.thickness / 2, 5);
+    expect(outlet.position.y).toBeCloseTo(
+      southWall.rect.y + southWall.thickness / 2,
+      5,
+    );
   });
 
   it("resolves outlet on east wall (vertical) at correct centerline position", () => {
     const result = resolveElectrical(
       {
         outlets: [
-          { type: "gfci", position: ["5ft", "0"], wall: "kitchen.east", circuit: 2 },
+          {
+            type: "gfci",
+            position: ["5ft", "0"],
+            wall: "kitchen.east",
+            circuit: 2,
+          },
         ],
       },
       rooms,
@@ -86,7 +99,10 @@ describe("electrical resolver", () => {
     // East wall extends right of room: rect at x = 12
     const eastWall = rooms[0].walls.find((w) => w.direction === "east")!;
     expect(outlet.position.y).toBe(5);
-    expect(outlet.position.x).toBeCloseTo(eastWall.rect.x + eastWall.thickness / 2, 5);
+    expect(outlet.position.x).toBeCloseTo(
+      eastWall.rect.x + eastWall.thickness / 2,
+      5,
+    );
   });
 
   it("resolves switch with controls", () => {
@@ -117,7 +133,12 @@ describe("electrical resolver", () => {
     const result = resolveElectrical(
       {
         fixtures: [
-          { id: "k-light", type: "recessed", position: ["6ft", "5ft"], circuit: 1 },
+          {
+            id: "k-light",
+            type: "recessed",
+            position: ["6ft", "5ft"],
+            circuit: 1,
+          },
         ],
       },
       rooms,
@@ -152,7 +173,11 @@ describe("electrical resolver", () => {
         runs: [
           {
             circuit: 1,
-            path: [["1ft", "8ft"], ["1ft", "5ft"], ["6ft", "5ft"]],
+            path: [
+              ["1ft", "8ft"],
+              ["1ft", "5ft"],
+              ["6ft", "5ft"],
+            ],
             style: "solid",
           },
         ],
@@ -175,7 +200,15 @@ describe("electrical resolver", () => {
   it("defaults run style to solid", () => {
     const result = resolveElectrical(
       {
-        runs: [{ circuit: 1, path: [["0", "0"], ["1ft", "1ft"]] }],
+        runs: [
+          {
+            circuit: 1,
+            path: [
+              ["0", "0"],
+              ["1ft", "1ft"],
+            ],
+          },
+        ],
       },
       rooms,
       "imperial",

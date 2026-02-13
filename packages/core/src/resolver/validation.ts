@@ -89,9 +89,8 @@ function checkOpeningExceedsWall(
 
   for (const wall of plan.wallGraph.walls) {
     const dir = wall.directionInA ?? wall.directionInB;
-    const wallLength = dir === "south" || dir === "north"
-      ? wall.rect.width
-      : wall.rect.height;
+    const wallLength =
+      dir === "south" || dir === "north" ? wall.rect.width : wall.rect.height;
 
     for (const opening of wall.openings) {
       if (opening.width > wallLength + 0.001) {
@@ -186,7 +185,8 @@ function checkFixtureOutOfBounds(
         roomId: null,
         wallId: null,
         elementId: fixture.id ?? null,
-        suggestion: "Move the fixture inside a room or use wall-relative positioning",
+        suggestion:
+          "Move the fixture inside a room or use wall-relative positioning",
       });
     }
   }
@@ -202,8 +202,14 @@ function checkRunsThroughWalls(
   if (!plan.wallGraph || !plan.plumbing) return;
 
   const allRuns = [
-    ...plan.plumbing.supplyRuns.map((r) => ({ path: r.path, label: `supply run (${r.supplyType})` })),
-    ...plan.plumbing.drainRuns.map((r) => ({ path: r.path, label: "drain run" })),
+    ...plan.plumbing.supplyRuns.map((r) => ({
+      path: r.path,
+      label: `supply run (${r.supplyType})`,
+    })),
+    ...plan.plumbing.drainRuns.map((r) => ({
+      path: r.path,
+      label: "drain run",
+    })),
   ];
 
   for (const run of allRuns) {
@@ -223,12 +229,18 @@ function checkRunsThroughWalls(
             // Horizontal wall: check if segment's x range overlaps opening gap x range
             const segMinX = Math.min(segStart.x, segEnd.x);
             const segMaxX = Math.max(segStart.x, segEnd.x);
-            return segMaxX > opening.gapStart.x + 0.001 && segMinX < opening.gapEnd.x - 0.001;
+            return (
+              segMaxX > opening.gapStart.x + 0.001 &&
+              segMinX < opening.gapEnd.x - 0.001
+            );
           } else {
             // Vertical wall: check if segment's y range overlaps opening gap y range
             const segMinY = Math.min(segStart.y, segEnd.y);
             const segMaxY = Math.max(segStart.y, segEnd.y);
-            return segMaxY > opening.gapStart.y + 0.001 && segMinY < opening.gapEnd.y - 0.001;
+            return (
+              segMaxY > opening.gapStart.y + 0.001 &&
+              segMinY < opening.gapEnd.y - 0.001
+            );
           }
         });
 
@@ -240,7 +252,8 @@ function checkRunsThroughWalls(
             roomId: wall.roomA,
             wallId: wall.id,
             elementId: null,
-            suggestion: "Route the run through an opening or add a wall penetration",
+            suggestion:
+              "Route the run through an opening or add a wall penetration",
           });
         }
       }

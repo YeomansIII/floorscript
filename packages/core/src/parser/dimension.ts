@@ -3,8 +3,7 @@ import type { Dimension, UnitSystem } from "../types/config.js";
 // Imperial regex patterns (ordered from most specific to least)
 const FT_IN_FRAC =
   /^(\d+(?:\.\d+)?)\s*(?:ft|')\s+(\d+)\s*-\s*(\d+)\/(\d+)\s*(?:in|")$/i;
-const FT_IN =
-  /^(\d+(?:\.\d+)?)\s*(?:ft|')\s+(\d+(?:\.\d+)?)\s*(?:in|")$/i;
+const FT_IN = /^(\d+(?:\.\d+)?)\s*(?:ft|')\s+(\d+(?:\.\d+)?)\s*(?:in|")$/i;
 const FT_ONLY = /^(\d+(?:\.\d+)?)\s*(?:ft|')$/i;
 const IN_ONLY = /^(\d+(?:\.\d+)?)\s*(?:in|")$/i;
 

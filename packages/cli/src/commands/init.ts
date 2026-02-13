@@ -1,5 +1,5 @@
-import { singleRoomTemplate } from "../templates/single-room.js";
 import { kitchenRenoTemplate } from "../templates/kitchen-reno.js";
+import { singleRoomTemplate } from "../templates/single-room.js";
 
 const templates: Record<string, string> = {
   "single-room": singleRoomTemplate,

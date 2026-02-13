@@ -1,0 +1,72 @@
+version: "0.1"
+
+project:
+  title: "Upstairs Bedrooms & Hallway"
+
+units: imperial
+
+plans:
+  - id: upstairs
+    title: "Upstairs Floor Plan"
+    rooms:
+      # East bedroom - NOTE: actual room is L-shaped
+      # (south=17'3", east=11'10", north=14'11", west=5'4")
+      # Modeled as bounding box rectangle
+      - id: bedroom1
+        label: "Bedroom 1 (East)"
+        position: [0, 0]
+        width: 17ft 3in
+        height: 11ft 10in
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: exterior }
+          west:
+            type: interior
+            openings:
+              - type: door
+                position: 2ft 7in
+                width: 2ft 6in
+                swing: inward-right
+
+      # Wide landing/hallway between bedrooms
+      - id: hallway
+        label: "Hallway"
+        adjacent_to:
+          room: bedroom1
+          wall: west
+          alignment: start
+        width: 13ft 8in
+        height: 5ft 7in
+        walls:
+          north: { type: interior }
+          south: { type: interior }
+          east: { type: interior }
+          west: { type: interior }
+
+      # West bedroom
+      - id: bedroom2
+        label: "Bedroom 2 (West)"
+        adjacent_to:
+          room: hallway
+          wall: west
+          alignment: start
+        width: 15ft 4in
+        height: 11ft 10in
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          west: { type: exterior }
+          east:
+            type: interior
+            openings:
+              - type: door
+                position: 2ft 6in
+                width: 2ft 6in
+                swing: inward-left
+
+    layers:
+      structural:
+        visible: true
+      dimensions:
+        visible: true

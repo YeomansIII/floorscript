@@ -1,6 +1,10 @@
-import type { OpeningConfig, UnitSystem } from "../types/config.js";
-import type { LineSegment, ResolvedOpening, ResolvedWall } from "../types/geometry.js";
 import { parseDimension } from "../parser/dimension.js";
+import type { OpeningConfig, UnitSystem } from "../types/config.js";
+import type {
+  LineSegment,
+  ResolvedOpening,
+  ResolvedWall,
+} from "../types/geometry.js";
 
 /**
  * Resolve openings (doors/windows) to absolute positions on a wall.

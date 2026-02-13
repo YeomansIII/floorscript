@@ -103,9 +103,9 @@ describe("parseConfig", () => {
 
   it("throws on missing required fields", () => {
     expect(() => parseConfig(`{}`)).toThrow("Invalid FloorScript config");
-    expect(() =>
-      parseConfig(`version: "0.1"\nunits: imperial`),
-    ).toThrow("Invalid FloorScript config");
+    expect(() => parseConfig(`version: "0.1"\nunits: imperial`)).toThrow(
+      "Invalid FloorScript config",
+    );
   });
 
   it("throws on invalid YAML/JSON", () => {

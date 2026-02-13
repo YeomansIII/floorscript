@@ -1,5 +1,9 @@
 import type { ResolvedDimension } from "@floorscript/core";
-import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
+import {
+  scaleValue,
+  type TransformContext,
+  toSvg,
+} from "../coordinate-transform.js";
 import type { DrawingContext } from "../drawing-context.js";
 import { n } from "../utils.js";
 
@@ -30,10 +34,22 @@ export function renderDimension(
   const textOffset = scaleValue(TEXT_OFFSET_FT, ctx);
   const fontSize = scaleValue(FONT_SIZE_FT, ctx);
 
-  dc.openGroup({ class: "dimension", stroke: "#555", "stroke-width": "0.18mm" });
+  dc.openGroup({
+    class: "dimension",
+    stroke: "#555",
+    "stroke-width": "0.18mm",
+  });
 
   if (dim.orientation === "horizontal") {
-    renderHorizontalDimension(dc, from, to, dim, tickSize, textOffset, fontSize);
+    renderHorizontalDimension(
+      dc,
+      from,
+      to,
+      dim,
+      tickSize,
+      textOffset,
+      fontSize,
+    );
   } else {
     renderVerticalDimension(dc, from, to, dim, tickSize, textOffset, fontSize);
   }

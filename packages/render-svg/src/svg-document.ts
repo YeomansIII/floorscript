@@ -70,4 +70,4 @@ export class SvgDocument {
   }
 }
 
-export { n, escapeXml } from "./utils.js";
+export { escapeXml, n } from "./utils.js";

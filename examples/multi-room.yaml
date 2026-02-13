@@ -57,11 +57,11 @@ plans:
       - id: hallway
         label: "Hallway"
         adjacent_to:
-          room: kitchen
+          room: living
           wall: south
-          alignment: start
-        width: 10ft
-        height: 3ft
+          alignment: end
+        width: 6.5ft
+        height: 10ft
         walls:
           north: { type: interior }
           south: { type: interior }
@@ -149,23 +149,36 @@ plans:
       fixtures:
         - id: bath-toilet
           type: toilet
-          position: [2, -4.5]
+          wall: bathroom.south
+          position: 2ft
+          offset: 0in
           width: 18in
           depth: 28in
         - id: bath-sink
           type: bath-sink
-          position: [5, -4]
+          wall: bathroom.south
+          position: 5ft
+          offset: 0in
           width: 20in
           depth: 16in
       supply_runs:
         - type: cold
-          path: [[5, -4], [5, -1]]
+          from: bath-sink
+          to:
+            wall: bathroom.south
+            position: 4.5ft
           size: "1/2in"
         - type: hot
-          path: [[5.5, -4], [5.5, -1]]
+          from: bath-sink
+          to:
+            wall: bathroom.south
+            position: 5.5ft
           size: "1/2in"
       drain_runs:
-        - path: [[2, -4.5], [2, -6]]
+        - from: bath-toilet
+          to:
+            wall: bathroom.south
+            position: 2ft
           size: "3in"
 
     layers:

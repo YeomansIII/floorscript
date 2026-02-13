@@ -10,10 +10,11 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./schema.json": "./floorscript.schema.json"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && node scripts/generate-schema.mjs",
     "dev": "tsup --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
@@ -21,9 +22,12 @@
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
-    "zod": "^3.24.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

@@ -1,10 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { buildWallGraph, resolveWallComposition } from "../src/resolver/shared-wall-resolver.js";
-import { resolveWalls } from "../src/resolver/wall-resolver.js";
 import { resolveOpenings } from "../src/resolver/opening-resolver.js";
 import { resolveWallSegments } from "../src/resolver/segment-resolver.js";
-import type { ResolvedRoom, ResolvedWall } from "../src/types/geometry.js";
+import {
+  buildWallGraph,
+  resolveWallComposition,
+} from "../src/resolver/shared-wall-resolver.js";
+import { resolveWalls } from "../src/resolver/wall-resolver.js";
 import type { WallsConfig } from "../src/types/config.js";
+import type { ResolvedRoom } from "../src/types/geometry.js";
 
 function makeRoom(
   id: string,
@@ -133,7 +136,14 @@ describe("buildWallGraph", () => {
       makeRoom("living", 0, 0, 15, 12, {
         east: {
           type: "interior",
-          openings: [{ type: "door", position: "2ft", width: "3ft", swing: "inward-left" }],
+          openings: [
+            {
+              type: "door",
+              position: "2ft",
+              width: "3ft",
+              swing: "inward-left",
+            },
+          ],
         },
       }),
       makeRoom("kitchen", 15, 0, 12, 10, {
@@ -188,7 +198,14 @@ describe("buildWallGraph", () => {
       makeRoom("living", 0, 0, 15, 12, {
         east: {
           type: "interior",
-          openings: [{ type: "door", position: "3ft", width: "3ft", swing: "inward-left" as const }],
+          openings: [
+            {
+              type: "door",
+              position: "3ft",
+              width: "3ft",
+              swing: "inward-left" as const,
+            },
+          ],
         },
       }),
       makeRoom("kitchen", 15, 0, 12, 10),
@@ -204,7 +221,10 @@ describe("buildWallGraph", () => {
     expect(opening.gapStart.x).toBeCloseTo(shared!.rect.x, 4);
     expect(opening.gapEnd.x).toBeCloseTo(shared!.rect.x, 4);
     // Centerline x should be at wall midpoint
-    expect(opening.position.x).toBeCloseTo(shared!.rect.x + shared!.thickness / 2, 4);
+    expect(opening.position.x).toBeCloseTo(
+      shared!.rect.x + shared!.thickness / 2,
+      4,
+    );
     // wallThickness should match shared wall
     expect(opening.wallThickness).toBeCloseTo(shared!.thickness, 4);
   });
@@ -215,7 +235,14 @@ describe("buildWallGraph", () => {
       makeRoom("bathroom", 0, -6, 8, 6, {
         north: {
           type: "interior",
-          openings: [{ type: "door", position: "2ft", width: "2.5ft", swing: "inward-left" as const }],
+          openings: [
+            {
+              type: "door",
+              position: "2ft",
+              width: "2.5ft",
+              swing: "inward-left" as const,
+            },
+          ],
         },
       }),
     ];
@@ -258,12 +285,16 @@ describe("buildWallGraph", () => {
     const graph = buildWallGraph(rooms);
 
     // Should have a shared wall for the overlap region (x=0 to x=8)
-    const shared = graph.walls.find((w) => w.shared && w.roomA === "living" && w.roomB === "bathroom");
+    const shared = graph.walls.find(
+      (w) => w.shared && w.roomA === "living" && w.roomB === "bathroom",
+    );
     expect(shared).toBeDefined();
     expect(shared!.rect.width).toBeCloseTo(8, 1);
 
     // Should have a remainder wall for x=8 to x=15
-    const remainder = graph.walls.find((w) => w.id.includes("living.south.remainder"));
+    const remainder = graph.walls.find((w) =>
+      w.id.includes("living.south.remainder"),
+    );
     expect(remainder).toBeDefined();
     expect(remainder!.rect.x).toBeCloseTo(8, 1);
     expect(remainder!.rect.width).toBeCloseTo(7, 1);
@@ -281,7 +312,9 @@ describe("buildWallGraph", () => {
     const graph = buildWallGraph(rooms);
 
     // Remainders for living.east (y=0 to y=2 and y=10 to y=12)
-    const remainders = graph.walls.filter((w) => w.id.includes("living.east.remainder"));
+    const remainders = graph.walls.filter((w) =>
+      w.id.includes("living.east.remainder"),
+    );
     expect(remainders).toHaveLength(2);
   });
 

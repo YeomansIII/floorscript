@@ -2,6 +2,7 @@ import type {
   CardinalDirection,
   DetectorType,
   DoorStyle,
+  FacingDirection,
   LayersConfig,
   LightFixtureType,
   OpeningType,
@@ -9,8 +10,8 @@ import type {
   PlumbingFixtureType,
   ProjectConfig,
   SupplyType,
-  SwitchType,
   SwingDirection,
+  SwitchType,
   UnitSystem,
   ValveType,
   WallComposition,
@@ -206,6 +207,7 @@ export interface ResolvedPlumbingFixture {
   position: Point;
   width?: number;
   depth?: number;
+  orientation?: FacingDirection;
   supply?: SupplyType[];
   drain?: boolean;
 }

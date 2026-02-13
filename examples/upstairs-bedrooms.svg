@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 579.72" width="1200" height="579.72">
+<rect x="0" y="0" width="1200" height="579.72" fill="white"/>
+<g class="layer-structural">
+<g class="walls">
+<g fill="#333" stroke="none">
+<rect x="730.35" y="283.82" width="8.32" height="57.32"/>
+<rect x="730.35" y="217.26" width="8.32" height="11.09"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="418.8" y="285.67" width="8.32" height="55.47"/>
+<rect x="418.8" y="217.26" width="8.32" height="12.94"/>
+</g>
+<rect x="730.35" y="78.58" width="8.32" height="138.67" stroke="none" fill="#333"/>
+<rect x="418.8" y="78.58" width="8.32" height="138.67" stroke="none" fill="#333"/>
+<rect x="730.35" y="66.56" width="403.08" height="12.02" stroke="none" fill="#000"/>
+<rect x="730.35" y="341.14" width="403.08" height="12.02" stroke="none" fill="#000"/>
+<rect x="1121.42" y="78.58" width="12.02" height="262.56" stroke="none" fill="#000"/>
+<rect x="418.8" y="208.94" width="319.88" height="8.32" stroke="none" fill="#333"/>
+<rect x="418.8" y="341.14" width="319.88" height="8.32" stroke="none" fill="#333"/>
+<rect x="66.56" y="66.56" width="360.55" height="12.02" stroke="none" fill="#000"/>
+<rect x="66.56" y="341.14" width="360.55" height="12.02" stroke="none" fill="#000"/>
+<rect x="66.56" y="78.58" width="12.02" height="262.56" stroke="none" fill="#000"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="730.35" y1="228.35" x2="785.82" y2="228.35"/>
+<path d="M 785.82,228.35 A 55.47,55.47 0 0,1 730.35,283.82"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="418.8" y1="285.67" x2="363.33" y2="285.67"/>
+<path d="M 363.33,285.67 A 55.47,55.47 0 0,1 418.8,230.2"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="930.05" y="209.86" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="11.09" font-weight="500" text-anchor="middle" dominant-baseline="central">Bedroom 1 (East)</text>
+<text x="578.74" y="279.2" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="11.09" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
+<text x="248.69" y="209.86" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="11.09" font-weight="500" text-anchor="middle" dominant-baseline="central">Bedroom 2 (West)</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="738.67" y1="385.52" x2="1121.42" y2="385.52"/>
+<line x1="735.35" y1="388.84" x2="742" y2="382.19"/>
+<line x1="1118.09" y1="388.84" x2="1124.75" y2="382.19"/>
+<text x="930.05" y="379.97" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.77" text-anchor="middle">17&apos;-3&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="1165.79" y1="341.14" x2="1165.79" y2="78.58"/>
+<line x1="1162.47" y1="344.47" x2="1169.12" y2="337.81"/>
+<line x1="1162.47" y1="81.91" x2="1169.12" y2="75.25"/>
+<text x="1160.25" y="209.86" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.77" text-anchor="middle" transform="rotate(-90, 1160.25, 209.86)">11&apos;-10&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="427.12" y1="385.52" x2="730.35" y2="385.52"/>
+<line x1="423.79" y1="388.84" x2="430.45" y2="382.19"/>
+<line x1="727.03" y1="388.84" x2="733.68" y2="382.19"/>
+<text x="578.74" y="379.97" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.77" text-anchor="middle">13&apos;-8&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="774.73" y1="341.14" x2="774.73" y2="217.26"/>
+<line x1="771.4" y1="344.47" x2="778.06" y2="337.81"/>
+<line x1="771.4" y1="220.59" x2="778.06" y2="213.93"/>
+<text x="769.18" y="279.2" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.77" text-anchor="middle" transform="rotate(-90, 769.18, 279.2)">5&apos;-7&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="78.58" y1="385.52" x2="418.8" y2="385.52"/>
+<line x1="75.25" y1="388.84" x2="81.91" y2="382.19"/>
+<line x1="415.47" y1="388.84" x2="422.13" y2="382.19"/>
+<text x="248.69" y="379.97" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.77" text-anchor="middle">15&apos;-4&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="34.21" y1="341.14" x2="34.21" y2="78.58"/>
+<line x1="30.88" y1="344.47" x2="37.53" y2="337.81"/>
+<line x1="30.88" y1="81.91" x2="37.53" y2="75.25"/>
+<text x="28.66" y="209.86" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.77" text-anchor="middle" transform="rotate(-90, 28.66, 209.86)">11&apos;-10&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="419.72" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="509.72" x2="1180" y2="509.72" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="443.72" font-size="18" font-weight="bold">Upstairs Bedrooms &amp; Hallway</text>
+<text x="1015" y="547.72" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>

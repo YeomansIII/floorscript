@@ -1,14 +1,24 @@
-import type { CardinalDirection, FloorPlanConfig, PlanConfig, RoomConfig, UnitSystem, WallsConfig } from "../types/config.js";
-import type { Rect, ResolvedPlan, ResolvedRoom } from "../types/geometry.js";
 import { parseDimension } from "../parser/dimension.js";
-import { resolveWalls } from "./wall-resolver.js";
-import { resolveOpenings } from "./opening-resolver.js";
-import { resolveWallSegments } from "./segment-resolver.js";
+import type {
+  CardinalDirection,
+  FloorPlanConfig,
+  PlanConfig,
+  RoomConfig,
+  UnitSystem,
+  WallsConfig,
+} from "../types/config.js";
+import type { Rect, ResolvedPlan, ResolvedRoom } from "../types/geometry.js";
 import { generateDimensions } from "./dimension-resolver.js";
 import { resolveElectrical } from "./electrical-resolver.js";
+import { resolveOpenings } from "./opening-resolver.js";
 import { resolvePlumbing } from "./plumbing-resolver.js";
-import { buildWallGraph, resolveWallComposition } from "./shared-wall-resolver.js";
+import { resolveWallSegments } from "./segment-resolver.js";
+import {
+  buildWallGraph,
+  resolveWallComposition,
+} from "./shared-wall-resolver.js";
 import { validatePlan } from "./validation.js";
+import { resolveWalls } from "./wall-resolver.js";
 
 /**
  * Resolve a parsed FloorPlanConfig into a ResolvedPlan ready for rendering.
@@ -99,19 +109,31 @@ function resolveRoom(
 
     switch (adj.wall) {
       case "east":
-        x = ref.x + ref.width + computeSharedGap(refRoom, config.walls, "east", units);
+        x =
+          ref.x +
+          ref.width +
+          computeSharedGap(refRoom, config.walls, "east", units);
         y = alignPosition(ref.y, ref.height, height, adj.alignment, offset);
         break;
       case "west":
-        x = ref.x - width - computeSharedGap(refRoom, config.walls, "west", units);
+        x =
+          ref.x -
+          width -
+          computeSharedGap(refRoom, config.walls, "west", units);
         y = alignPosition(ref.y, ref.height, height, adj.alignment, offset);
         break;
       case "north":
-        y = ref.y + ref.height + computeSharedGap(refRoom, config.walls, "north", units);
+        y =
+          ref.y +
+          ref.height +
+          computeSharedGap(refRoom, config.walls, "north", units);
         x = alignPosition(ref.x, ref.width, width, adj.alignment, offset);
         break;
       case "south":
-        y = ref.y - height - computeSharedGap(refRoom, config.walls, "south", units);
+        y =
+          ref.y -
+          height -
+          computeSharedGap(refRoom, config.walls, "south", units);
         x = alignPosition(ref.x, ref.width, width, adj.alignment, offset);
         break;
     }
@@ -133,7 +155,12 @@ function resolveRoom(
     const wallDir = wall.direction;
     const wallConfig = config.walls?.[wallDir];
     if (wallConfig?.openings && wallConfig.openings.length > 0) {
-      wall.openings = resolveOpenings(wall, wallConfig.openings, units, config.id);
+      wall.openings = resolveOpenings(
+        wall,
+        wallConfig.openings,
+        units,
+        config.id,
+      );
     }
     wall.segments = resolveWallSegments(wall);
   }
@@ -162,7 +189,6 @@ function alignPosition(
       return refStart + (refLength - thisLength) / 2 + offset;
     case "end":
       return refStart + refLength - thisLength + offset;
-    case "start":
     default:
       return refStart + offset;
   }
@@ -180,7 +206,10 @@ function computeSharedGap(
   units: UnitSystem,
 ): number {
   const oppositeDir: Record<CardinalDirection, CardinalDirection> = {
-    east: "west", west: "east", north: "south", south: "north",
+    east: "west",
+    west: "east",
+    north: "south",
+    south: "north",
   };
   const refWall = refRoom.walls.find((w) => w.direction === adjWall);
   const refThickness = refWall?.thickness ?? 0;

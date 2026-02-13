@@ -1,7 +1,5 @@
-import type {
-  ElectricalConfig,
-  UnitSystem,
-} from "../types/config.js";
+import { parseDimension } from "../parser/dimension.js";
+import type { ElectricalConfig, UnitSystem } from "../types/config.js";
 import type {
   Point,
   ResolvedElectrical,
@@ -13,8 +11,7 @@ import type {
   ResolvedSmokeDetector,
   ResolvedSwitch,
 } from "../types/geometry.js";
-import { parseDimension } from "../parser/dimension.js";
-import { findWallById, computeWallPosition } from "./wall-utils.js";
+import { computeWallPosition, findWallById } from "./wall-utils.js";
 
 /**
  * Resolve electrical config into absolute plan geometry.
@@ -29,9 +26,7 @@ export function resolveElectrical(
   rooms: ResolvedRoom[],
   units: UnitSystem,
 ): ResolvedElectrical {
-  const panel = config.panel
-    ? resolvePanel(config.panel, units)
-    : undefined;
+  const panel = config.panel ? resolvePanel(config.panel, units) : undefined;
 
   const outlets = (config.outlets ?? []).map((o) =>
     resolveOutlet(o, rooms, units),

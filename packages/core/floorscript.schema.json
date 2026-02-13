@@ -1,0 +1,1892 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Schema version, currently '1.0'"
+    },
+    "project": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "date": {
+          "type": "string"
+        },
+        "sheet": {
+          "type": "string"
+        },
+        "scale": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "title"
+      ],
+      "additionalProperties": false
+    },
+    "units": {
+      "type": "string",
+      "enum": [
+        "imperial",
+        "metric"
+      ],
+      "description": "Unit system for all dimensions in this file"
+    },
+    "plans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique plan identifier, referenced by diffs"
+          },
+          "title": {
+            "type": "string",
+            "description": "Plan title shown in the title block"
+          },
+          "rooms": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Unique room identifier, referenced by adjacency and shared walls"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "Display label rendered inside the room"
+                },
+                "position": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    },
+                    {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    }
+                  ],
+                  "description": "Absolute [x, y] position; omit if using adjacent_to"
+                },
+                "adjacent_to": {
+                  "type": "object",
+                  "properties": {
+                    "room": {
+                      "type": "string",
+                      "description": "ID of the room to attach to"
+                    },
+                    "wall": {
+                      "type": "string",
+                      "enum": [
+                        "north",
+                        "south",
+                        "east",
+                        "west"
+                      ],
+                      "description": "Which wall of the target room to attach to"
+                    },
+                    "alignment": {
+                      "type": "string",
+                      "enum": [
+                        "start",
+                        "center",
+                        "end"
+                      ]
+                    },
+                    "offset": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    }
+                  },
+                  "required": [
+                    "room",
+                    "wall"
+                  ],
+                  "additionalProperties": false,
+                  "description": "Place this room adjacent to another room's wall"
+                },
+                "width": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                },
+                "height": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                },
+                "walls": {
+                  "type": "object",
+                  "properties": {
+                    "north": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "exterior",
+                            "interior",
+                            "load-bearing"
+                          ],
+                          "description": "Wall structural classification"
+                        },
+                        "thickness": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        "stud": {
+                          "type": "string",
+                          "enum": [
+                            "2x4",
+                            "2x6",
+                            "2x8"
+                          ],
+                          "description": "Lumber stud size"
+                        },
+                        "finish": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "Finish thickness per side (e.g. drywall)"
+                        },
+                        "openings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "door",
+                                  "window"
+                                ],
+                                "description": "Opening type"
+                              },
+                              "position": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "Offset along the wall from the wall's start point"
+                              },
+                              "width": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "style": {
+                                "type": "string",
+                                "enum": [
+                                  "standard",
+                                  "double",
+                                  "sliding",
+                                  "pocket",
+                                  "bifold",
+                                  "barn",
+                                  "french",
+                                  "cased-opening"
+                                ],
+                                "description": "Door style; ignored for windows"
+                              },
+                              "swing": {
+                                "type": "string",
+                                "enum": [
+                                  "inward-left",
+                                  "inward-right",
+                                  "outward-left",
+                                  "outward-right"
+                                ],
+                                "description": "Door swing direction relative to the room"
+                              },
+                              "sill_height": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "existing",
+                                  "demolish",
+                                  "new"
+                                ],
+                                "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "position",
+                              "width"
+                            ],
+                            "additionalProperties": false,
+                            "description": "A door or window opening placed on a wall"
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "existing",
+                            "demolish",
+                            "new"
+                          ],
+                          "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Configuration for a single wall segment"
+                    },
+                    "south": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "exterior",
+                            "interior",
+                            "load-bearing"
+                          ],
+                          "description": "Wall structural classification"
+                        },
+                        "thickness": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        "stud": {
+                          "type": "string",
+                          "enum": [
+                            "2x4",
+                            "2x6",
+                            "2x8"
+                          ],
+                          "description": "Lumber stud size"
+                        },
+                        "finish": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "Finish thickness per side (e.g. drywall)"
+                        },
+                        "openings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "door",
+                                  "window"
+                                ],
+                                "description": "Opening type"
+                              },
+                              "position": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "Offset along the wall from the wall's start point"
+                              },
+                              "width": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "style": {
+                                "type": "string",
+                                "enum": [
+                                  "standard",
+                                  "double",
+                                  "sliding",
+                                  "pocket",
+                                  "bifold",
+                                  "barn",
+                                  "french",
+                                  "cased-opening"
+                                ],
+                                "description": "Door style; ignored for windows"
+                              },
+                              "swing": {
+                                "type": "string",
+                                "enum": [
+                                  "inward-left",
+                                  "inward-right",
+                                  "outward-left",
+                                  "outward-right"
+                                ],
+                                "description": "Door swing direction relative to the room"
+                              },
+                              "sill_height": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "existing",
+                                  "demolish",
+                                  "new"
+                                ],
+                                "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "position",
+                              "width"
+                            ],
+                            "additionalProperties": false,
+                            "description": "A door or window opening placed on a wall"
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "existing",
+                            "demolish",
+                            "new"
+                          ],
+                          "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Configuration for a single wall segment"
+                    },
+                    "east": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "exterior",
+                            "interior",
+                            "load-bearing"
+                          ],
+                          "description": "Wall structural classification"
+                        },
+                        "thickness": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        "stud": {
+                          "type": "string",
+                          "enum": [
+                            "2x4",
+                            "2x6",
+                            "2x8"
+                          ],
+                          "description": "Lumber stud size"
+                        },
+                        "finish": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "Finish thickness per side (e.g. drywall)"
+                        },
+                        "openings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "door",
+                                  "window"
+                                ],
+                                "description": "Opening type"
+                              },
+                              "position": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "Offset along the wall from the wall's start point"
+                              },
+                              "width": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "style": {
+                                "type": "string",
+                                "enum": [
+                                  "standard",
+                                  "double",
+                                  "sliding",
+                                  "pocket",
+                                  "bifold",
+                                  "barn",
+                                  "french",
+                                  "cased-opening"
+                                ],
+                                "description": "Door style; ignored for windows"
+                              },
+                              "swing": {
+                                "type": "string",
+                                "enum": [
+                                  "inward-left",
+                                  "inward-right",
+                                  "outward-left",
+                                  "outward-right"
+                                ],
+                                "description": "Door swing direction relative to the room"
+                              },
+                              "sill_height": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "existing",
+                                  "demolish",
+                                  "new"
+                                ],
+                                "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "position",
+                              "width"
+                            ],
+                            "additionalProperties": false,
+                            "description": "A door or window opening placed on a wall"
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "existing",
+                            "demolish",
+                            "new"
+                          ],
+                          "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Configuration for a single wall segment"
+                    },
+                    "west": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "exterior",
+                            "interior",
+                            "load-bearing"
+                          ],
+                          "description": "Wall structural classification"
+                        },
+                        "thickness": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        "stud": {
+                          "type": "string",
+                          "enum": [
+                            "2x4",
+                            "2x6",
+                            "2x8"
+                          ],
+                          "description": "Lumber stud size"
+                        },
+                        "finish": {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "Finish thickness per side (e.g. drywall)"
+                        },
+                        "openings": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "enum": [
+                                  "door",
+                                  "window"
+                                ],
+                                "description": "Opening type"
+                              },
+                              "position": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "Offset along the wall from the wall's start point"
+                              },
+                              "width": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "style": {
+                                "type": "string",
+                                "enum": [
+                                  "standard",
+                                  "double",
+                                  "sliding",
+                                  "pocket",
+                                  "bifold",
+                                  "barn",
+                                  "french",
+                                  "cased-opening"
+                                ],
+                                "description": "Door style; ignored for windows"
+                              },
+                              "swing": {
+                                "type": "string",
+                                "enum": [
+                                  "inward-left",
+                                  "inward-right",
+                                  "outward-left",
+                                  "outward-right"
+                                ],
+                                "description": "Door swing direction relative to the room"
+                              },
+                              "sill_height": {
+                                "anyOf": [
+                                  {
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "number"
+                                  }
+                                ],
+                                "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                              },
+                              "status": {
+                                "type": "string",
+                                "enum": [
+                                  "existing",
+                                  "demolish",
+                                  "new"
+                                ],
+                                "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "position",
+                              "width"
+                            ],
+                            "additionalProperties": false,
+                            "description": "A door or window opening placed on a wall"
+                          }
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": [
+                            "existing",
+                            "demolish",
+                            "new"
+                          ],
+                          "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                        }
+                      },
+                      "required": [
+                        "type"
+                      ],
+                      "additionalProperties": false,
+                      "description": "Configuration for a single wall segment"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "id",
+                "label",
+                "width",
+                "height"
+              ],
+              "additionalProperties": false,
+              "description": "A room with dimensions, position, and optional wall overrides"
+            }
+          },
+          "shared_walls": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "rooms": {
+                  "type": "array",
+                  "prefixItems": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ],
+                  "description": "Pair of room IDs that share this wall"
+                },
+                "wall": {
+                  "type": "string",
+                  "description": "Wall identifier, e.g. 'room1.south' or cardinal direction"
+                },
+                "thickness": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    }
+                  ],
+                  "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                },
+                "openings": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": [
+                          "door",
+                          "window"
+                        ],
+                        "description": "Opening type"
+                      },
+                      "position": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "Offset along the wall from the wall's start point"
+                      },
+                      "width": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                      },
+                      "style": {
+                        "type": "string",
+                        "enum": [
+                          "standard",
+                          "double",
+                          "sliding",
+                          "pocket",
+                          "bifold",
+                          "barn",
+                          "french",
+                          "cased-opening"
+                        ],
+                        "description": "Door style; ignored for windows"
+                      },
+                      "swing": {
+                        "type": "string",
+                        "enum": [
+                          "inward-left",
+                          "inward-right",
+                          "outward-left",
+                          "outward-right"
+                        ],
+                        "description": "Door swing direction relative to the room"
+                      },
+                      "sill_height": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "existing",
+                          "demolish",
+                          "new"
+                        ],
+                        "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                      }
+                    },
+                    "required": [
+                      "type",
+                      "position",
+                      "width"
+                    ],
+                    "additionalProperties": false,
+                    "description": "A door or window opening placed on a wall"
+                  }
+                }
+              },
+              "required": [
+                "rooms",
+                "wall"
+              ],
+              "additionalProperties": false,
+              "description": "A wall shared between two adjacent rooms, with optional openings"
+            }
+          },
+          "elements": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "layers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "visible": {
+                  "type": "boolean"
+                },
+                "color_override": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "visible"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "electrical": {
+            "type": "object",
+            "properties": {
+              "panel": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                      }
+                    ],
+                    "description": "An [x, y] coordinate pair"
+                  },
+                  "amps": {
+                    "type": "number"
+                  },
+                  "label": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "position",
+                  "amps"
+                ],
+                "additionalProperties": false
+              },
+              "outlets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "duplex",
+                        "gfci",
+                        "240v",
+                        "dedicated",
+                        "floor"
+                      ]
+                    },
+                    "position": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        }
+                      ],
+                      "description": "An [x, y] coordinate pair"
+                    },
+                    "wall": {
+                      "type": "string"
+                    },
+                    "height": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    },
+                    "circuit": {
+                      "type": "number"
+                    },
+                    "label": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "existing",
+                        "demolish",
+                        "new"
+                      ],
+                      "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "position",
+                    "wall"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "switches": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "single",
+                        "three-way",
+                        "four-way",
+                        "dimmer"
+                      ]
+                    },
+                    "position": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        }
+                      ],
+                      "description": "An [x, y] coordinate pair"
+                    },
+                    "wall": {
+                      "type": "string"
+                    },
+                    "controls": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "circuit": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "existing",
+                        "demolish",
+                        "new"
+                      ],
+                      "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "position",
+                    "wall"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "fixtures": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "recessed",
+                        "surface",
+                        "pendant",
+                        "under-cabinet",
+                        "fan"
+                      ]
+                    },
+                    "position": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        }
+                      ],
+                      "description": "An [x, y] coordinate pair"
+                    },
+                    "width": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    },
+                    "circuit": {
+                      "type": "number"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "existing",
+                        "demolish",
+                        "new"
+                      ],
+                      "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "position"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "smoke_detectors": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        }
+                      ],
+                      "description": "An [x, y] coordinate pair"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "smoke",
+                        "co",
+                        "combo"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "position",
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "runs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "circuit": {
+                      "type": "number"
+                    },
+                    "path": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                          }
+                        ],
+                        "description": "An [x, y] coordinate pair"
+                      }
+                    },
+                    "style": {
+                      "type": "string",
+                      "enum": [
+                        "solid",
+                        "dashed"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "circuit",
+                    "path"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "additionalProperties": false,
+            "description": "Electrical system: panel, outlets, switches, light fixtures, detectors, and circuit runs"
+          },
+          "plumbing": {
+            "type": "object",
+            "properties": {
+              "fixtures": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "kitchen-sink",
+                        "bath-sink",
+                        "toilet",
+                        "shower",
+                        "bathtub",
+                        "dishwasher",
+                        "washing-machine",
+                        "water-heater",
+                        "utility-sink",
+                        "hose-bib"
+                      ]
+                    },
+                    "position": {
+                      "anyOf": [
+                        {
+                          "type": "array",
+                          "prefixItems": [
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                            },
+                            {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                            }
+                          ],
+                          "description": "An [x, y] coordinate pair"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        }
+                      ]
+                    },
+                    "wall": {
+                      "type": "string"
+                    },
+                    "offset": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    },
+                    "orientation": {
+                      "type": "string",
+                      "enum": [
+                        "facing-north",
+                        "facing-south",
+                        "facing-east",
+                        "facing-west"
+                      ]
+                    },
+                    "width": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    },
+                    "depth": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        }
+                      ],
+                      "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                    },
+                    "supply": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "enum": [
+                          "hot",
+                          "cold"
+                        ]
+                      }
+                    },
+                    "drain": {
+                      "type": "boolean"
+                    },
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "existing",
+                        "demolish",
+                        "new"
+                      ],
+                      "description": "Renovation status: existing (keep), demolish (remove), new (add)"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "position"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "supply_runs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "hot",
+                        "cold"
+                      ]
+                    },
+                    "path": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                          }
+                        ],
+                        "description": "An [x, y] coordinate pair"
+                      }
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "wall": {
+                              "type": "string"
+                            },
+                            "position": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                            }
+                          },
+                          "required": [
+                            "wall",
+                            "position"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "wall": {
+                              "type": "string"
+                            },
+                            "position": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                            }
+                          },
+                          "required": [
+                            "wall",
+                            "position"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "size": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "drain_runs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "array",
+                      "items": {
+                        "type": "array",
+                        "prefixItems": [
+                          {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                          },
+                          {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              }
+                            ],
+                            "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                          }
+                        ],
+                        "description": "An [x, y] coordinate pair"
+                      }
+                    },
+                    "from": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "wall": {
+                              "type": "string"
+                            },
+                            "position": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                            }
+                          },
+                          "required": [
+                            "wall",
+                            "position"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "to": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "wall": {
+                              "type": "string"
+                            },
+                            "position": {
+                              "anyOf": [
+                                {
+                                  "type": "string"
+                                },
+                                {
+                                  "type": "number"
+                                }
+                              ],
+                              "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                            }
+                          },
+                          "required": [
+                            "wall",
+                            "position"
+                          ],
+                          "additionalProperties": false
+                        }
+                      ]
+                    },
+                    "size": {
+                      "type": "string"
+                    },
+                    "slope": {
+                      "type": "string"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "valves": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "shutoff",
+                        "pressure-regulator",
+                        "check"
+                      ]
+                    },
+                    "position": {
+                      "type": "array",
+                      "prefixItems": [
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        },
+                        {
+                          "anyOf": [
+                            {
+                              "type": "string"
+                            },
+                            {
+                              "type": "number"
+                            }
+                          ],
+                          "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                        }
+                      ],
+                      "description": "An [x, y] coordinate pair"
+                    },
+                    "line": {
+                      "type": "string",
+                      "enum": [
+                        "hot",
+                        "cold"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "position"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "water_heater": {
+                "type": "object",
+                "properties": {
+                  "position": {
+                    "type": "array",
+                    "prefixItems": [
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                      },
+                      {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          }
+                        ],
+                        "description": "A dimension value: a string like '10ft 6in' or '3.2m', or a number in the plan's unit system"
+                      }
+                    ],
+                    "description": "An [x, y] coordinate pair"
+                  },
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "tank",
+                      "tankless"
+                    ]
+                  },
+                  "capacity": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "position",
+                  "type"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "additionalProperties": false,
+            "description": "Plumbing system: fixtures, supply/drain runs, valves, and water heater"
+          },
+          "fixtures": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          },
+          "annotations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "propertyNames": {
+                "type": "string"
+              },
+              "additionalProperties": {}
+            }
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "rooms"
+        ],
+        "additionalProperties": false,
+        "description": "A single floor plan containing rooms, systems, and annotations"
+      }
+    },
+    "definitions": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string"
+      },
+      "additionalProperties": {}
+    },
+    "diffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "before": {
+            "type": "string"
+          },
+          "after": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "project",
+    "units",
+    "plans"
+  ],
+  "additionalProperties": false,
+  "description": "FloorScript floor plan configuration — the top-level document schema",
+  "$id": "https://floorscript.dev/schema/v1/floorscript.schema.json",
+  "title": "FloorScript Configuration"
+}

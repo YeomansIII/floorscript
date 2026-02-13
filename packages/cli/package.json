@@ -16,5 +16,11 @@
     "@floorscript/core": "workspace:*",
     "@floorscript/render-svg": "workspace:*",
     "commander": "^13.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3"
   }
 }

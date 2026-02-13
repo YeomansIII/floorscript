@@ -1,5 +1,9 @@
 import type { ResolvedRoom } from "@floorscript/core";
-import { toSvg, scaleValue, type TransformContext } from "../coordinate-transform.js";
+import {
+  scaleValue,
+  type TransformContext,
+  toSvg,
+} from "../coordinate-transform.js";
 import type { DrawingContext } from "../drawing-context.js";
 
 // Room label font size in plan units (feet or meters)

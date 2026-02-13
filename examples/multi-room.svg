@@ -1,32 +1,37 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1052.38" width="1200" height="1052.38">
-<rect x="0" y="0" width="1200" height="1052.38" fill="white"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1185.88" width="1200" height="1185.88">
+<rect x="0" y="0" width="1200" height="1185.88" fill="white"/>
 <g class="layer-structural">
 <g class="walls">
 <g fill="#333" stroke="none">
 <rect x="645.71" y="436.76" width="13.06" height="34.82"/>
 <rect x="645.71" y="123.34" width="13.06" height="104.47"/>
 </g>
-<rect x="645.71" y="484.64" width="13.06" height="56.59" stroke="none" fill="#333"/>
+<rect x="419.35" y="541.23" width="226.36" height="18.86" stroke="none" fill="#333"/>
 <g fill="#333" stroke="none">
 <rect x="123.34" y="541.23" width="69.65" height="18.86"/>
 <rect x="280.05" y="541.23" width="121.89" height="18.86"/>
 </g>
-<rect x="658.77" y="471.58" width="348.25" height="13.06" stroke="none" fill="#333"/>
-<rect x="401.93" y="541.23" width="243.77" height="18.86" stroke="none" fill="#000"/>
-<rect x="645.71" y="471.58" width="13.06" height="13.06" stroke="none" fill="#333"/>
-<rect x="1007.01" y="471.58" width="69.65" height="13.06" stroke="none" fill="#333"/>
-<rect x="645.71" y="541.23" width="13.06" height="47.88" stroke="none" fill="#333"/>
+<rect x="404.11" y="560.1" width="13.06" height="208.95" stroke="none" fill="#333"/>
+<rect x="401.93" y="541.23" width="17.41" height="18.86" stroke="none" fill="#000"/>
+<rect x="645.71" y="471.58" width="13.06" height="88.51" stroke="none" fill="#333"/>
+<rect x="406.29" y="769.04" width="13.06" height="139.3" stroke="none" fill="#333"/>
 <rect x="104.47" y="104.47" width="554.29" height="18.86" stroke="none" fill="#000"/>
-<rect x="104.47" y="123.34" width="18.86" height="427.33" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="104.47" y="401.93" width="18.86" height="158.16"/>
+<rect x="104.47" y="123.34" width="18.86" height="174.12"/>
+</g>
 <rect x="645.71" y="104.47" width="449.82" height="18.86" stroke="none" fill="#000"/>
-<rect x="1076.66" y="123.34" width="18.86" height="361.31" stroke="none" fill="#000"/>
-<rect x="645.71" y="589.12" width="374.37" height="13.06" stroke="none" fill="#333"/>
-<rect x="1007.01" y="478.11" width="13.06" height="111" stroke="none" fill="#333"/>
+<rect x="645.71" y="471.58" width="449.82" height="13.06" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="1076.66" y="367.11" width="18.86" height="104.47"/>
+<rect x="1076.66" y="123.34" width="18.86" height="104.47"/>
+</g>
+<rect x="406.29" y="908.34" width="252.48" height="13.06" stroke="none" fill="#333"/>
+<rect x="645.71" y="550.67" width="13.06" height="357.68" stroke="none" fill="#333"/>
 <g fill="#000" stroke="none">
 <rect x="104.47" y="769.04" width="88.51" height="18.86"/>
 <rect x="297.46" y="769.04" width="117.53" height="18.86"/>
 </g>
-<rect x="401.93" y="550.67" width="13.06" height="218.38" stroke="none" fill="#333"/>
 <rect x="104.47" y="550.67" width="18.86" height="218.38" stroke="none" fill="#000"/>
 </g>
 <g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
@@ -57,7 +62,7 @@
 <g class="layer-labels">
 <text x="384.52" y="332.29" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="17.41" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
 <text x="867.71" y="297.46" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="17.41" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen</text>
-<text x="832.89" y="536.88" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="17.41" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
+<text x="532.53" y="734.22" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="17.41" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
 <text x="262.64" y="664.57" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="17.41" font-weight="500" text-anchor="middle" dominant-baseline="central">Bathroom</text>
 </g>
 <g class="layer-dimensions">
@@ -74,10 +79,10 @@
 <text x="44.98" y="332.29" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle" transform="rotate(-90, 44.98, 332.29)">12&apos;-0&quot;</text>
 </g>
 <g class="dimension" stroke="#555" stroke-width="0.18mm">
-<line x1="658.77" y1="53.69" x2="1076.66" y2="53.69"/>
-<line x1="653.54" y1="58.91" x2="663.99" y2="48.46"/>
-<line x1="1071.44" y1="58.91" x2="1081.89" y2="48.46"/>
-<text x="867.71" y="44.98" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle">12&apos;-0&quot;</text>
+<line x1="658.77" y1="541.23" x2="1076.66" y2="541.23"/>
+<line x1="653.54" y1="546.46" x2="663.99" y2="536.01"/>
+<line x1="1071.44" y1="546.46" x2="1081.89" y2="536.01"/>
+<text x="867.71" y="532.53" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle">12&apos;-0&quot;</text>
 </g>
 <g class="dimension" stroke="#555" stroke-width="0.18mm">
 <line x1="1146.31" y1="471.58" x2="1146.31" y2="123.34"/>
@@ -86,16 +91,16 @@
 <text x="1137.61" y="297.46" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle" transform="rotate(-90, 1137.61, 297.46)">10&apos;-0&quot;</text>
 </g>
 <g class="dimension" stroke="#555" stroke-width="0.18mm">
-<line x1="658.77" y1="658.77" x2="1007.01" y2="658.77"/>
-<line x1="653.54" y1="663.99" x2="663.99" y2="653.54"/>
-<line x1="1001.79" y1="663.99" x2="1012.24" y2="653.54"/>
-<text x="832.89" y="650.06" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle">10&apos;-0&quot;</text>
+<line x1="419.35" y1="977.99" x2="645.71" y2="977.99"/>
+<line x1="414.12" y1="983.22" x2="424.57" y2="972.77"/>
+<line x1="640.48" y1="983.22" x2="650.93" y2="972.77"/>
+<text x="532.53" y="969.29" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle">6&apos;-6&quot;</text>
 </g>
 <g class="dimension" stroke="#555" stroke-width="0.18mm">
-<line x1="1076.66" y1="589.12" x2="1076.66" y2="484.64"/>
-<line x1="1071.44" y1="594.34" x2="1081.89" y2="583.89"/>
-<line x1="1071.44" y1="489.87" x2="1081.89" y2="479.42"/>
-<text x="1067.96" y="536.88" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle" transform="rotate(-90, 1067.96, 536.88)">3&apos;-0&quot;</text>
+<line x1="715.36" y1="908.34" x2="715.36" y2="560.1"/>
+<line x1="710.13" y1="913.57" x2="720.58" y2="903.12"/>
+<line x1="710.13" y1="565.32" x2="720.58" y2="554.87"/>
+<text x="706.65" y="734.22" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="12.19" text-anchor="middle" transform="rotate(-90, 706.65, 734.22)">10&apos;-0&quot;</text>
 </g>
 <g class="dimension" stroke="#555" stroke-width="0.18mm">
 <line x1="123.34" y1="838.69" x2="401.93" y2="838.69"/>
@@ -160,31 +165,31 @@
 </g>
 <g class="layer-plumbing">
 <g class="plumbing">
-<polyline points="297.46,680.53 297.46,576.06" stroke="#0000CC" stroke-width="0.4mm" fill="none"/>
-<text x="302.68" y="576.06" fill="#0000CC" font-family="sans-serif" font-size="5.22" text-anchor="start" dominant-baseline="central">1/2in</text>
-<polyline points="314.87,680.53 314.87,576.06" stroke="#CC0000" stroke-width="0.4mm" fill="none"/>
-<text x="320.1" y="576.06" fill="#CC0000" font-family="sans-serif" font-size="5.22" text-anchor="start" dominant-baseline="central">1/2in</text>
-<polyline points="192.99,697.94 192.99,750.18" stroke="#006600" stroke-width="0.5mm" fill="none"/>
-<g class="plumbing-fixture fixture-toilet">
-<rect x="172.09" y="657.32" width="41.79" height="20.31" stroke="#000" stroke-width="0.3mm" fill="none"/>
-<ellipse cx="192.99" cy="706.07" rx="26.12" ry="32.5" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<polyline points="297.46,745.83 280.05,769.04" stroke="#0000CC" stroke-width="0.4mm" fill="none"/>
+<text x="285.27" y="769.04" fill="#0000CC" font-family="sans-serif" font-size="5.22" text-anchor="start" dominant-baseline="central">1/2in</text>
+<polyline points="297.46,745.83 314.87,769.04" stroke="#CC0000" stroke-width="0.4mm" fill="none"/>
+<text x="320.1" y="769.04" fill="#CC0000" font-family="sans-serif" font-size="5.22" text-anchor="start" dominant-baseline="central">1/2in</text>
+<polyline points="192.99,728.42 192.99,769.04" stroke="#006600" stroke-width="0.5mm" fill="none"/>
+<g class="plumbing-fixture fixture-toilet" transform="rotate(180, 192.9866989117291, 728.4159613059248)">
+<rect x="172.09" y="687.79" width="41.79" height="20.31" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<ellipse cx="192.99" cy="736.54" rx="26.12" ry="32.5" stroke="#000" stroke-width="0.3mm" fill="none"/>
 </g>
-<g class="plumbing-fixture fixture-bath-sink">
-<ellipse cx="297.46" cy="680.53" rx="29.02" ry="23.22" stroke="#000" stroke-width="0.3mm" fill="none"/>
+<g class="plumbing-fixture fixture-bath-sink" transform="rotate(180, 297.4607013301088, 745.8282950423215)">
+<ellipse cx="297.46" cy="745.83" rx="29.02" ry="23.22" stroke="#000" stroke-width="0.3mm" fill="none"/>
 </g>
 </g>
 </g>
 <g class="layer-title-block">
 <g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
-<rect x="830" y="892.38" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
-<line x1="830" y1="982.38" x2="1180" y2="982.38" stroke="#000" stroke-width="0.35"/>
-<text x="842" y="916.38" font-size="18" font-weight="bold">Multi-Room Floor Plan</text>
-<text x="842" y="938.38" font-size="13">456 Oak Avenue, Anytown, ST 12345</text>
-<text x="842" y="958.38" font-size="13">John Doe</text>
-<text x="842" y="1002.38" font-size="12">Sheet: A1</text>
-<text x="1015" y="1002.38" font-size="12">Date: 2026-02-11</text>
-<text x="842" y="1020.38" font-size="12">Scale: 1/4in = 1ft</text>
-<text x="1015" y="1020.38" fill="#666" font-size="10">FloorScript v0.1</text>
+<rect x="830" y="1025.88" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="1115.88" x2="1180" y2="1115.88" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="1049.88" font-size="18" font-weight="bold">Multi-Room Floor Plan</text>
+<text x="842" y="1071.88" font-size="13">456 Oak Avenue, Anytown, ST 12345</text>
+<text x="842" y="1091.88" font-size="13">John Doe</text>
+<text x="842" y="1135.88" font-size="12">Sheet: A1</text>
+<text x="1015" y="1135.88" font-size="12">Date: 2026-02-11</text>
+<text x="842" y="1153.88" font-size="12">Scale: 1/4in = 1ft</text>
+<text x="1015" y="1153.88" fill="#666" font-size="10">FloorScript v0.1</text>
 </g>
 </g>
 </svg>
