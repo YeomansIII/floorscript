@@ -149,6 +149,85 @@ describe("plumbing resolver", () => {
   });
 });
 
+describe("wall-relative plumbing positioning", () => {
+  it("resolves fixture with wall reference", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bath
+        label: "Bathroom"
+        position: [0, 0]
+        width: 8ft
+        height: 6ft
+        walls:
+          south: { type: exterior }
+    plumbing:
+      fixtures:
+        - id: toilet
+          type: toilet
+          wall: bath.south
+          position: 2ft
+          offset: 0in
+          width: 18in
+          depth: 28in
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    const fixture = plan.plumbing!.fixtures[0];
+    expect(fixture.fixtureType).toBe("toilet");
+    // Wall-relative: 2ft along south wall inner face, 0 offset into room
+    // South wall inner face is at y=0, fixture at x=2, y=0
+    expect(fixture.position.x).toBe(2);
+    expect(fixture.position.y).toBe(0);
+  });
+
+  it("resolves supply run with fixture ID reference", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bath
+        label: "Bathroom"
+        position: [0, 0]
+        width: 8ft
+        height: 6ft
+    plumbing:
+      fixtures:
+        - id: sink
+          type: bath-sink
+          position: [5ft, 4ft]
+      supply_runs:
+        - type: cold
+          from: sink
+          to:
+            wall: bath.north
+            position: 5ft
+          size: "1/2in"
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    const run = plan.plumbing!.supplyRuns[0];
+    expect(run.path).toHaveLength(2);
+    // from: fixture position
+    expect(run.path[0]).toEqual({ x: 5, y: 4 });
+    // to: wall reference on north wall at 5ft along
+    expect(run.path[1].x).toBe(5);
+  });
+});
+
 describe("plumbing resolver integration via resolveLayout", () => {
   it("resolves plumbing from YAML config", () => {
     const yaml = `

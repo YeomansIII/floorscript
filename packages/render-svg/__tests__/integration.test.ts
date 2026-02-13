@@ -139,8 +139,7 @@ plans:
 
     expect(svg).toContain("Kitchen");
     expect(svg).toContain("Dining Room");
-    expect(svg).toContain("room-kitchen");
-    expect(svg).toContain("room-dining");
+    expect(svg).toContain('class="walls"');
     expect(svg).toContain("123 Main St");
     expect(svg).toContain("Jane Smith");
     expect(svg).toContain("Sheet: A1");
@@ -207,6 +206,58 @@ plans:
     expect(svg).not.toContain('class="layer-electrical"');
     // Plumbing should still be visible
     expect(svg).toContain('class="layer-plumbing"');
+  });
+
+  it("renders door on shared wall with correct swing direction", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Door Swing Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: living
+        label: "Living"
+        position: [0, 0]
+        width: 15ft
+        height: 12ft
+        walls:
+          south:
+            type: interior
+            openings:
+              - type: door
+                position: 4ft
+                width: 3ft
+                swing: inward-right
+      - id: bathroom
+        label: "Bathroom"
+        adjacent_to:
+          room: living
+          wall: south
+        width: 8ft
+        height: 6ft
+        walls:
+          north:
+            type: interior
+            openings:
+              - type: door
+                position: 2ft
+                width: 2ft 6in
+                swing: inward-left
+`;
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved);
+
+    // Both doors render as opening groups
+    const doorMatches = svg.match(/class="opening door"/g);
+    expect(doorMatches).not.toBeNull();
+    expect(doorMatches!.length).toBe(2);
+
+    // Door arcs present (quarter-circle swings)
+    expect(svg).toContain("<path");
   });
 
   it("hides plumbing layer when layer visibility is false", () => {

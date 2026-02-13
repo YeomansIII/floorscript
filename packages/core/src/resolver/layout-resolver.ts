@@ -1,4 +1,4 @@
-import type { FloorPlanConfig, PlanConfig, RoomConfig, UnitSystem } from "../types/config.js";
+import type { CardinalDirection, FloorPlanConfig, PlanConfig, RoomConfig, UnitSystem, WallsConfig } from "../types/config.js";
 import type { Rect, ResolvedPlan, ResolvedRoom } from "../types/geometry.js";
 import { parseDimension } from "../parser/dimension.js";
 import { resolveWalls } from "./wall-resolver.js";
@@ -7,6 +7,8 @@ import { resolveWallSegments } from "./segment-resolver.js";
 import { generateDimensions } from "./dimension-resolver.js";
 import { resolveElectrical } from "./electrical-resolver.js";
 import { resolvePlumbing } from "./plumbing-resolver.js";
+import { buildWallGraph, resolveWallComposition } from "./shared-wall-resolver.js";
+import { validatePlan } from "./validation.js";
 
 /**
  * Resolve a parsed FloorPlanConfig into a ResolvedPlan ready for rendering.
@@ -29,6 +31,7 @@ export function resolveLayout(
   }
 
   const rooms = resolveRooms(plan, config.units);
+  const wallGraph = buildWallGraph(rooms, plan.shared_walls, config.units);
   const bounds = computeBounds(rooms);
   const dimensions = generateDimensions(rooms, config.units);
 
@@ -37,20 +40,25 @@ export function resolveLayout(
     : undefined;
 
   const plumbing = plan.plumbing
-    ? resolvePlumbing(plan.plumbing, config.units)
+    ? resolvePlumbing(plan.plumbing, config.units, rooms, wallGraph)
     : undefined;
 
-  return {
+  const resolvedPlan: ResolvedPlan = {
     project: config.project,
     units: config.units,
     title: plan.title,
     rooms,
     dimensions,
     bounds,
+    wallGraph,
     electrical,
     plumbing,
     layers: plan.layers,
   };
+
+  resolvedPlan.validation = validatePlan(resolvedPlan);
+
+  return resolvedPlan;
 }
 
 function resolveRooms(plan: PlanConfig, units: UnitSystem): ResolvedRoom[] {
@@ -91,19 +99,19 @@ function resolveRoom(
 
     switch (adj.wall) {
       case "east":
-        x = ref.x + ref.width;
+        x = ref.x + ref.width + computeSharedGap(refRoom, config.walls, "east", units);
         y = alignPosition(ref.y, ref.height, height, adj.alignment, offset);
         break;
       case "west":
-        x = ref.x - width;
+        x = ref.x - width - computeSharedGap(refRoom, config.walls, "west", units);
         y = alignPosition(ref.y, ref.height, height, adj.alignment, offset);
         break;
       case "north":
-        y = ref.y + ref.height;
+        y = ref.y + ref.height + computeSharedGap(refRoom, config.walls, "north", units);
         x = alignPosition(ref.x, ref.width, width, adj.alignment, offset);
         break;
       case "south":
-        y = ref.y - height;
+        y = ref.y - height - computeSharedGap(refRoom, config.walls, "south", units);
         x = alignPosition(ref.x, ref.width, width, adj.alignment, offset);
         break;
     }
@@ -125,7 +133,7 @@ function resolveRoom(
     const wallDir = wall.direction;
     const wallConfig = config.walls?.[wallDir];
     if (wallConfig?.openings && wallConfig.openings.length > 0) {
-      wall.openings = resolveOpenings(wall, wallConfig.openings, units);
+      wall.openings = resolveOpenings(wall, wallConfig.openings, units, config.id);
     }
     wall.segments = resolveWallSegments(wall);
   }
@@ -160,6 +168,33 @@ function alignPosition(
   }
 }
 
+/**
+ * Compute the gap between adjacent rooms for the shared wall.
+ * The gap equals the thicker wall (thicker-wins rule) so the shared wall
+ * fills this gap without intruding into either room's interior.
+ */
+function computeSharedGap(
+  refRoom: ResolvedRoom,
+  thisWallsConfig: WallsConfig | undefined,
+  adjWall: CardinalDirection,
+  units: UnitSystem,
+): number {
+  const oppositeDir: Record<CardinalDirection, CardinalDirection> = {
+    east: "west", west: "east", north: "south", south: "north",
+  };
+  const refWall = refRoom.walls.find((w) => w.direction === adjWall);
+  const refThickness = refWall?.thickness ?? 0;
+  const thisDir = oppositeDir[adjWall];
+  const thisWallConfig = thisWallsConfig?.[thisDir];
+  const thisWallType = thisWallConfig?.type ?? "interior";
+  const thisComp = resolveWallComposition(thisWallConfig, thisWallType, units);
+  return Math.max(refThickness, thisComp.totalThickness);
+}
+
+/**
+ * Compute plan bounds including exterior wall extents.
+ * Room bounds are interior clear space; walls extend outside.
+ */
 function computeBounds(rooms: ResolvedRoom[]): Rect {
   if (rooms.length === 0) {
     return { x: 0, y: 0, width: 0, height: 0 };
@@ -171,6 +206,15 @@ function computeBounds(rooms: ResolvedRoom[]): Rect {
   let maxY = -Infinity;
 
   for (const room of rooms) {
+    // Include wall extents outside room bounds
+    for (const wall of room.walls) {
+      const wr = wall.rect;
+      minX = Math.min(minX, wr.x);
+      minY = Math.min(minY, wr.y);
+      maxX = Math.max(maxX, wr.x + wr.width);
+      maxY = Math.max(maxY, wr.y + wr.height);
+    }
+    // Also include room interior bounds
     const { x, y, width, height } = room.bounds;
     minX = Math.min(minX, x);
     minY = Math.min(minY, y);

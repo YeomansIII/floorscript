@@ -36,6 +36,9 @@ plans:
                 swing: inward-right
 `;
 
+// Default exterior thickness: 2x6 (5.5") + 0.5" drywall × 2 = 6.5" = 0.5417ft
+const EXT_THICK = 6.5 / 12;
+
 describe("resolveLayout", () => {
   it("resolves the minimal example", () => {
     const config = parseConfig(MINIMAL_YAML);
@@ -46,12 +49,13 @@ describe("resolveLayout", () => {
     expect(plan.rooms).toHaveLength(1);
   });
 
-  it("resolves room bounds correctly", () => {
+  it("resolves room bounds as interior clear space", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
     const room = plan.rooms[0];
 
     expect(room.id).toBe("room1");
+    // Room bounds = interior space, unchanged by walls
     expect(room.bounds).toEqual({
       x: 0,
       y: 0,
@@ -75,37 +79,65 @@ describe("resolveLayout", () => {
     expect(wallIds).toContain("room1.west");
   });
 
-  it("resolves exterior wall thickness (6 inches = 0.5ft)", () => {
+  it("resolves exterior wall thickness from composition (2x6 default)", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
     const room = plan.rooms[0];
     const northWall = room.walls.find((w) => w.direction === "north")!;
 
     expect(northWall.type).toBe("exterior");
-    expect(northWall.thickness).toBe(0.5);
+    expect(northWall.thickness).toBeCloseTo(EXT_THICK, 4);
     expect(northWall.lineWeight).toBe(0.7);
   });
 
-  it("resolves south wall geometry", () => {
+  it("resolves south wall geometry (extends below room, includes corners)", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
     const room = plan.rooms[0];
     const south = room.walls.find((w) => w.direction === "south")!;
+    const west = room.walls.find((w) => w.direction === "west")!;
+    const east = room.walls.find((w) => w.direction === "east")!;
 
-    // South wall: outer edge at y=0, thickness extends upward
-    expect(south.rect).toEqual({ x: 0, y: 0, width: 15, height: 0.5 });
-    expect(south.outerEdge.start).toEqual({ x: 0, y: 0 });
-    expect(south.outerEdge.end).toEqual({ x: 15, y: 0 });
+    // South wall extends below room and through corners
+    expect(south.rect.x).toBeCloseTo(-west.thickness, 4);
+    expect(south.rect.y).toBeCloseTo(-EXT_THICK, 4);
+    expect(south.rect.width).toBeCloseTo(15 + west.thickness + east.thickness, 4);
+    expect(south.rect.height).toBeCloseTo(EXT_THICK, 4);
+    expect(south.interiorStartOffset).toBeCloseTo(west.thickness, 4);
+    // Outer edge at y = -thickness, inner edge at y = 0
+    expect(south.outerEdge.start.y).toBeCloseTo(-EXT_THICK, 4);
+    expect(south.innerEdge.start.y).toBe(0);
   });
 
-  it("resolves north wall geometry", () => {
+  it("resolves north wall geometry (extends above room, includes corners)", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
     const room = plan.rooms[0];
     const north = room.walls.find((w) => w.direction === "north")!;
+    const west = room.walls.find((w) => w.direction === "west")!;
+    const east = room.walls.find((w) => w.direction === "east")!;
 
-    // North wall: outer edge at y=12, thickness extends downward
-    expect(north.rect).toEqual({ x: 0, y: 11.5, width: 15, height: 0.5 });
+    // North wall extends above room and through corners
+    expect(north.rect.x).toBeCloseTo(-west.thickness, 4);
+    expect(north.rect.y).toBe(12);
+    expect(north.rect.width).toBeCloseTo(15 + west.thickness + east.thickness, 4);
+    expect(north.rect.height).toBeCloseTo(EXT_THICK, 4);
+    expect(north.interiorStartOffset).toBeCloseTo(west.thickness, 4);
+  });
+
+  it("vertical walls do not extend through corners", () => {
+    const config = parseConfig(MINIMAL_YAML);
+    const plan = resolveLayout(config);
+    const room = plan.rooms[0];
+    const east = room.walls.find((w) => w.direction === "east")!;
+    const west = room.walls.find((w) => w.direction === "west")!;
+
+    expect(east.rect.y).toBe(0);
+    expect(east.rect.height).toBe(12);
+    expect(east.interiorStartOffset).toBe(0);
+    expect(west.rect.y).toBe(0);
+    expect(west.rect.height).toBe(12);
+    expect(west.interiorStartOffset).toBe(0);
   });
 
   it("resolves window opening on east wall", () => {
@@ -119,7 +151,7 @@ describe("resolveLayout", () => {
     expect(window.type).toBe("window");
     expect(window.width).toBe(6);
     expect(window.wallDirection).toBe("east");
-    // Window at position 3ft from bottom on east wall (vertical)
+    // East wall rect starts at x=15, position 3ft from bottom
     expect(window.gapStart.y).toBe(3);
     expect(window.gapEnd.y).toBe(9);
   });
@@ -136,7 +168,7 @@ describe("resolveLayout", () => {
     expect(door.width).toBe(3);
     expect(door.style).toBe("standard");
     expect(door.swing).toBe("inward-right");
-    // Door at position 4ft from bottom on west wall
+    // West wall rect starts at x = -thickness, position 4ft from bottom
     expect(door.gapStart.y).toBe(4);
     expect(door.gapEnd.y).toBe(7);
   });
@@ -154,16 +186,15 @@ describe("resolveLayout", () => {
     expect(vDim.label).toBe("12'-0\"");
   });
 
-  it("computes overall bounds", () => {
+  it("computes overall bounds including wall extents", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
 
-    expect(plan.bounds).toEqual({
-      x: 0,
-      y: 0,
-      width: 15,
-      height: 12,
-    });
+    // Bounds include walls extending outside rooms
+    expect(plan.bounds.x).toBeCloseTo(-EXT_THICK, 4);
+    expect(plan.bounds.y).toBeCloseTo(-EXT_THICK, 4);
+    expect(plan.bounds.width).toBeCloseTo(15 + 2 * EXT_THICK, 4);
+    expect(plan.bounds.height).toBeCloseTo(12 + 2 * EXT_THICK, 4);
   });
 
   it("resolves multi-room with adjacency", () => {
@@ -208,13 +239,14 @@ plans:
     const kitchen = plan.rooms.find((r) => r.id === "kitchen")!;
     const dining = plan.rooms.find((r) => r.id === "dining")!;
 
-    // Dining should be placed to the east of kitchen
-    expect(dining.bounds.x).toBe(12);
+    // Dining placed to the east of kitchen with a gap for the shared wall
+    // Both interior walls are 2x4 → 4.5" = 0.375ft. Gap = max(0.375, 0.375) = 0.375ft
+    const INT_THICK = 4.5 / 12;
+    expect(dining.bounds.x).toBeCloseTo(12 + INT_THICK, 4);
     expect(dining.bounds.y).toBe(0);
     expect(dining.bounds.width).toBe(14);
 
-    // Overall bounds should encompass both rooms
-    expect(plan.bounds.width).toBe(26); // 12 + 14
-    expect(plan.bounds.height).toBe(10);
+    // Overall bounds = total width including gap + exterior walls
+    expect(plan.bounds.width).toBeCloseTo(26 + INT_THICK + 2 * EXT_THICK, 4);
   });
 });

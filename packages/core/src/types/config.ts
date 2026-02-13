@@ -10,6 +10,8 @@ export type UnitSystem = "imperial" | "metric";
 
 export type CardinalDirection = "north" | "south" | "east" | "west";
 export type WallType = "exterior" | "interior" | "load-bearing";
+export type StudSize = "2x4" | "2x6" | "2x8";
+export type FacingDirection = "facing-north" | "facing-south" | "facing-east" | "facing-west";
 export type ElementStatus = "existing" | "demolish" | "new";
 export type OpeningType = "door" | "window";
 
@@ -70,10 +72,18 @@ export interface ProjectConfig {
   scale?: string;
 }
 
+export interface SharedWallConfig {
+  rooms: [string, string];
+  wall: string;
+  thickness?: Dimension;
+  openings?: OpeningConfig[];
+}
+
 export interface PlanConfig {
   id: string;
   title: string;
   rooms: RoomConfig[];
+  shared_walls?: SharedWallConfig[];
   elements?: ElementConfig[];
   layers?: LayersConfig;
   electrical?: ElectricalConfig;
@@ -107,9 +117,19 @@ export interface WallsConfig {
   west?: WallConfig;
 }
 
+export interface WallComposition {
+  stud: StudSize | null;
+  studWidthFt: number;
+  finishA: number;
+  finishB: number;
+  totalThickness: number;
+}
+
 export interface WallConfig {
   type: WallType;
   thickness?: Dimension;
+  stud?: StudSize;
+  finish?: Dimension;
   openings?: OpeningConfig[];
   status?: ElementStatus;
 }
@@ -203,7 +223,10 @@ export interface ElectricalConfig {
 export interface PlumbingFixtureConfig {
   id?: string;
   type: PlumbingFixtureType;
-  position: DimensionTuple;
+  position: DimensionTuple | Dimension;
+  wall?: string;
+  offset?: Dimension;
+  orientation?: FacingDirection;
   width?: Dimension;
   depth?: Dimension;
   supply?: SupplyType[];
@@ -213,12 +236,16 @@ export interface PlumbingFixtureConfig {
 
 export interface SupplyRunConfig {
   type: SupplyType;
-  path: DimensionTuple[];
+  path?: DimensionTuple[];
+  from?: string | { wall: string; position: Dimension };
+  to?: string | { wall: string; position: Dimension };
   size?: string;
 }
 
 export interface DrainRunConfig {
-  path: DimensionTuple[];
+  path?: DimensionTuple[];
+  from?: string | { wall: string; position: Dimension };
+  to?: string | { wall: string; position: Dimension };
   size?: string;
   slope?: string;
 }
@@ -318,9 +345,13 @@ const OpeningSchema = z.object({
   status: ElementStatusSchema.optional(),
 });
 
+const StudSizeSchema = z.enum(["2x4", "2x6", "2x8"]);
+
 const WallSchema = z.object({
   type: z.enum(["exterior", "interior", "load-bearing"]),
   thickness: DimensionSchema.optional(),
+  stud: StudSizeSchema.optional(),
+  finish: DimensionSchema.optional(),
   openings: z.array(OpeningSchema).optional(),
   status: ElementStatusSchema.optional(),
 });
@@ -418,6 +449,8 @@ const ElectricalSchema = z.object({
 
 // ---- Plumbing Zod schemas ----
 
+const FacingDirectionSchema = z.enum(["facing-north", "facing-south", "facing-east", "facing-west"]);
+
 const PlumbingFixtureSchema = z.object({
   id: z.string().optional(),
   type: z.enum([
@@ -432,7 +465,10 @@ const PlumbingFixtureSchema = z.object({
     "utility-sink",
     "hose-bib",
   ]),
-  position: DimensionTupleSchema,
+  position: z.union([DimensionTupleSchema, DimensionSchema]),
+  wall: z.string().optional(),
+  offset: DimensionSchema.optional(),
+  orientation: FacingDirectionSchema.optional(),
   width: DimensionSchema.optional(),
   depth: DimensionSchema.optional(),
   supply: z.array(z.enum(["hot", "cold"])).optional(),
@@ -440,14 +476,23 @@ const PlumbingFixtureSchema = z.object({
   status: ElementStatusSchema.optional(),
 });
 
+const WallRefSchema = z.object({
+  wall: z.string(),
+  position: DimensionSchema,
+});
+
 const SupplyRunSchema = z.object({
   type: z.enum(["hot", "cold"]),
-  path: z.array(DimensionTupleSchema),
+  path: z.array(DimensionTupleSchema).optional(),
+  from: z.union([z.string(), WallRefSchema]).optional(),
+  to: z.union([z.string(), WallRefSchema]).optional(),
   size: z.string().optional(),
 });
 
 const DrainRunSchema = z.object({
-  path: z.array(DimensionTupleSchema),
+  path: z.array(DimensionTupleSchema).optional(),
+  from: z.union([z.string(), WallRefSchema]).optional(),
+  to: z.union([z.string(), WallRefSchema]).optional(),
   size: z.string().optional(),
   slope: z.string().optional(),
 });
@@ -481,12 +526,22 @@ const LayerSchema = z.object({
 
 const LayersSchema = z.record(z.string(), LayerSchema);
 
+// ---- Shared wall Zod schema ----
+
+const SharedWallSchema = z.object({
+  rooms: z.tuple([z.string(), z.string()]),
+  wall: z.string(),
+  thickness: DimensionSchema.optional(),
+  openings: z.array(OpeningSchema).optional(),
+});
+
 // ---- Plan and top-level schemas ----
 
 const PlanSchema = z.object({
   id: z.string(),
   title: z.string(),
   rooms: z.array(RoomSchema),
+  shared_walls: z.array(SharedWallSchema).optional(),
   elements: z.array(z.record(z.unknown())).optional(),
   layers: LayersSchema.optional(),
   electrical: ElectricalSchema.optional(),

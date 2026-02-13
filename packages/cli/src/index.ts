@@ -1,6 +1,7 @@
 import { Command } from "commander";
 import { renderCommand } from "./commands/render.js";
 import { initCommand } from "./commands/init.js";
+import { validateCommand } from "./commands/validate.js";
 
 const program = new Command();
 
@@ -19,6 +20,12 @@ program
   .option("--no-labels", "Omit room labels")
   .option("--no-title-block", "Omit title block")
   .action(renderCommand);
+
+program
+  .command("validate <input>")
+  .description("Validate a floor plan config file for geometry errors")
+  .option("--plan <id>", "Plan ID to validate (default: first plan)")
+  .action(validateCommand);
 
 program
   .command("init")

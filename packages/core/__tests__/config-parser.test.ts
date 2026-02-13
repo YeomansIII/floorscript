@@ -319,4 +319,95 @@ plans:
     expect(layers!.electrical.visible).toBe(true);
     expect(layers!.plumbing.visible).toBe(false);
   });
+
+  it("parses wall stud config", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Stud Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+        walls:
+          north: { type: exterior, stud: 2x6 }
+          south: { type: interior, stud: 2x4 }
+          east: { type: exterior, stud: 2x8, finish: 0.75in }
+          west: { type: interior }
+`;
+    const config = parseConfig(yaml);
+    const walls = config.plans[0].rooms[0].walls!;
+    expect(walls.north!.stud).toBe("2x6");
+    expect(walls.south!.stud).toBe("2x4");
+    expect(walls.east!.stud).toBe("2x8");
+    expect(walls.east!.finish).toBe("0.75in");
+    expect(walls.west!.stud).toBeUndefined();
+  });
+
+  it("rejects invalid stud size", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: r1
+        label: "Room"
+        position: [0, 0]
+        width: 10ft
+        height: 8ft
+        walls:
+          north: { type: exterior, stud: 2x12 }
+`;
+    expect(() => parseConfig(yaml)).toThrow("Invalid FloorScript config");
+  });
+
+  it("parses shared_walls config", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Shared Walls Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: living
+        label: "Living"
+        position: [0, 0]
+        width: 15ft
+        height: 12ft
+      - id: kitchen
+        label: "Kitchen"
+        position: [15ft, 0]
+        width: 12ft
+        height: 10ft
+    shared_walls:
+      - rooms: [living, kitchen]
+        wall: east/west
+        thickness: 4.5in
+        openings:
+          - type: door
+            style: cased-opening
+            position: 1ft
+            width: 6ft
+`;
+    const config = parseConfig(yaml);
+    const shared = config.plans[0].shared_walls;
+    expect(shared).toHaveLength(1);
+    expect(shared![0].rooms).toEqual(["living", "kitchen"]);
+    expect(shared![0].wall).toBe("east/west");
+    expect(shared![0].thickness).toBe("4.5in");
+    expect(shared![0].openings).toHaveLength(1);
+    expect(shared![0].openings![0].style).toBe("cased-opening");
+  });
 });

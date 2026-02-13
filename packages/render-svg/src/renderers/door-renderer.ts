@@ -39,7 +39,6 @@ function renderStandardDoor(
   let hingePoint: { x: number; y: number };
   let doorEndPoint: { x: number; y: number };
   let arcEndPoint: { x: number; y: number };
-  let sweepFlag: 0 | 1;
 
   switch (dir) {
     case "south": {
@@ -50,13 +49,9 @@ function renderStandardDoor(
         hingePoint = toSvg(opening.gapStart, ctx);
         arcEndPoint = toSvg(opening.gapEnd, ctx);
       }
-      if (isInward) {
-        doorEndPoint = { x: hingePoint.x, y: hingePoint.y - doorWidth };
-        sweepFlag = isRight ? 1 : 0;
-      } else {
-        doorEndPoint = { x: hingePoint.x, y: hingePoint.y + doorWidth };
-        sweepFlag = isRight ? 0 : 1;
-      }
+      doorEndPoint = isInward
+        ? { x: hingePoint.x, y: hingePoint.y - doorWidth }
+        : { x: hingePoint.x, y: hingePoint.y + doorWidth };
       break;
     }
     case "north": {
@@ -67,13 +62,9 @@ function renderStandardDoor(
         hingePoint = toSvg(opening.gapStart, ctx);
         arcEndPoint = toSvg(opening.gapEnd, ctx);
       }
-      if (isInward) {
-        doorEndPoint = { x: hingePoint.x, y: hingePoint.y + doorWidth };
-        sweepFlag = isRight ? 0 : 1;
-      } else {
-        doorEndPoint = { x: hingePoint.x, y: hingePoint.y - doorWidth };
-        sweepFlag = isRight ? 1 : 0;
-      }
+      doorEndPoint = isInward
+        ? { x: hingePoint.x, y: hingePoint.y + doorWidth }
+        : { x: hingePoint.x, y: hingePoint.y - doorWidth };
       break;
     }
     case "west": {
@@ -84,13 +75,9 @@ function renderStandardDoor(
         hingePoint = toSvg(opening.gapStart, ctx);
         arcEndPoint = toSvg(opening.gapEnd, ctx);
       }
-      if (isInward) {
-        doorEndPoint = { x: hingePoint.x + doorWidth, y: hingePoint.y };
-        sweepFlag = isRight ? 1 : 0;
-      } else {
-        doorEndPoint = { x: hingePoint.x - doorWidth, y: hingePoint.y };
-        sweepFlag = isRight ? 0 : 1;
-      }
+      doorEndPoint = isInward
+        ? { x: hingePoint.x + doorWidth, y: hingePoint.y }
+        : { x: hingePoint.x - doorWidth, y: hingePoint.y };
       break;
     }
     case "east": {
@@ -101,16 +88,21 @@ function renderStandardDoor(
         hingePoint = toSvg(opening.gapStart, ctx);
         arcEndPoint = toSvg(opening.gapEnd, ctx);
       }
-      if (isInward) {
-        doorEndPoint = { x: hingePoint.x - doorWidth, y: hingePoint.y };
-        sweepFlag = isRight ? 0 : 1;
-      } else {
-        doorEndPoint = { x: hingePoint.x + doorWidth, y: hingePoint.y };
-        sweepFlag = isRight ? 1 : 0;
-      }
+      doorEndPoint = isInward
+        ? { x: hingePoint.x - doorWidth, y: hingePoint.y }
+        : { x: hingePoint.x + doorWidth, y: hingePoint.y };
       break;
     }
   }
+
+  // Compute sweep flag geometrically via cross product in SVG coordinates.
+  // This replaces per-direction sweep assignments and is immune to Y-flip confusion.
+  const leafDx = doorEndPoint.x - hingePoint.x;
+  const leafDy = doorEndPoint.y - hingePoint.y;
+  const swingDx = arcEndPoint.x - hingePoint.x;
+  const swingDy = arcEndPoint.y - hingePoint.y;
+  const cross = leafDx * swingDy - leafDy * swingDx;
+  const sweepFlag: 0 | 1 = cross > 0 ? 1 : 0;
 
   dc.openGroup({ class: "opening door", ...OPENING_STYLE });
 
@@ -123,6 +115,11 @@ function renderStandardDoor(
   dc.closeGroup();
 }
 
+/**
+ * Render a cased opening with L-shaped casing marks at each end.
+ * The L-marks extend along the wall edge and perpendicular into the wall thickness,
+ * making them clearly visible at standard zoom levels.
+ */
 function renderCasedOpening(
   opening: ResolvedOpening,
   ctx: TransformContext,
@@ -130,17 +127,35 @@ function renderCasedOpening(
 ): void {
   const gapStart = toSvg(opening.gapStart, ctx);
   const gapEnd = toSvg(opening.gapEnd, ctx);
-  const tickLen = scaleValue(opening.wallThickness, ctx);
+  const wallThick = scaleValue(opening.wallThickness, ctx);
+  // L-mark arm along the opening = proportional to wall thickness
+  const armLen = wallThick * 1.5;
 
   dc.openGroup({ class: "opening cased-opening", ...OPENING_STYLE });
 
   const dir = opening.wallDirection;
   if (dir === "south" || dir === "north") {
-    dc.line(gapStart.x, gapStart.y - tickLen / 2, gapStart.x, gapStart.y + tickLen / 2);
-    dc.line(gapEnd.x, gapEnd.y - tickLen / 2, gapEnd.x, gapEnd.y + tickLen / 2);
+    // Horizontal wall: L-marks at left and right ends
+    // In SVG coords, gapStart.y is the bottom of the wall rect; wall extends upward
+    // Left end (gapStart):
+    dc.line(gapStart.x, gapStart.y - wallThick, gapStart.x, gapStart.y);
+    dc.line(gapStart.x, gapStart.y - wallThick, gapStart.x + armLen, gapStart.y - wallThick);
+    dc.line(gapStart.x, gapStart.y, gapStart.x + armLen, gapStart.y);
+    // Right end (gapEnd):
+    dc.line(gapEnd.x, gapEnd.y - wallThick, gapEnd.x, gapEnd.y);
+    dc.line(gapEnd.x, gapEnd.y - wallThick, gapEnd.x - armLen, gapEnd.y - wallThick);
+    dc.line(gapEnd.x, gapEnd.y, gapEnd.x - armLen, gapEnd.y);
   } else {
-    dc.line(gapStart.x - tickLen / 2, gapStart.y, gapStart.x + tickLen / 2, gapStart.y);
-    dc.line(gapEnd.x - tickLen / 2, gapEnd.y, gapEnd.x + tickLen / 2, gapEnd.y);
+    // Vertical wall: L-marks at top and bottom ends
+    // In SVG coords, gapStart.x is the left edge of the wall rect; wall extends rightward
+    // Bottom end (gapStart):
+    dc.line(gapStart.x, gapStart.y, gapStart.x + wallThick, gapStart.y);
+    dc.line(gapStart.x, gapStart.y, gapStart.x, gapStart.y + armLen);
+    dc.line(gapStart.x + wallThick, gapStart.y, gapStart.x + wallThick, gapStart.y + armLen);
+    // Top end (gapEnd):
+    dc.line(gapEnd.x, gapEnd.y, gapEnd.x + wallThick, gapEnd.y);
+    dc.line(gapEnd.x, gapEnd.y, gapEnd.x, gapEnd.y - armLen);
+    dc.line(gapEnd.x + wallThick, gapEnd.y, gapEnd.x + wallThick, gapEnd.y - armLen);
   }
 
   dc.closeGroup();

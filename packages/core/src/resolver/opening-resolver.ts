@@ -13,12 +13,17 @@ export function resolveOpenings(
   wall: ResolvedWall,
   openings: OpeningConfig[],
   units: UnitSystem,
+  ownerRoomId?: string,
 ): ResolvedOpening[] {
   return openings.map((config) => {
     const position = parseDimension(config.position, units);
     const width = parseDimension(config.width, units);
 
-    return resolveOpeningGeometry(wall, config, position, width);
+    const resolved = resolveOpeningGeometry(wall, config, position, width);
+    if (ownerRoomId) {
+      resolved.ownerRoomId = ownerRoomId;
+    }
+    return resolved;
   });
 }
 
@@ -39,8 +44,8 @@ function resolveOpeningGeometry(
   switch (dir) {
     case "south":
     case "north": {
-      // Horizontal wall: position is distance from left
-      const startX = rect.x + position;
+      // Horizontal wall: position is distance from room interior left edge
+      const startX = rect.x + wall.interiorStartOffset + position;
       const endX = startX + width;
       const wallY = rect.y;
       const midY = wallY + wall.thickness / 2;
@@ -55,8 +60,8 @@ function resolveOpeningGeometry(
     }
     case "east":
     case "west": {
-      // Vertical wall: position is distance from bottom
-      const startY = rect.y + position;
+      // Vertical wall: position is distance from room interior bottom edge
+      const startY = rect.y + wall.interiorStartOffset + position;
       const endY = startY + width;
       const wallX = rect.x;
       const midX = wallX + wall.thickness / 2;

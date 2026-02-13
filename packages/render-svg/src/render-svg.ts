@@ -2,7 +2,7 @@ import type { ResolvedPlan } from "@floorscript/core";
 import { SvgDocument } from "./svg-document.js";
 import { createTransform } from "./coordinate-transform.js";
 import { SvgDrawingContext } from "./svg-drawing-context.js";
-import { renderWalls } from "./renderers/wall-renderer.js";
+import { renderWalls, renderWallGraph } from "./renderers/wall-renderer.js";
 import { renderDoor } from "./renderers/door-renderer.js";
 import { renderWindow } from "./renderers/window-renderer.js";
 import { renderLabel } from "./renderers/label-renderer.js";
@@ -73,15 +73,17 @@ export function renderSvg(
     opts.background,
   );
 
-  // Render rooms (walls + openings)
+  // Render walls + openings
   if (isLayerVisible("structural", plan, opts)) {
-    for (const room of plan.rooms) {
-      const dc = new SvgDrawingContext();
-      renderWalls(room, ctx, dc);
-      doc.addToLayer("structural", dc.getOutput());
+    if (plan.wallGraph) {
+      // Render from plan-level wall graph (shared walls rendered once)
+      const wallDc = new SvgDrawingContext();
+      renderWallGraph(plan.wallGraph, ctx, wallDc);
+      doc.addToLayer("structural", wallDc.getOutput());
 
-      for (const wall of room.walls) {
-        for (const opening of wall.openings) {
+      // Render openings from wall graph
+      for (const planWall of plan.wallGraph.walls) {
+        for (const opening of planWall.openings) {
           const openingDc = new SvgDrawingContext();
           if (opening.type === "door") {
             renderDoor(opening, ctx, openingDc);
@@ -89,6 +91,25 @@ export function renderSvg(
             renderWindow(opening, ctx, openingDc);
           }
           doc.addToLayer("structural", openingDc.getOutput());
+        }
+      }
+    } else {
+      // Fallback: per-room wall rendering
+      for (const room of plan.rooms) {
+        const dc = new SvgDrawingContext();
+        renderWalls(room, ctx, dc);
+        doc.addToLayer("structural", dc.getOutput());
+
+        for (const wall of room.walls) {
+          for (const opening of wall.openings) {
+            const openingDc = new SvgDrawingContext();
+            if (opening.type === "door") {
+              renderDoor(opening, ctx, openingDc);
+            } else if (opening.type === "window") {
+              renderWindow(opening, ctx, openingDc);
+            }
+            doc.addToLayer("structural", openingDc.getOutput());
+          }
         }
       }
     }

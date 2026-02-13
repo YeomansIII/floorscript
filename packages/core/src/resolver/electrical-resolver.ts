@@ -1,7 +1,6 @@
 import type {
   ElectricalConfig,
   UnitSystem,
-  CardinalDirection,
 } from "../types/config.js";
 import type {
   Point,
@@ -13,9 +12,9 @@ import type {
   ResolvedRoom,
   ResolvedSmokeDetector,
   ResolvedSwitch,
-  ResolvedWall,
 } from "../types/geometry.js";
 import { parseDimension } from "../parser/dimension.js";
+import { findWallById, computeWallPosition } from "./wall-utils.js";
 
 /**
  * Resolve electrical config into absolute plan geometry.
@@ -142,6 +141,9 @@ function resolveRun(
   };
 }
 
+// Re-export findWallById for backwards compatibility
+export { findWallById } from "./wall-utils.js";
+
 // ---- Helpers ----
 
 function parseDimensionTuple(
@@ -152,83 +154,4 @@ function parseDimensionTuple(
     x: parseDimension(tuple[0], units),
     y: parseDimension(tuple[1], units),
   };
-}
-
-/**
- * Find a wall by its reference string (e.g. "kitchen.south").
- * Throws a descriptive error if the room or wall direction is not found.
- */
-export function findWallById(
-  wallRef: string,
-  rooms: ResolvedRoom[],
-): { room: ResolvedRoom; wall: ResolvedWall } {
-  const dotIndex = wallRef.lastIndexOf(".");
-  if (dotIndex === -1) {
-    throw new Error(
-      `Invalid wall reference "${wallRef}": expected format "roomId.direction" (e.g. "kitchen.south")`,
-    );
-  }
-
-  const roomId = wallRef.substring(0, dotIndex);
-  const direction = wallRef.substring(dotIndex + 1) as CardinalDirection;
-
-  const validDirections: CardinalDirection[] = [
-    "north",
-    "south",
-    "east",
-    "west",
-  ];
-  if (!validDirections.includes(direction)) {
-    throw new Error(
-      `Invalid wall direction "${direction}" in wall reference "${wallRef}": must be north, south, east, or west`,
-    );
-  }
-
-  const room = rooms.find((r) => r.id === roomId);
-  if (!room) {
-    const available = rooms.map((r) => r.id).join(", ");
-    throw new Error(
-      `Room "${roomId}" not found in wall reference "${wallRef}". Available rooms: ${available}`,
-    );
-  }
-
-  const wall = room.walls.find((w) => w.direction === direction);
-  if (!wall) {
-    throw new Error(
-      `Wall "${direction}" not found on room "${roomId}"`,
-    );
-  }
-
-  return { room, wall };
-}
-
-/**
- * Compute absolute position for a wall-mounted element.
- * The element is placed along the wall at the given offset from wall start,
- * on the wall's centerline (midpoint of wall thickness).
- */
-function computeWallPosition(
-  wall: ResolvedWall,
-  _room: ResolvedRoom,
-  alongWallOffset: number,
-): Point {
-  const rect = wall.rect;
-  const centerOffset = wall.thickness / 2;
-
-  switch (wall.direction) {
-    case "south":
-    case "north":
-      // Horizontal wall: offset runs along X, centerline is Y
-      return {
-        x: rect.x + alongWallOffset,
-        y: rect.y + centerOffset,
-      };
-    case "east":
-    case "west":
-      // Vertical wall: offset runs along Y, centerline is X
-      return {
-        x: rect.x + centerOffset,
-        y: rect.y + alongWallOffset,
-      };
-  }
 }

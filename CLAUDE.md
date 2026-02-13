@@ -159,3 +159,10 @@ npx sharp-cli -i examples/multi-room.svg -o examples/multi-room.png
 - Examples in `examples/` show real YAML inputs and their rendered SVG/PNG outputs
 - When adding new geometry resolvers, follow the pattern in `packages/core/src/resolver/`
 - When adding new SVG renderers, add to `packages/render-svg/src/renderers/` and wire into `render-svg.ts`
+
+## Active Technologies
+- TypeScript 5.7.0, target ES2022, strict mode + Zod (validation), yaml (parsing), tsup (bundler), Commander (CLI) (001-fix-structural-rendering)
+- N/A (file-based I/O) (001-fix-structural-rendering)
+
+## Recent Changes
+- 001-fix-structural-rendering: Added TypeScript 5.7.0, target ES2022, strict mode + Zod (validation), yaml (parsing), tsup (bundler), Commander (CLI)

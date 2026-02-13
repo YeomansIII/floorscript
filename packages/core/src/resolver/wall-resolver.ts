@@ -5,12 +5,7 @@ import type {
   WallsConfig,
 } from "../types/config.js";
 import type { Rect, ResolvedWall } from "../types/geometry.js";
-import { parseDimension } from "../parser/dimension.js";
-
-const DEFAULT_EXTERIOR_THICKNESS_FT = 0.5; // 6 inches
-const DEFAULT_INTERIOR_THICKNESS_FT = 0.375; // 4.5 inches
-const DEFAULT_EXTERIOR_THICKNESS_M = 0.15;
-const DEFAULT_INTERIOR_THICKNESS_M = 0.1;
+import { resolveWallComposition } from "./shared-wall-resolver.js";
 
 const LINE_WEIGHTS: Record<string, number> = {
   exterior: 0.7,
@@ -18,24 +13,11 @@ const LINE_WEIGHTS: Record<string, number> = {
   "load-bearing": 0.5,
 };
 
-function getDefaultThickness(
-  wallType: string,
-  units: UnitSystem,
-): number {
-  if (units === "imperial") {
-    return wallType === "exterior"
-      ? DEFAULT_EXTERIOR_THICKNESS_FT
-      : DEFAULT_INTERIOR_THICKNESS_FT;
-  }
-  return wallType === "exterior"
-    ? DEFAULT_EXTERIOR_THICKNESS_M
-    : DEFAULT_INTERIOR_THICKNESS_M;
-}
-
 /**
  * Resolve walls for a room given its bounding rectangle.
- * Room position and dimensions define the outer boundary;
- * wall thickness extends inward.
+ * Room bounds represent interior clear space (sheetrock to sheetrock).
+ * Walls extend OUTSIDE the room bounds as additional material.
+ * Horizontal walls (north/south) extend through corners; vertical walls (east/west) butt in.
  */
 export function resolveWalls(
   wallsConfig: WallsConfig | undefined,
@@ -46,20 +28,28 @@ export function resolveWalls(
   const walls: ResolvedWall[] = [];
   const directions: CardinalDirection[] = ["north", "south", "east", "west"];
 
+  // Pre-compute all thicknesses so horizontal walls can extend by perpendicular thicknesses
+  const thicknesses = new Map<CardinalDirection, number>();
   for (const dir of directions) {
     const wallConfig: WallConfig | undefined = wallsConfig?.[dir];
-    // Default to interior wall if not specified
     const wallType = wallConfig?.type ?? "interior";
-    const thickness = wallConfig?.thickness
-      ? parseDimension(wallConfig.thickness, units)
-      : getDefaultThickness(wallType, units);
+    const composition = resolveWallComposition(wallConfig, wallType, units);
+    thicknesses.set(dir, composition.totalThickness);
+  }
+
+  for (const dir of directions) {
+    const wallConfig: WallConfig | undefined = wallsConfig?.[dir];
+    const wallType = wallConfig?.type ?? "interior";
+    const composition = resolveWallComposition(wallConfig, wallType, units);
 
     const wall = resolveWallGeometry(
       roomId,
       dir,
       wallType,
-      thickness,
+      composition.totalThickness,
       roomBounds,
+      thicknesses.get("west")!,
+      thicknesses.get("east")!,
     );
     walls.push(wall);
   }
@@ -67,12 +57,20 @@ export function resolveWalls(
   return walls;
 }
 
+/**
+ * Compute wall geometry with walls extending OUTSIDE room bounds.
+ * Inner edge = room boundary. Outer edge = room boundary + thickness outward.
+ * Horizontal walls (north/south) extend to cover corner squares.
+ * Vertical walls (east/west) butt into horizontal walls.
+ */
 function resolveWallGeometry(
   roomId: string,
   direction: CardinalDirection,
   wallType: string,
   thickness: number,
   bounds: Rect,
+  westThickness: number,
+  eastThickness: number,
 ): ResolvedWall {
   const { x, y, width, height } = bounds;
 
@@ -81,35 +79,44 @@ function resolveWallGeometry(
   let outerEnd: { x: number; y: number };
   let innerStart: { x: number; y: number };
   let innerEnd: { x: number; y: number };
+  let interiorStartOffset: number;
 
   switch (direction) {
     case "south":
-      rect = { x, y, width, height: thickness };
-      outerStart = { x, y };
-      outerEnd = { x: x + width, y };
-      innerStart = { x, y: y + thickness };
-      innerEnd = { x: x + width, y: y + thickness };
+      // Horizontal wall extends through corners
+      rect = { x: x - westThickness, y: y - thickness, width: width + westThickness + eastThickness, height: thickness };
+      outerStart = { x: x - westThickness, y: y - thickness };
+      outerEnd = { x: x + width + eastThickness, y: y - thickness };
+      innerStart = { x: x - westThickness, y };
+      innerEnd = { x: x + width + eastThickness, y };
+      interiorStartOffset = westThickness;
       break;
     case "north":
-      rect = { x, y: y + height - thickness, width, height: thickness };
-      outerStart = { x, y: y + height };
-      outerEnd = { x: x + width, y: y + height };
-      innerStart = { x, y: y + height - thickness };
-      innerEnd = { x: x + width, y: y + height - thickness };
+      // Horizontal wall extends through corners
+      rect = { x: x - westThickness, y: y + height, width: width + westThickness + eastThickness, height: thickness };
+      outerStart = { x: x - westThickness, y: y + height + thickness };
+      outerEnd = { x: x + width + eastThickness, y: y + height + thickness };
+      innerStart = { x: x - westThickness, y: y + height };
+      innerEnd = { x: x + width + eastThickness, y: y + height };
+      interiorStartOffset = westThickness;
       break;
     case "west":
-      rect = { x, y, width: thickness, height };
-      outerStart = { x, y };
-      outerEnd = { x, y: y + height };
-      innerStart = { x: x + thickness, y };
-      innerEnd = { x: x + thickness, y: y + height };
+      // Vertical wall butts into horizontal walls (no corner extension)
+      rect = { x: x - thickness, y, width: thickness, height };
+      outerStart = { x: x - thickness, y };
+      outerEnd = { x: x - thickness, y: y + height };
+      innerStart = { x, y };
+      innerEnd = { x, y: y + height };
+      interiorStartOffset = 0;
       break;
     case "east":
-      rect = { x: x + width - thickness, y, width: thickness, height };
-      outerStart = { x: x + width, y };
-      outerEnd = { x: x + width, y: y + height };
-      innerStart = { x: x + width - thickness, y };
-      innerEnd = { x: x + width - thickness, y: y + height };
+      // Vertical wall butts into horizontal walls (no corner extension)
+      rect = { x: x + width, y, width: thickness, height };
+      outerStart = { x: x + width + thickness, y };
+      outerEnd = { x: x + width + thickness, y: y + height };
+      innerStart = { x: x + width, y };
+      innerEnd = { x: x + width, y: y + height };
+      interiorStartOffset = 0;
       break;
   }
 
@@ -124,5 +131,6 @@ function resolveWallGeometry(
     rect,
     openings: [],
     segments: [rect],
+    interiorStartOffset,
   };
 }

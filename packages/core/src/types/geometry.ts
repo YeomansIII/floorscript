@@ -13,6 +13,7 @@ import type {
   SwingDirection,
   UnitSystem,
   ValveType,
+  WallComposition,
   WallType,
 } from "./config.js";
 
@@ -44,6 +45,8 @@ export interface ResolvedPlan {
   rooms: ResolvedRoom[];
   dimensions: ResolvedDimension[];
   bounds: Rect;
+  wallGraph?: WallGraph;
+  validation?: ValidationResult;
   electrical?: ResolvedElectrical;
   plumbing?: ResolvedPlumbing;
   layers?: LayersConfig;
@@ -68,6 +71,8 @@ export interface ResolvedWall {
   rect: Rect;
   openings: ResolvedOpening[];
   segments: Rect[];
+  /** Distance from rect start to room interior edge along wall axis (for corner extensions) */
+  interiorStartOffset: number;
 }
 
 export interface ResolvedOpening {
@@ -76,6 +81,7 @@ export interface ResolvedOpening {
   width: number;
   wallDirection: CardinalDirection;
   wallThickness: number;
+  ownerRoomId?: string;
   style?: DoorStyle;
   swing?: SwingDirection;
   gapStart: Point;
@@ -89,6 +95,49 @@ export interface ResolvedDimension {
   offset: number;
   label: string;
   orientation: "horizontal" | "vertical";
+}
+
+// ---- Plan-level wall graph ----
+
+export interface PlanWall {
+  id: string;
+  roomA: string | null;
+  roomB: string | null;
+  directionInA: CardinalDirection | null;
+  directionInB: CardinalDirection | null;
+  type: WallType;
+  composition: WallComposition;
+  thickness: number;
+  lineWeight: number;
+  centerline: LineSegment;
+  outerEdge: LineSegment;
+  innerEdge: LineSegment;
+  rect: Rect;
+  openings: ResolvedOpening[];
+  segments: Rect[];
+  shared: boolean;
+}
+
+export interface WallGraph {
+  walls: PlanWall[];
+  byRoom: Map<string, Map<CardinalDirection, PlanWall>>;
+}
+
+// ---- Validation ----
+
+export interface ValidationIssue {
+  code: string;
+  severity: "error" | "warning";
+  message: string;
+  roomId: string | null;
+  wallId: string | null;
+  elementId: string | null;
+  suggestion: string | null;
+}
+
+export interface ValidationResult {
+  errors: ValidationIssue[];
+  warnings: ValidationIssue[];
 }
 
 // ---- Electrical resolved geometry ----

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { parseConfig } from "../src/parser/config-parser.js";
 import { resolveLayout } from "../src/resolver/layout-resolver.js";
-import { resolveElectrical, findWallById } from "../src/resolver/electrical-resolver.js";
+import { resolveElectrical } from "../src/resolver/electrical-resolver.js";
+import { findWallById } from "../src/resolver/wall-utils.js";
 import type { ResolvedRoom } from "../src/types/geometry.js";
 import { resolveWalls } from "../src/resolver/wall-resolver.js";
 
@@ -23,6 +24,9 @@ function makeRoom(
     walls,
   };
 }
+
+// Default interior thickness: 2x4 (3.5") + 0.5" × 2 = 4.5" = 0.375ft
+const INT_THICK = 4.5 / 12;
 
 describe("electrical resolver", () => {
   const rooms = [
@@ -59,9 +63,11 @@ describe("electrical resolver", () => {
     expect(outlet.outletType).toBe("duplex");
     expect(outlet.wallDirection).toBe("south");
     expect(outlet.wallId).toBe("kitchen.south");
-    // South wall at y=0, offset 3ft along x, centerline at y = wallThickness/2
+    // South wall extends below room: rect at y = -thickness
+    // Offset 3ft along x, centerline at y = rect.y + thickness/2
     expect(outlet.position.x).toBe(3);
-    expect(outlet.position.y).toBeCloseTo(rooms[0].walls[1].thickness / 2, 5);
+    const southWall = rooms[0].walls.find((w) => w.direction === "south")!;
+    expect(outlet.position.y).toBeCloseTo(southWall.rect.y + southWall.thickness / 2, 5);
   });
 
   it("resolves outlet on east wall (vertical) at correct centerline position", () => {
@@ -77,7 +83,7 @@ describe("electrical resolver", () => {
 
     const outlet = result.outlets[0];
     expect(outlet.wallDirection).toBe("east");
-    // East wall: position along Y at 5ft, centerline at wall midpoint X
+    // East wall extends right of room: rect at x = 12
     const eastWall = rooms[0].walls.find((w) => w.direction === "east")!;
     expect(outlet.position.y).toBe(5);
     expect(outlet.position.x).toBeCloseTo(eastWall.rect.x + eastWall.thickness / 2, 5);
