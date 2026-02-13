@@ -1,0 +1,376 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1095.8" width="1200" height="1095.8">
+<rect x="0" y="0" width="1200" height="1095.8" fill="white"/>
+<g class="layer-structural">
+<g class="walls">
+<g fill="#333" stroke="none">
+<rect x="502.59" y="817.49" width="8.01" height="42.7"/>
+<rect x="502.59" y="518.61" width="8.01" height="170.79"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="75.61" y="510.6" width="149.44" height="8.01"/>
+<rect x="353.15" y="510.6" width="149.44" height="8.01"/>
+</g>
+<rect x="852.19" y="518.61" width="8.01" height="341.59" stroke="none" fill="#333"/>
+<rect x="510.6" y="510.6" width="341.59" height="8.01" stroke="none" fill="#333"/>
+<g fill="#333" stroke="none">
+<rect x="860.19" y="510.6" width="156.56" height="8.01"/>
+<rect x="1073.68" y="510.6" width="26.69" height="8.01"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="75.61" y="417.2" width="64.05" height="8.01"/>
+<rect x="196.59" y="417.2" width="220.61" height="8.01"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="425.2" y="421.2" width="42.7" height="8.01"/>
+<rect x="517.72" y="421.2" width="78.28" height="8.01"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="604" y="417.2" width="156.56" height="8.01"/>
+<rect x="817.49" y="417.2" width="42.7" height="8.01"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="868.2" y="417.2" width="42.7" height="8.01"/>
+<rect x="967.83" y="417.2" width="132.54" height="8.01"/>
+</g>
+<g fill="#333" stroke="none">
+<rect x="417.2" y="171.68" width="8.01" height="117.42"/>
+<rect x="417.2" y="75.61" width="8.01" height="42.7"/>
+</g>
+<rect x="417.2" y="297.11" width="8.01" height="120.09" stroke="none" fill="#333"/>
+<rect x="425.2" y="289.1" width="170.79" height="8.01" stroke="none" fill="#333"/>
+<rect x="596" y="75.61" width="8.01" height="213.49" stroke="none" fill="#333"/>
+<rect x="596" y="297.11" width="8.01" height="120.09" stroke="none" fill="#333"/>
+<rect x="860.19" y="75.61" width="8.01" height="341.59" stroke="none" fill="#333"/>
+<rect x="1100.37" y="510.6" width="16.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="417.2" y="417.2" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="596" y="417.2" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="860.19" y="417.2" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="502.59" y="510.6" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="852.19" y="510.6" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="417.2" y="289.1" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="596" y="417.2" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="417.2" y="417.2" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="596" y="289.1" width="8.01" height="8.01" stroke="none" fill="#333"/>
+<rect x="1100.37" y="417.2" width="24.02" height="8.01" stroke="none" fill="#333"/>
+<g fill="#000" stroke="none">
+<rect x="64.05" y="860.19" width="54.26" height="11.56"/>
+<rect x="182.36" y="860.19" width="149.44" height="11.56"/>
+<rect x="438.55" y="860.19" width="72.05" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="64.05" y="742.77" width="11.56" height="117.42"/>
+<rect x="64.05" y="514.6" width="11.56" height="121.42"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="502.59" y="860.19" width="136.1" height="11.56"/>
+<rect x="724.09" y="860.19" width="136.1" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="852.19" y="860.19" width="98.74" height="11.56"/>
+<rect x="1025.65" y="860.19" width="102.3" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="1116.38" y="726.76" width="11.56" height="133.43"/>
+<rect x="1116.38" y="510.6" width="11.56" height="141.44"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="1100.37" y="499.93" width="11.56" height="18.68"/>
+<rect x="1100.37" y="417.2" width="11.56" height="18.68"/>
+</g>
+<rect x="64.05" y="417.2" width="11.56" height="101.41" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="64.05" y="64.05" width="225.06" height="11.56"/>
+<rect x="374.5" y="64.05" width="50.7" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="64.05" y="374.5" width="11.56" height="46.7"/>
+<rect x="64.05" y="75.61" width="11.56" height="213.49"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="417.2" y="64.05" width="66.72" height="11.56"/>
+<rect x="537.29" y="64.05" width="66.72" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="596" y="64.05" width="98.74" height="11.56"/>
+<rect x="769.46" y="64.05" width="98.74" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="860.19" y="64.05" width="98.74" height="11.56"/>
+<rect x="1033.65" y="64.05" width="102.3" height="11.56"/>
+</g>
+<g fill="#000" stroke="none">
+<rect x="1124.39" y="283.77" width="11.56" height="141.44"/>
+<rect x="1124.39" y="75.61" width="11.56" height="133.43"/>
+</g>
+</g>
+<g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="502.59" y1="817.49" x2="510.6" y2="817.49"/>
+<line x1="502.59" y1="817.49" x2="502.59" y2="829.5"/>
+<line x1="510.6" y1="817.49" x2="510.6" y2="829.5"/>
+<line x1="502.59" y1="689.4" x2="510.6" y2="689.4"/>
+<line x1="502.59" y1="689.4" x2="502.59" y2="677.39"/>
+<line x1="510.6" y1="689.4" x2="510.6" y2="677.39"/>
+</g>
+<g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="225.06" y1="510.6" x2="225.06" y2="518.61"/>
+<line x1="225.06" y1="510.6" x2="213.05" y2="510.6"/>
+<line x1="225.06" y1="518.61" x2="213.05" y2="518.61"/>
+<line x1="353.15" y1="510.6" x2="353.15" y2="518.61"/>
+<line x1="353.15" y1="510.6" x2="365.16" y2="510.6"/>
+<line x1="353.15" y1="518.61" x2="365.16" y2="518.61"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1016.75" y1="518.61" x2="1016.75" y2="575.54"/>
+<path d="M 1016.75,575.54 A 56.93,56.93 0 0,0 1073.68,518.61"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="196.59" y1="425.2" x2="196.59" y2="368.27"/>
+<path d="M 196.59,368.27 A 56.93,56.93 0 0,0 139.66,425.2"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="517.72" y1="429.21" x2="517.72" y2="379.39"/>
+<path d="M 517.72,379.39 A 49.81,49.81 0 0,0 467.9,429.21"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="760.56" y1="425.2" x2="760.56" y2="368.27"/>
+<path d="M 760.56,368.27 A 56.93,56.93 0 0,1 817.49,425.2"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="967.83" y1="425.2" x2="967.83" y2="368.27"/>
+<path d="M 967.83,368.27 A 56.93,56.93 0 0,0 910.9,425.2"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="417.2" y1="118.31" x2="470.57" y2="118.31"/>
+<path d="M 470.57,118.31 A 53.37,53.37 0 0,1 417.2,171.68"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="182.36" y1="871.76" x2="182.36" y2="807.71"/>
+<path d="M 182.36,807.71 A 64.05,64.05 0 0,0 118.31,871.76"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="331.8" y1="863.08" x2="438.55" y2="863.08"/>
+<line x1="331.8" y1="868.87" x2="438.55" y2="868.87"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="66.94" y1="742.77" x2="66.94" y2="636.03"/>
+<line x1="72.72" y1="742.77" x2="72.72" y2="636.03"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="638.7" y1="863.08" x2="724.09" y2="863.08"/>
+<line x1="638.7" y1="868.87" x2="724.09" y2="868.87"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="950.93" y1="863.08" x2="1025.65" y2="863.08"/>
+<line x1="950.93" y1="868.87" x2="1025.65" y2="868.87"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1119.27" y1="726.76" x2="1119.27" y2="652.04"/>
+<line x1="1125.06" y1="726.76" x2="1125.06" y2="652.04"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1100.37" y1="499.93" x2="1036.32" y2="499.93"/>
+<path d="M 1036.32,499.93 A 64.05,64.05 0 0,1 1100.37,435.88"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="289.1" y1="66.94" x2="374.5" y2="66.94"/>
+<line x1="289.1" y1="72.72" x2="374.5" y2="72.72"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="66.94" y1="374.5" x2="66.94" y2="289.1"/>
+<line x1="72.72" y1="374.5" x2="72.72" y2="289.1"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="483.91" y1="66.94" x2="537.29" y2="66.94"/>
+<line x1="483.91" y1="72.72" x2="537.29" y2="72.72"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="694.74" y1="66.94" x2="769.46" y2="66.94"/>
+<line x1="694.74" y1="72.72" x2="769.46" y2="72.72"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="958.93" y1="66.94" x2="1033.65" y2="66.94"/>
+<line x1="958.93" y1="72.72" x2="1033.65" y2="72.72"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="1127.28" y1="283.77" x2="1127.28" y2="209.04"/>
+<line x1="1133.06" y1="283.77" x2="1133.06" y2="209.04"/>
+</g>
+<g class="enclosure-walls" id="enclosure-bed2-closet">
+<g fill="#333" stroke="none">
+<rect x="894.89" y="849.52" width="8.01" height="10.67"/>
+<rect x="894.89" y="732.1" width="8.01" height="32.02"/>
+</g>
+<rect x="860.19" y="732.1" width="42.7" height="8.01" stroke="none" fill="#333"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="894.89" y1="764.12" x2="809.49" y2="764.12"/>
+<path d="M 809.49,764.12 A 85.4,85.4 0 0,0 894.89,849.52"/>
+</g>
+<g class="enclosure-walls" id="enclosure-walkin-closet">
+<g fill="#333" stroke="none">
+<rect x="174.35" y="203.71" width="8.01" height="21.35"/>
+<rect x="174.35" y="75.61" width="8.01" height="74.72"/>
+</g>
+<rect x="75.61" y="217.05" width="106.75" height="8.01" stroke="none" fill="#333"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="174.35" y1="150.33" x2="120.98" y2="150.33"/>
+<path d="M 120.98,150.33 A 53.37,53.37 0 0,0 174.35,203.71"/>
+</g>
+<g class="enclosure-walls" id="enclosure-bed3-closet">
+<g fill="#333" stroke="none">
+<rect x="817.49" y="171.68" width="8.01" height="10.67"/>
+<rect x="817.49" y="75.61" width="8.01" height="21.35"/>
+</g>
+<rect x="817.49" y="174.35" width="42.7" height="8.01" stroke="none" fill="#333"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="817.49" y1="96.96" x2="892.22" y2="96.96"/>
+<path d="M 892.22,96.96 A 74.72,74.72 0 0,1 817.49,171.68"/>
+</g>
+<g class="enclosure-walls" id="enclosure-bed4-closet">
+<g fill="#333" stroke="none">
+<rect x="902.89" y="171.68" width="8.01" height="10.67"/>
+<rect x="902.89" y="75.61" width="8.01" height="21.35"/>
+</g>
+<rect x="868.2" y="174.35" width="42.7" height="8.01" stroke="none" fill="#333"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="902.89" y1="96.96" x2="828.17" y2="96.96"/>
+<path d="M 828.17,96.96 A 74.72,74.72 0 0,0 902.89,171.68"/>
+</g>
+</g>
+<g class="layer-labels">
+<text x="289.1" y="689.4" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Living Room</text>
+<text x="681.39" y="689.4" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Kitchen / Dining</text>
+<text x="988.29" y="689.4" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Bedroom 2</text>
+<text x="881.54" y="796.15" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Closet</text>
+<text x="587.99" y="467.9" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Hallway</text>
+<text x="246.4" y="246.4" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Master Bedroom</text>
+<text x="128.98" y="150.33" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Walk-in Closet</text>
+<text x="510.6" y="182.36" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Master Bath</text>
+<text x="510.6" y="361.16" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Hall Bath</text>
+<text x="732.1" y="246.4" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Bedroom 3</text>
+<text x="838.84" y="128.98" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Closet</text>
+<text x="996.29" y="246.4" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Bedroom 4</text>
+<text x="889.55" y="128.98" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="10.67" font-weight="500" text-anchor="middle" dominant-baseline="central">Closet</text>
+</g>
+<g class="layer-dimensions">
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="75.61" y1="902.89" x2="502.59" y2="902.89"/>
+<line x1="72.41" y1="906.09" x2="78.81" y2="899.69"/>
+<line x1="499.39" y1="906.09" x2="505.8" y2="899.69"/>
+<text x="289.1" y="897.55" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">20&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="32.91" y1="860.19" x2="32.91" y2="518.61"/>
+<line x1="29.71" y1="863.4" x2="36.12" y2="856.99"/>
+<line x1="29.71" y1="521.81" x2="36.12" y2="515.4"/>
+<text x="27.58" y="689.4" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 27.58, 689.4)">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="510.6" y1="902.89" x2="852.19" y2="902.89"/>
+<line x1="507.4" y1="906.09" x2="513.8" y2="899.69"/>
+<line x1="848.98" y1="906.09" x2="855.39" y2="899.69"/>
+<text x="681.39" y="897.55" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="894.89" y1="860.19" x2="894.89" y2="518.61"/>
+<line x1="891.68" y1="863.4" x2="898.09" y2="856.99"/>
+<line x1="891.68" y1="521.81" x2="898.09" y2="515.4"/>
+<text x="889.55" y="689.4" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 889.55, 689.4)">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="860.19" y1="902.89" x2="1116.38" y2="902.89"/>
+<line x1="856.99" y1="906.09" x2="863.4" y2="899.69"/>
+<line x1="1113.18" y1="906.09" x2="1119.58" y2="899.69"/>
+<text x="988.29" y="897.55" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="1159.08" y1="860.19" x2="1159.08" y2="518.61"/>
+<line x1="1155.88" y1="863.4" x2="1162.28" y2="856.99"/>
+<line x1="1155.88" y1="521.81" x2="1162.28" y2="515.4"/>
+<text x="1153.74" y="689.4" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 1153.74, 689.4)">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="75.61" y1="382.51" x2="1100.37" y2="382.51"/>
+<line x1="72.41" y1="385.71" x2="78.81" y2="379.3"/>
+<line x1="1097.17" y1="385.71" x2="1103.57" y2="379.3"/>
+<text x="587.99" y="377.17" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">48&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="32.91" y1="510.6" x2="32.91" y2="425.2"/>
+<line x1="29.71" y1="513.8" x2="36.12" y2="507.4"/>
+<line x1="29.71" y1="428.41" x2="36.12" y2="422"/>
+<text x="27.58" y="467.9" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 27.58, 467.9)">4&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="75.61" y1="32.91" x2="417.2" y2="32.91"/>
+<line x1="72.41" y1="36.12" x2="78.81" y2="29.71"/>
+<line x1="414" y1="36.12" x2="420.4" y2="29.71"/>
+<text x="246.4" y="27.58" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="32.91" y1="417.2" x2="32.91" y2="75.61"/>
+<line x1="29.71" y1="420.4" x2="36.12" y2="414"/>
+<line x1="29.71" y1="78.81" x2="36.12" y2="72.41"/>
+<text x="27.58" y="246.4" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 27.58, 246.4)">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="425.2" y1="32.91" x2="596" y2="32.91"/>
+<line x1="422" y1="36.12" x2="428.41" y2="29.71"/>
+<line x1="592.79" y1="36.12" x2="599.2" y2="29.71"/>
+<text x="510.6" y="27.58" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">8&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="638.7" y1="289.1" x2="638.7" y2="75.61"/>
+<line x1="635.49" y1="292.31" x2="641.9" y2="285.9"/>
+<line x1="635.49" y1="78.81" x2="641.9" y2="72.41"/>
+<text x="633.36" y="182.36" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 633.36, 182.36)">10&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="425.2" y1="254.41" x2="596" y2="254.41"/>
+<line x1="422" y1="257.61" x2="428.41" y2="251.21"/>
+<line x1="592.79" y1="257.61" x2="599.2" y2="251.21"/>
+<text x="510.6" y="249.07" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">8&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="638.7" y1="425.2" x2="638.7" y2="297.11"/>
+<line x1="635.49" y1="428.41" x2="641.9" y2="422"/>
+<line x1="635.49" y1="300.31" x2="641.9" y2="293.91"/>
+<text x="633.36" y="361.16" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 633.36, 361.16)">6&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="604" y1="32.91" x2="860.19" y2="32.91"/>
+<line x1="600.8" y1="36.12" x2="607.21" y2="29.71"/>
+<line x1="856.99" y1="36.12" x2="863.4" y2="29.71"/>
+<text x="732.1" y="27.58" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="902.89" y1="417.2" x2="902.89" y2="75.61"/>
+<line x1="899.69" y1="420.4" x2="906.09" y2="414"/>
+<line x1="899.69" y1="78.81" x2="906.09" y2="72.41"/>
+<text x="897.55" y="246.4" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 897.55, 246.4)">16&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="868.2" y1="32.91" x2="1124.39" y2="32.91"/>
+<line x1="865" y1="36.12" x2="871.4" y2="29.71"/>
+<line x1="1121.19" y1="36.12" x2="1127.59" y2="29.71"/>
+<text x="996.29" y="27.58" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle">12&apos;-0&quot;</text>
+</g>
+<g class="dimension" stroke="#555" stroke-width="0.18mm">
+<line x1="1167.09" y1="417.2" x2="1167.09" y2="75.61"/>
+<line x1="1163.88" y1="420.4" x2="1170.29" y2="414"/>
+<line x1="1163.88" y1="78.81" x2="1170.29" y2="72.41"/>
+<text x="1161.75" y="246.4" stroke="none" fill="#000" font-family="'Helvetica','Arial',sans-serif" font-size="7.47" text-anchor="middle" transform="rotate(-90, 1161.75, 246.4)">16&apos;-0&quot;</text>
+</g>
+</g>
+<g class="layer-title-block">
+<g class="title-block" font-family="'Helvetica','Arial',sans-serif" fill="#000">
+<rect x="830" y="935.8" width="350" height="140" stroke="#000" stroke-width="0.50" fill="white"/>
+<line x1="830" y1="1025.8" x2="1180" y2="1025.8" stroke="#000" stroke-width="0.35"/>
+<text x="842" y="959.8" font-size="18" font-weight="bold">4-Bedroom Ranch</text>
+<text x="1015" y="1063.8" fill="#666" font-size="10">FloorScript v0.1</text>
+</g>
+</g>
+</svg>

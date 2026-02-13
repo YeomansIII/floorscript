@@ -74,9 +74,9 @@ function getRotationAngle(orientation?: string): number {
     case "facing-north":
       return 180;
     case "facing-east":
-      return 90;
-    case "facing-west":
       return -90;
+    case "facing-west":
+      return 90;
     default:
       return 0;
   }

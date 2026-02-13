@@ -4,11 +4,19 @@
 <g class="walls">
 <rect x="190.73" y="190.73" width="818.54" height="31.79" stroke="none" fill="#000"/>
 <rect x="190.73" y="858.28" width="818.54" height="23.84" stroke="none" fill="#333"/>
-<rect x="985.43" y="222.52" width="23.84" height="635.76" stroke="none" fill="#333"/>
+<rect x="985.43" y="731.13" width="23.84" height="127.15" stroke="none" fill="#333"/>
 <g fill="#000" stroke="none">
 <rect x="190.73" y="667.55" width="31.79" height="190.73"/>
 <rect x="190.73" y="222.52" width="31.79" height="190.73"/>
 </g>
+</g>
+<g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="985.43" y1="731.13" x2="1009.27" y2="731.13"/>
+<line x1="985.43" y1="731.13" x2="985.43" y2="766.89"/>
+<line x1="1009.27" y1="731.13" x2="1009.27" y2="766.89"/>
+<line x1="985.43" y1="222.52" x2="1009.27" y2="222.52"/>
+<line x1="985.43" y1="222.52" x2="985.43" y2="186.75"/>
+<line x1="1009.27" y1="222.52" x2="1009.27" y2="186.75"/>
 </g>
 <g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
 <line x1="198.68" y1="667.55" x2="198.68" y2="413.25"/>

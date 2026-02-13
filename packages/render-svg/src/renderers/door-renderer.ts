@@ -157,23 +157,23 @@ function renderCasedOpening(
     dc.line(
       gapStart.x,
       gapStart.y - wallThick,
-      gapStart.x + armLen,
+      gapStart.x - armLen,
       gapStart.y - wallThick,
     );
-    dc.line(gapStart.x, gapStart.y, gapStart.x + armLen, gapStart.y);
+    dc.line(gapStart.x, gapStart.y, gapStart.x - armLen, gapStart.y);
     // Right end (gapEnd):
     dc.line(gapEnd.x, gapEnd.y - wallThick, gapEnd.x, gapEnd.y);
     dc.line(
       gapEnd.x,
       gapEnd.y - wallThick,
-      gapEnd.x - armLen,
+      gapEnd.x + armLen,
       gapEnd.y - wallThick,
     );
-    dc.line(gapEnd.x, gapEnd.y, gapEnd.x - armLen, gapEnd.y);
+    dc.line(gapEnd.x, gapEnd.y, gapEnd.x + armLen, gapEnd.y);
   } else {
     // Vertical wall: L-marks at top and bottom ends
     // In SVG coords, gapStart.x is the left edge of the wall rect; wall extends rightward
-    // Bottom end (gapStart):
+    // Bottom end (gapStart — higher Y in SVG, arms extend downward/outward):
     dc.line(gapStart.x, gapStart.y, gapStart.x + wallThick, gapStart.y);
     dc.line(gapStart.x, gapStart.y, gapStart.x, gapStart.y + armLen);
     dc.line(
@@ -182,7 +182,7 @@ function renderCasedOpening(
       gapStart.x + wallThick,
       gapStart.y + armLen,
     );
-    // Top end (gapEnd):
+    // Top end (gapEnd — lower Y in SVG, arms extend upward/outward):
     dc.line(gapEnd.x, gapEnd.y, gapEnd.x + wallThick, gapEnd.y);
     dc.line(gapEnd.x, gapEnd.y, gapEnd.x, gapEnd.y - armLen);
     dc.line(

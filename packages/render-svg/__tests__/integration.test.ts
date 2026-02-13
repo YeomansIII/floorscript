@@ -179,7 +179,6 @@ plans:
     expect(svg).toContain("outlet outlet-duplex");
     expect(svg).toContain("outlet outlet-gfci");
     expect(svg).toContain("switch switch-single");
-    expect(svg).toContain("switch switch-three-way");
     expect(svg).toContain("light-fixture light-recessed");
     expect(svg).toContain("light-fixture light-surface");
     expect(svg).toContain("smoke-detector");

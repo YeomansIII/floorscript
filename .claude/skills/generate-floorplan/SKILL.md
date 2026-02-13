@@ -16,6 +16,7 @@ Before generating YAML, read these files to understand the schema and convention
 
 1. **JSON Schema** (authoritative field reference): `packages/core/floorscript.schema.json`
 2. **Spec** (full format documentation): `SPEC.md` — sections 3.1 through 3.10
+3. **Best Practices** (architectural guidelines): `.claude/skills/generate-floorplan/BEST-PRACTICES.md` — reference this for design decisions around door swing direction, window placement, outlet/switch positioning, fixture orientation, room sizing, and traffic flow. **The user's explicit instructions always take priority over best practices.** When the user leaves design details open to interpretation (e.g., "add a bathroom" without specifying fixture layout), use the best practices to make sensible default choices.
 
 If the user provides a description as `$ARGUMENTS`, use that. Otherwise, ask what they want to build.
 

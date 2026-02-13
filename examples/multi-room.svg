@@ -26,7 +26,11 @@
 <rect x="520.47" y="131.16" width="12.56" height="251.16" stroke="none" fill="#333"/>
 <rect x="733.95" y="131.16" width="12.56" height="251.16" stroke="none" fill="#333"/>
 <rect x="520.47" y="466.05" width="12.56" height="12.56" stroke="none" fill="#333"/>
-<rect x="298.6" y="947.44" width="435.35" height="18.14" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="298.6" y="947.44" width="33.49" height="18.14"/>
+<rect x="432.56" y="947.44" width="66.98" height="18.14"/>
+<rect x="633.49" y="947.44" width="100.47" height="18.14"/>
+</g>
 <rect x="118.6" y="466.05" width="12.56" height="12.56" stroke="none" fill="#333"/>
 <rect x="520.47" y="353.02" width="12.56" height="12.56" stroke="none" fill="#333"/>
 <rect x="733.95" y="118.6" width="12.56" height="12.56" stroke="none" fill="#333"/>
@@ -40,7 +44,10 @@
 <rect x="733.95" y="947.44" width="113.02" height="18.14"/>
 <rect x="980.93" y="947.44" width="118.6" height="18.14"/>
 </g>
-<rect x="1081.4" y="466.05" width="18.14" height="499.53" stroke="none" fill="#000"/>
+<g fill="#000" stroke="none">
+<rect x="1081.4" y="813.49" width="18.14" height="152.09"/>
+<rect x="1081.4" y="466.05" width="18.14" height="180"/>
+</g>
 <g fill="#000" stroke="none">
 <rect x="100.47" y="113.02" width="219.07" height="18.14"/>
 <rect x="453.49" y="113.02" width="79.53" height="18.14"/>
@@ -72,11 +79,11 @@
 </g>
 <g class="opening cased-opening" stroke="#000" stroke-width="0.35mm" fill="none">
 <line x1="566.51" y1="466.05" x2="566.51" y2="478.6"/>
-<line x1="566.51" y1="466.05" x2="585.35" y2="466.05"/>
-<line x1="566.51" y1="478.6" x2="585.35" y2="478.6"/>
+<line x1="566.51" y1="466.05" x2="547.67" y2="466.05"/>
+<line x1="566.51" y1="478.6" x2="547.67" y2="478.6"/>
 <line x1="700.47" y1="466.05" x2="700.47" y2="478.6"/>
-<line x1="700.47" y1="466.05" x2="681.63" y2="466.05"/>
-<line x1="700.47" y1="478.6" x2="681.63" y2="478.6"/>
+<line x1="700.47" y1="466.05" x2="719.3" y2="466.05"/>
+<line x1="700.47" y1="478.6" x2="719.3" y2="478.6"/>
 </g>
 <g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
 <line x1="432.56" y1="965.58" x2="432.56" y2="865.12"/>
@@ -91,24 +98,32 @@
 <path d="M 164.65,1049.3 A 83.72,83.72 0 0,0 248.37,965.58"/>
 </g>
 <g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
-<line x1="520.47" y1="382.33" x2="436.74" y2="382.33"/>
-<path d="M 436.74,382.33 A 83.72,83.72 0 0,0 520.47,466.05"/>
+<line x1="520.47" y1="466.05" x2="436.74" y2="466.05"/>
+<path d="M 436.74,466.05 A 83.72,83.72 0 0,1 520.47,382.33"/>
 </g>
 <g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
 <line x1="566.51" y1="365.58" x2="566.51" y2="281.86"/>
 <path d="M 566.51,281.86 A 83.72,83.72 0 0,1 650.23,365.58"/>
 </g>
 <g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
-<line x1="733.95" y1="382.33" x2="817.67" y2="382.33"/>
-<path d="M 817.67,382.33 A 83.72,83.72 0 0,1 733.95,466.05"/>
+<line x1="733.95" y1="466.05" x2="817.67" y2="466.05"/>
+<path d="M 817.67,466.05 A 83.72,83.72 0 0,0 733.95,382.33"/>
 </g>
 <g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
-<line x1="520.47" y1="382.33" x2="436.74" y2="382.33"/>
-<path d="M 436.74,382.33 A 83.72,83.72 0 0,0 520.47,466.05"/>
+<line x1="520.47" y1="466.05" x2="436.74" y2="466.05"/>
+<path d="M 436.74,466.05 A 83.72,83.72 0 0,1 520.47,382.33"/>
 </g>
 <g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
-<line x1="733.95" y1="382.33" x2="817.67" y2="382.33"/>
-<path d="M 817.67,382.33 A 83.72,83.72 0 0,1 733.95,466.05"/>
+<line x1="733.95" y1="466.05" x2="817.67" y2="466.05"/>
+<path d="M 817.67,466.05 A 83.72,83.72 0 0,0 733.95,382.33"/>
+</g>
+<g class="opening door" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="432.56" y1="965.58" x2="432.56" y2="865.12"/>
+<path d="M 432.56,865.12 A 100.47,100.47 0 0,0 332.09,965.58"/>
+</g>
+<g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
+<line x1="499.53" y1="951.98" x2="633.49" y2="951.98"/>
+<line x1="499.53" y1="961.05" x2="633.49" y2="961.05"/>
 </g>
 <g class="opening window" stroke="#000" stroke-width="0.35mm" fill="none">
 <line x1="117.56" y1="813.49" x2="117.56" y2="646.05"/>
@@ -407,11 +422,11 @@
 <line x1="466.05" y1="118.6" x2="466.05" y2="118.6" stroke="#000" stroke-width="0.3mm" fill="none"/>
 <line x1="633.49" y1="118.6" x2="633.49" y2="118.6" stroke="#000" stroke-width="0.3mm" fill="none"/>
 </g>
-<g class="plumbing-fixture fixture-toilet" transform="rotate(-90, 694.8837209302325, 319.5348837209301)">
+<g class="plumbing-fixture fixture-toilet" transform="rotate(90, 694.8837209302325, 319.5348837209301)">
 <rect x="674.79" y="280.47" width="40.19" height="19.53" stroke="#000" stroke-width="0.3mm" fill="none"/>
 <ellipse cx="694.88" cy="327.35" rx="25.12" ry="31.26" stroke="#000" stroke-width="0.3mm" fill="none"/>
 </g>
-<g class="plumbing-fixture fixture-bath-sink" transform="rotate(-90, 711.627906976744, 219.06976744186045)">
+<g class="plumbing-fixture fixture-bath-sink" transform="rotate(90, 711.627906976744, 219.06976744186045)">
 <ellipse cx="711.63" cy="219.07" rx="27.91" ry="22.33" stroke="#000" stroke-width="0.3mm" fill="none"/>
 </g>
 <g class="plumbing-fixture fixture-bath-sink" transform="rotate(180, 164.65116279069764, 1110.6976744186045)">

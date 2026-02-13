@@ -411,7 +411,7 @@ export function buildWallGraph(
     }
 
     if (modified) {
-      pw.rect = { ...pw.rect, y: yMin, height: yMax - yMin };
+      const newRect = { ...pw.rect, y: yMin, height: yMax - yMin };
       pw.outerEdge = {
         start: { x: pw.outerEdge.start.x, y: yMin },
         end: { x: pw.outerEdge.end.x, y: yMax },
@@ -421,13 +421,58 @@ export function buildWallGraph(
         end: { x: pw.innerEdge.end.x, y: yMax },
       };
       pw.centerline = computeCenterline(pw.outerEdge, pw.innerEdge);
-      // Recompute segments around any existing openings (don't discard them)
-      pw.segments = resolveWallSegments({
-        ...pw,
-        id: pw.id,
-        direction: dir!,
-        interiorStartOffset: 0,
-      });
+
+      if (pw.segments.length > 1) {
+        // Wall has gaps (e.g., from extensions) — preserve them by only
+        // extending the first/last segments to cover the new Y range
+        const sorted = [...pw.segments].sort((a, b) => a.y - b.y);
+        // Extend first segment downward to new yMin
+        const first = sorted[0];
+        const firstBottomDelta = first.y - yMin;
+        if (firstBottomDelta > EPSILON) {
+          sorted[0] = {
+            ...first,
+            x: newRect.x,
+            width: newRect.width,
+            y: yMin,
+            height: first.height + firstBottomDelta,
+          };
+        } else {
+          sorted[0] = { ...first, x: newRect.x, width: newRect.width };
+        }
+        // Extend last segment upward to new yMax
+        const last = sorted[sorted.length - 1];
+        const lastTopDelta = yMax - (last.y + last.height);
+        if (lastTopDelta > EPSILON) {
+          sorted[sorted.length - 1] = {
+            ...last,
+            x: newRect.x,
+            width: newRect.width,
+            height: last.height + lastTopDelta,
+          };
+        } else {
+          sorted[sorted.length - 1] = {
+            ...last,
+            x: newRect.x,
+            width: newRect.width,
+          };
+        }
+        // Update X/width on middle segments
+        for (let s = 1; s < sorted.length - 1; s++) {
+          sorted[s] = { ...sorted[s], x: newRect.x, width: newRect.width };
+        }
+        pw.segments = sorted;
+      } else {
+        // No gaps — recompute segments normally
+        pw.rect = newRect;
+        pw.segments = resolveWallSegments({
+          ...pw,
+          id: pw.id,
+          direction: dir!,
+          interiorStartOffset: 0,
+        });
+      }
+      pw.rect = newRect;
     }
   }
 
@@ -615,6 +660,7 @@ function buildRemainderPlanWall(
     thickness: number;
     lineWeight: number;
     direction: CardinalDirection;
+    openings: ResolvedOpening[];
   },
   direction: CardinalDirection,
   start: number,
@@ -714,7 +760,42 @@ function buildRemainderPlanWall(
     }
   }
 
-  return {
+  // Filter openings from the per-room wall that fall within this remainder's range
+  const isHorizontal = direction === "south" || direction === "north";
+  const filteredOpenings = wall.openings
+    .filter((o) => {
+      if (isHorizontal) {
+        return o.gapStart.x >= start - EPSILON && o.gapEnd.x <= end + EPSILON;
+      }
+      return o.gapStart.y >= start - EPSILON && o.gapEnd.y <= end + EPSILON;
+    })
+    .map((o) => ({
+      ...o,
+      ownerRoomId: room.id,
+      // Realign perpendicular coordinate to remainder wall rect
+      ...(isHorizontal
+        ? {
+            gapStart: { ...o.gapStart, y: rect.y },
+            gapEnd: { ...o.gapEnd, y: rect.y },
+            position: { ...o.position, y: rect.y + thickness / 2 },
+            centerline: {
+              start: { ...o.centerline.start, y: rect.y + thickness / 2 },
+              end: { ...o.centerline.end, y: rect.y + thickness / 2 },
+            },
+          }
+        : {
+            gapStart: { ...o.gapStart, x: rect.x },
+            gapEnd: { ...o.gapEnd, x: rect.x },
+            position: { ...o.position, x: rect.x + thickness / 2 },
+            centerline: {
+              start: { ...o.centerline.start, x: rect.x + thickness / 2 },
+              end: { ...o.centerline.end, x: rect.x + thickness / 2 },
+            },
+          }),
+      wallThickness: thickness,
+    }));
+
+  const pw: PlanWall = {
     id: `${room.id}.${direction}.remainder-${side}`,
     roomA: room.id,
     roomB: null,
@@ -734,10 +815,22 @@ function buildRemainderPlanWall(
     outerEdge,
     innerEdge,
     rect,
-    openings: [],
+    openings: filteredOpenings,
     segments: [rect],
     shared: false,
   };
+
+  // Recompute segments if openings exist
+  if (filteredOpenings.length > 0) {
+    pw.segments = resolveWallSegments({
+      ...pw,
+      id: pw.id,
+      direction,
+      interiorStartOffset: 0,
+    });
+  }
+
+  return pw;
 }
 
 /**

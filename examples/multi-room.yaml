@@ -130,7 +130,7 @@ plans:
                 from: south
                 offset: 0ft
                 width: 2ft 6in
-                swing: inward-right
+                swing: inward-left
           west:
             type: exterior
             openings:
@@ -207,7 +207,7 @@ plans:
                 from: south
                 offset: 0ft
                 width: 2ft 6in
-                swing: inward-right
+                swing: inward-left
         enclosures:
           - id: closet2
             label: "Closet"

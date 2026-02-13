@@ -1,0 +1,341 @@
+version: "0.1"
+project:
+  title: "4-Bedroom Ranch"
+units: imperial
+
+plans:
+  - id: main
+    title: "Floor Plan"
+    rooms:
+      # === SOUTH ROW ===
+      - id: living
+        label: "Living Room"
+        position: [0, 0]
+        width: 20ft
+        height: 16ft
+        walls:
+          north:
+            type: interior
+            openings:
+              - type: door
+                style: cased-opening
+                position: center
+                width: 6ft
+          south:
+            type: exterior
+            openings:
+              - type: door
+                from: west
+                offset: 2ft
+                width: 3ft
+                swing: inward-right
+              - type: window
+                from: east
+                offset: 3ft
+                width: 5ft
+          east:
+            type: interior
+            openings:
+              - type: door
+                style: cased-opening
+                from: south
+                offset: 2ft
+                width: 6ft
+          west:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 5ft
+
+      - id: kitchen
+        label: "Kitchen / Dining"
+        adjacent_to:
+          room: living
+          wall: east
+          alignment: start
+        width: 16ft
+        height: 16ft
+        walls:
+          north:
+            type: interior
+          south:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 4ft
+          east:
+            type: interior
+          west:
+            type: interior
+
+      - id: bed2
+        label: "Bedroom 2"
+        adjacent_to:
+          room: kitchen
+          wall: east
+          alignment: start
+        width: 12ft
+        height: 16ft
+        enclosures:
+          - id: bed2-closet
+            label: "Closet"
+            corner: southwest
+            facing: east
+            length: 6ft
+            depth: 2ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    style: bifold
+                    position: 0ft 6in
+                    width: 4ft
+        walls:
+          north:
+            type: interior
+            openings:
+              - type: door
+                from: east
+                offset: 2ft
+                width: 2ft 8in
+                swing: inward-left
+          south:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 3ft 6in
+          east:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 3ft 6in
+          west:
+            type: interior
+
+      # === HALLWAY ===
+      - id: hallway
+        label: "Hallway"
+        adjacent_to:
+          room: living
+          wall: north
+          alignment: start
+        width: 48ft
+        height: 4ft
+        walls:
+          north:
+            type: interior
+          south:
+            type: interior
+          east:
+            type: exterior
+            openings:
+              - type: door
+                from: south
+                offset: 0ft 6in
+                width: 3ft
+                swing: inward-left
+          west:
+            type: exterior
+
+      # === NORTH ROW ===
+      - id: master
+        label: "Master Bedroom"
+        adjacent_to:
+          room: hallway
+          wall: north
+          alignment: start
+        width: 16ft
+        height: 16ft
+        enclosures:
+          - id: walkin-closet
+            label: "Walk-in Closet"
+            corner: northwest
+            facing: east
+            length: 7ft
+            depth: 5ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    position: 1ft
+                    width: 2ft 6in
+                    swing: inward-right
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                from: east
+                offset: 2ft
+                width: 4ft
+          south:
+            type: interior
+            openings:
+              - type: door
+                from: west
+                offset: 3ft
+                width: 2ft 8in
+                swing: inward-right
+          east:
+            type: interior
+          west:
+            type: exterior
+            openings:
+              - type: window
+                from: south
+                offset: 2ft
+                width: 4ft
+
+      - id: master-bath
+        label: "Master Bath"
+        adjacent_to:
+          room: master
+          wall: east
+          alignment: end
+        width: 8ft
+        height: 10ft
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 2ft 6in
+          south:
+            type: interior
+          east:
+            type: interior
+          west:
+            type: interior
+            openings:
+              - type: door
+                from: north
+                offset: 2ft
+                width: 2ft 6in
+                swing: inward-right
+
+      - id: hall-bath
+        label: "Hall Bath"
+        adjacent_to:
+          room: master-bath
+          wall: south
+          alignment: start
+        width: 8ft
+        height: 6ft
+        walls:
+          north:
+            type: interior
+          south:
+            type: interior
+            openings:
+              - type: door
+                from: west
+                offset: 2ft
+                width: 2ft 4in
+                swing: inward-right
+          east:
+            type: interior
+          west:
+            type: interior
+
+      - id: bed3
+        label: "Bedroom 3"
+        adjacent_to:
+          room: master-bath
+          wall: east
+          alignment: end
+        width: 12ft
+        height: 16ft
+        enclosures:
+          - id: bed3-closet
+            label: "Closet"
+            corner: northeast
+            facing: west
+            length: 5ft
+            depth: 2ft
+            walls:
+              west:
+                type: interior
+                openings:
+                  - type: door
+                    style: bifold
+                    position: 0ft 6in
+                    width: 3ft 6in
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 3ft 6in
+          south:
+            type: interior
+            openings:
+              - type: door
+                from: east
+                offset: 2ft
+                width: 2ft 8in
+                swing: inward-left
+          east:
+            type: interior
+          west:
+            type: interior
+
+      - id: bed4
+        label: "Bedroom 4"
+        adjacent_to:
+          room: bed3
+          wall: east
+          alignment: start
+        width: 12ft
+        height: 16ft
+        enclosures:
+          - id: bed4-closet
+            label: "Closet"
+            corner: northwest
+            facing: east
+            length: 5ft
+            depth: 2ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    style: bifold
+                    position: 0ft 6in
+                    width: 3ft 6in
+        walls:
+          north:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 3ft 6in
+          south:
+            type: interior
+            openings:
+              - type: door
+                from: west
+                offset: 2ft
+                width: 2ft 8in
+                swing: inward-right
+          east:
+            type: exterior
+            openings:
+              - type: window
+                position: center
+                width: 3ft 6in
+          west:
+            type: interior
+
+    layers:
+      structural:
+        visible: true
+      dimensions:
+        visible: true
