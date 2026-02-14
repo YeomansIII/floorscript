@@ -47,7 +47,7 @@ export interface ResolvedPlan {
   rooms: ResolvedRoom[];
   dimensions: ResolvedDimension[];
   bounds: Rect;
-  wallGraph?: WallGraph;
+  wallGraph: WallGraph;
   validation?: ValidationResult;
   electrical?: ResolvedElectrical;
   plumbing?: ResolvedPlumbing;
@@ -60,7 +60,6 @@ export interface ResolvedEnclosure {
   parentRoomId: string;
   bounds: Rect;
   facing: CardinalDirection;
-  walls: ResolvedWall[];
 }
 
 export interface ResolvedExtension {
@@ -69,7 +68,6 @@ export interface ResolvedExtension {
   parentRoomId: string;
   bounds: Rect;
   parentWall: CardinalDirection;
-  walls: ResolvedWall[];
 }
 
 export interface ResolvedRoom {
@@ -77,25 +75,9 @@ export interface ResolvedRoom {
   label: string;
   bounds: Rect;
   labelPosition: Point;
-  walls: ResolvedWall[];
   compositeOutline?: Point[];
   enclosures?: ResolvedEnclosure[];
   extensions?: ResolvedExtension[];
-}
-
-export interface ResolvedWall {
-  id: string;
-  direction: CardinalDirection;
-  type: WallType;
-  thickness: number;
-  lineWeight: number;
-  outerEdge: LineSegment;
-  innerEdge: LineSegment;
-  rect: Rect;
-  openings: ResolvedOpening[];
-  segments: Rect[];
-  /** Distance from rect start to room interior edge along wall axis (for corner extensions) */
-  interiorStartOffset: number;
 }
 
 export interface ResolvedOpening {
@@ -120,30 +102,60 @@ export interface ResolvedDimension {
   orientation: "horizontal" | "vertical";
 }
 
-// ---- Plan-level wall graph ----
+// ---- Unified wall type ----
 
-export interface PlanWall {
+export type WallSource = "parent" | "enclosure" | "extension";
+
+export interface Wall {
   id: string;
-  roomA: string | null;
-  roomB: string | null;
-  directionInA: CardinalDirection | null;
-  directionInB: CardinalDirection | null;
+  direction: CardinalDirection;
   type: WallType;
-  composition: WallComposition;
   thickness: number;
   lineWeight: number;
-  centerline: LineSegment;
   outerEdge: LineSegment;
   innerEdge: LineSegment;
+  centerline: LineSegment;
   rect: Rect;
   openings: ResolvedOpening[];
   segments: Rect[];
+  /** Distance from rect start to room interior edge along wall axis (for corner extensions) */
+  interiorStartOffset: number;
+  composition: WallComposition;
+  /** Parent room ID (roomA for shared walls) */
+  roomId: string;
+  /** Second room ID for shared walls, null otherwise */
+  roomIdB: string | null;
+  /** Direction from roomB perspective (shared walls only) */
+  directionInB: CardinalDirection | null;
+  /** Enclosure/extension ID, null for parent walls */
+  subSpaceId: string | null;
+  /** Origin: parent room wall, enclosure interior wall, or extension exterior wall */
+  source: WallSource;
+  /** Whether wall is shared between two rooms */
   shared: boolean;
 }
 
+// ---- Perimeter edges ----
+
+export interface PerimeterEdge {
+  start: Point;
+  end: Point;
+  wallId: string;
+  direction: CardinalDirection;
+}
+
+export interface PerimeterChain {
+  edges: PerimeterEdge[];
+  bounds: Rect;
+}
+
+// ---- Plan-level wall graph ----
+
 export interface WallGraph {
-  walls: PlanWall[];
-  byRoom: Map<string, Map<CardinalDirection, PlanWall>>;
+  walls: Wall[];
+  byRoom: Map<string, Map<CardinalDirection, Wall>>;
+  bySubSpace: Map<string, Map<CardinalDirection, Wall>>;
+  perimeter: PerimeterChain[];
 }
 
 // ---- Validation ----

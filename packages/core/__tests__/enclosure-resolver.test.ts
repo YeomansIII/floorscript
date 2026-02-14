@@ -172,11 +172,11 @@ describe("resolveEnclosures — corner placement", () => {
     ];
 
     const result = resolveEnclosures(configs, parentBounds, "imperial", "room1");
-    const enc = result.enclosures[0];
 
     // NW corner enclosure has 2 exposed edges: east and south (facing room interior)
-    expect(enc.walls).toHaveLength(2);
-    const wallDirs = enc.walls.map((w) => w.direction);
+    const closetWalls = result.walls.filter((w) => w.subSpaceId === "closet");
+    expect(closetWalls).toHaveLength(2);
+    const wallDirs = closetWalls.map((w) => w.direction);
     expect(wallDirs).toContain("east");
     expect(wallDirs).toContain("south");
   });
@@ -306,14 +306,54 @@ describe("resolveEnclosures — corner placement", () => {
     ];
 
     const result = resolveEnclosures(configs, parentBounds, "imperial", "room1");
-    const enc = result.enclosures[0];
 
     // Mid-wall enclosure: not at either corner → 3 exposed edges: south (facing), west, east
-    const wallDirs = enc.walls.map((w) => w.direction);
+    const closetWalls = result.walls.filter((w) => w.subSpaceId === "closet");
+    const wallDirs = closetWalls.map((w) => w.direction);
     expect(wallDirs).toContain("south"); // facing direction
     expect(wallDirs).toContain("west"); // not flush with west corner
     expect(wallDirs).toContain("east"); // not flush with east corner
     expect(wallDirs).not.toContain("north"); // against parent wall
+  });
+
+  it("full-length wall-based enclosure produces correct facing wall", () => {
+    const configs: EnclosureConfig[] = [
+      makeEnclosure({
+        id: "pantry",
+        label: "Pantry",
+        corner: undefined,
+        wall: "north",
+        length: "full",
+        depth: "3ft",
+        walls: {
+          south: {
+            type: "interior",
+            openings: [
+              {
+                type: "door",
+                position: "2ft",
+                width: "3ft",
+              },
+            ],
+          },
+        },
+      }) as EnclosureConfig,
+    ];
+
+    const result = resolveEnclosures(configs, parentBounds, "imperial", "room1");
+    const enc = result.enclosures[0];
+
+    // Full-length north wall enclosure: width = parent width (12)
+    expect(enc.bounds.width).toBeCloseTo(12, 3);
+    expect(enc.bounds.height).toBeCloseTo(3, 3);
+    expect(enc.facing).toBe("south");
+
+    // Should produce exactly 1 wall (south/facing), no side walls
+    // since it spans the full parent wall length
+    const pantryWalls = result.walls.filter((w) => w.subSpaceId === "pantry");
+    expect(pantryWalls).toHaveLength(1);
+    expect(pantryWalls[0].direction).toBe("south");
+    expect(pantryWalls[0].openings).toHaveLength(1);
   });
 
   it("rejects duplicate enclosure ID within same room", () => {

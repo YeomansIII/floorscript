@@ -215,7 +215,7 @@ classDiagram
         rooms: ResolvedRoom[]
         dimensions: ResolvedDimension[]
         bounds: Rect
-        wallGraph?: WallGraph
+        wallGraph: WallGraph
         electrical?: ResolvedElectrical
         plumbing?: ResolvedPlumbing
         validation?: ValidationResult
@@ -226,51 +226,55 @@ classDiagram
         label: string
         bounds: Rect
         labelPosition: Point
-        walls: ResolvedWall[]
         compositeOutline?: Point[]
         enclosures?: ResolvedEnclosure[]
         extensions?: ResolvedExtension[]
     }
 
-    class ResolvedWall {
+    class Wall {
         id: string
         direction: CardinalDirection
         type: WallType
         thickness: number
+        lineWeight: number
         outerEdge: LineSegment
         innerEdge: LineSegment
+        centerline: LineSegment
         rect: Rect
         openings: ResolvedOpening[]
         segments: Rect[]
+        interiorStartOffset: number
+        composition: WallComposition
+        roomId: string
+        roomIdB: string | null
+        directionInB: CardinalDirection | null
+        subSpaceId: string | null
+        source: WallSource
+        shared: boolean
     }
 
     class WallGraph {
-        walls: PlanWall[]
-        byRoom: Map
-    }
-
-    class PlanWall {
-        id: string
-        roomA: string
-        roomB: string
-        shared: boolean
-        thickness: number
-        centerline: LineSegment
-        openings: ResolvedOpening[]
-        segments: Rect[]
+        walls: Wall[]
+        byRoom: Map~string, Map~CardinalDirection, Wall~~
+        bySubSpace: Map~string, Map~CardinalDirection, Wall~~
+        perimeter: PerimeterChain[]
     }
 
     ResolvedPlan --> ResolvedRoom
     ResolvedPlan --> WallGraph
-    ResolvedRoom --> ResolvedWall
-    WallGraph --> PlanWall
+    WallGraph --> Wall
 ```
+
+There is a single unified `Wall` type for all walls in the plan. The `source` field (`"parent"` | `"enclosure"` | `"extension"`) indicates where the wall originated. Rooms no longer carry their own `.walls` array — all walls live in the `WallGraph`.
 
 **Key conventions:**
 - `bounds` = room interior clear space (sheetrock-to-sheetrock)
 - Walls extend **outward** from bounds
 - `segments` = wall rectangles split around openings/gaps
 - `compositeOutline` = union polygon for rooms with extensions/enclosures
+- `wallGraph.byRoom` = lookup walls by room ID and direction
+- `wallGraph.bySubSpace` = lookup walls by enclosure/extension ID and direction
+- `wallGraph.perimeter` = computed building outline chains for rendering
 
 ---
 
@@ -318,7 +322,7 @@ The resolver converts validated configuration into absolute geometry. This is th
 flowchart TD
     Config["FloorPlanConfig"] --> SelectPlan["Select plan by ID\nor use first"]
     SelectPlan --> ResolveRooms["resolveRooms()\nIterate rooms, compute\npositions + walls"]
-    ResolveRooms --> WallGraph["buildWallGraph()\nPromote all parent walls to PlanWalls,\nmerge shared, gap-fill corners"]
+    ResolveRooms --> WallGraph["buildWallGraph()\nUnify all walls into WallGraph,\nmerge shared, gap-fill corners,\nadd sub-space walls, compute perimeter"]
     WallGraph --> Bounds["Compute plan bounds\n(union of all rooms + walls)"]
     Bounds --> Dims["generateDimensions()\nAuto-create dimension lines"]
     Dims --> Elec["resolveElectrical()\nTransform to absolute coords"]
@@ -428,36 +432,38 @@ flowchart TD
 
 **File:** `packages/core/src/resolver/shared-wall-resolver.ts`
 
-`buildWallGraph()` promotes **all** parent room walls (N/S/E/W) into a unified plan-level `WallGraph`. This is the single source of truth for parent room walls at render time. Enclosure and extension walls are **not** included — they remain on their respective `ResolvedEnclosure.walls` and `ResolvedExtension.walls` arrays.
+`buildWallGraph()` collects **all** walls in the plan — parent room walls (N/S/E/W), enclosure interior walls, and extension exterior walls — into a single unified `WallGraph`. This is the **sole source of truth** for all wall geometry at render time.
 
 ```mermaid
 flowchart TD
-    Rooms["All resolved rooms\n(each with 4 ResolvedWalls)"] --> Detect["Step 1: Detect shared boundaries\n(gap-aware, ≤ 1ft gap)"]
-    Detect --> Shared["Create shared PlanWalls\n• Thicker-wins thickness\n• Centered in gap\n• Merge openings from both rooms"]
+    Rooms["All resolved rooms\n(each with parent walls,\nenclosure walls, extension walls)"] --> Detect["Step 1: Detect shared boundaries\n(gap-aware, ≤ 1ft gap)"]
+    Detect --> Shared["Create shared Walls\n• Thicker-wins thickness\n• Centered in gap\n• Merge openings from both rooms"]
     Shared --> Consumed["Track consumed ranges\nalong each wall axis"]
-    Consumed --> Remainder["Step 2: Create remainder PlanWalls\n(uncovered portions of\npartially-shared walls)"]
-    Remainder --> NonShared["Step 3: Promote non-shared walls\n(walls with no consumed ranges\nbecome standalone PlanWalls)"]
+    Consumed --> Remainder["Step 2: Create remainder Walls\n(uncovered portions of\npartially-shared walls)"]
+    Remainder --> NonShared["Step 3: Promote non-shared walls\n(walls with no consumed ranges\nbecome standalone Walls)"]
     NonShared --> Extend["Step 4: Extend vertical walls\ninto corner gaps"]
-    Extend --> Graph["WallGraph\n{ walls: PlanWall[], byRoom }"]
+    Extend --> SubSpace["Step 5: Add enclosure + extension\nwalls (source: 'enclosure' | 'extension')"]
+    SubSpace --> Perimeter["Step 6: computePerimeter()\nBuild outer boundary chains"]
+    Perimeter --> Graph["WallGraph\n{ walls: Wall[],\n  byRoom, bySubSpace, perimeter }"]
 ```
 
-The result is that every parent room wall ends up as one or more `PlanWall` entries — shared, remainder, or non-shared.
+The result is that **every** wall in the plan — parent, shared, enclosure, and extension — ends up as a `Wall` entry in the graph. The `source` field distinguishes wall origin (`"parent"`, `"enclosure"`, `"extension"`), and `bySubSpace` enables lookups by enclosure/extension ID.
 
 **Thicker-wins rule:** When two rooms share a wall, the thicker specification wins: `thickness = max(wallA.thickness, wallB.thickness)`. The shared wall is centered in the gap between rooms.
 
 **Vertical wall gap-filling:** After all walls are promoted, vertical (E/W) walls are extended into corner gaps. If both rooms have walls on the same face, they meet at the gap centerline. If only one room has a wall, it extends to the full far edge.
 
-### Current Wall Data Split
+### Unified Wall Rendering
 
-Parent room walls and sub-space walls are stored and rendered separately:
+All walls live in a single `plan.wallGraph.walls` array as `Wall[]`. The renderer iterates this array once in `renderWallGraph()` to draw every wall in the plan — parent room walls, shared walls, enclosure walls, and extension walls alike. There is no separate rendering path for sub-space walls.
 
-| Structure | Contains | Rendered by |
-|-----------|----------|-------------|
-| `plan.wallGraph.walls` | All parent room walls (shared + non-shared + remainders) as `PlanWall[]` | `renderWallGraph()` |
-| `room.enclosures[].walls` | Interior walls on enclosure exposed edges as `ResolvedWall[]` | `renderEnclosureWalls()` |
-| `room.extensions[].walls` | 3 exterior walls per extension as `ResolvedWall[]` | `renderExtensionWalls()` |
+| Wall Source | Example | Lookup |
+|-------------|---------|--------|
+| `"parent"` | Room's N/S/E/W walls (shared or standalone) | `wallGraph.byRoom.get(roomId)` |
+| `"enclosure"` | Closet/pantry interior walls | `wallGraph.bySubSpace.get(enclosureId)` |
+| `"extension"` | Bay window / bump-out exterior walls | `wallGraph.bySubSpace.get(extensionId)` |
 
-This split means the renderer must iterate three separate structures to draw all walls, and dimension generation currently only sees the wall graph (not sub-space walls).
+The `wallGraph.perimeter` field contains `PerimeterChain[]` computed by `computePerimeter()`, which traces the outer boundary of the building for outline rendering.
 
 ### Enclosure Resolution
 
@@ -517,9 +523,13 @@ Wall-mounted elements (outlets, switches, plumbing fixtures) are resolved from w
 # Config: reference a wall by "roomId.direction"
 wall: "kitchen.south"
 position: ["3ft", "1ft 6in"]   # [along wall, height]
+
+# Enclosure and extension walls can also be referenced by "subSpaceId.direction"
+wall: "pantry.south"
+wall: "nook.north"
 ```
 
-The resolver finds the referenced wall, computes a point on its centerline at the specified offset from wall start, and returns absolute coordinates.
+The resolver uses the `WallGraph` to find the referenced wall — looking up parent room walls via `byRoom` and enclosure/extension walls via `bySubSpace`. It computes a point on the wall's centerline at the specified offset from wall start and returns absolute coordinates.
 
 Plumbing fixtures add depth-aware positioning: `offset: 0` places the fixture edge flush with the wall face (not the fixture center).
 
@@ -606,7 +616,7 @@ interface DrawingContext {
 
 | Renderer | File | Renders |
 |----------|------|---------|
-| Wall | `wall-renderer.ts` | Wall segments (filled rects), enclosure walls, extension walls |
+| Wall | `wall-renderer.ts` | All wall segments in a single pass via `renderWallGraph()` (parent, shared, enclosure, extension) |
 | Door | `door-renderer.ts` | Door leaf + swing arc, cased openings, sliding doors |
 | Window | `window-renderer.ts` | Window symbol (double line through wall) |
 | Dimension | `dimension-renderer.ts` | Extension lines, dimension line, arrows, text label |

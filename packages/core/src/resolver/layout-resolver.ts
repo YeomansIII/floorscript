@@ -13,6 +13,7 @@ import type {
   ResolvedExtension,
   ResolvedPlan,
   ResolvedRoom,
+  Wall,
 } from "../types/geometry.js";
 import { computeCompositeOutline } from "./composite-outline.js";
 import { generateDimensions } from "./dimension-resolver.js";
@@ -20,6 +21,7 @@ import { resolveElectrical } from "./electrical-resolver.js";
 import { resolveEnclosures } from "./enclosure-resolver.js";
 import { resolveExtensions } from "./extension-resolver.js";
 import { resolveOpenings } from "./opening-resolver.js";
+import { computePerimeter } from "./perimeter-resolver.js";
 import { resolvePlumbing } from "./plumbing-resolver.js";
 import { resolveWallSegments } from "./segment-resolver.js";
 import {
@@ -49,13 +51,14 @@ export function resolveLayout(
     );
   }
 
-  const rooms = resolveRooms(plan, config.units);
-  const wallGraph = buildWallGraph(rooms, plan.shared_walls, config.units);
-  const bounds = computeBounds(rooms);
+  const { rooms, parentWallsByRoom, enclosureWalls, extensionWalls } = resolveRooms(plan, config.units);
+  const wallGraph = buildWallGraph(rooms, parentWallsByRoom, plan.shared_walls, config.units, enclosureWalls, extensionWalls);
+  wallGraph.perimeter = computePerimeter(wallGraph);
+  const bounds = computeBounds(wallGraph.walls);
   const dimensions = generateDimensions(rooms, config.units);
 
   const electrical = plan.electrical
-    ? resolveElectrical(plan.electrical, rooms, config.units)
+    ? resolveElectrical(plan.electrical, rooms, config.units, wallGraph)
     : undefined;
 
   const plumbing = plan.plumbing
@@ -80,24 +83,53 @@ export function resolveLayout(
   return resolvedPlan;
 }
 
-function resolveRooms(plan: PlanConfig, units: UnitSystem): ResolvedRoom[] {
+interface RoomsResult {
+  rooms: ResolvedRoom[];
+  parentWallsByRoom: Map<string, Wall[]>;
+  enclosureWalls: Wall[];
+  extensionWalls: Wall[];
+}
+
+function resolveRooms(plan: PlanConfig, units: UnitSystem): RoomsResult {
   const resolvedRooms: ResolvedRoom[] = [];
   const roomMap = new Map<string, ResolvedRoom>();
+  const wallThicknessMap = new Map<string, Map<CardinalDirection, number>>();
+  const parentWallsByRoom = new Map<string, Wall[]>();
+  const allEnclosureWalls: Wall[] = [];
+  const allExtensionWalls: Wall[] = [];
 
   for (const roomConfig of plan.rooms) {
-    const resolved = resolveRoom(roomConfig, roomMap, units);
-    resolvedRooms.push(resolved);
-    roomMap.set(roomConfig.id, resolved);
+    const result = resolveRoom(roomConfig, roomMap, wallThicknessMap, units);
+    resolvedRooms.push(result.room);
+    roomMap.set(roomConfig.id, result.room);
+    parentWallsByRoom.set(roomConfig.id, result.parentWalls);
+    allEnclosureWalls.push(...result.enclosureWalls);
+    allExtensionWalls.push(...result.extensionWalls);
+
+    // Store wall thicknesses for adjacent room gap computation
+    const thickMap = new Map<CardinalDirection, number>();
+    for (const w of result.parentWalls) {
+      thickMap.set(w.direction, w.thickness);
+    }
+    wallThicknessMap.set(roomConfig.id, thickMap);
   }
 
-  return resolvedRooms;
+  return { rooms: resolvedRooms, parentWallsByRoom, enclosureWalls: allEnclosureWalls, extensionWalls: allExtensionWalls };
+}
+
+interface RoomResult {
+  room: ResolvedRoom;
+  parentWalls: Wall[];
+  enclosureWalls: Wall[];
+  extensionWalls: Wall[];
 }
 
 function resolveRoom(
   config: RoomConfig,
   roomMap: Map<string, ResolvedRoom>,
+  wallThicknessMap: Map<string, Map<CardinalDirection, number>>,
   units: UnitSystem,
-): ResolvedRoom {
+): RoomResult {
   const width = parseDimension(config.width, units);
   const height = parseDimension(config.height, units);
 
@@ -116,33 +148,34 @@ function resolveRoom(
     const offset = adj.offset ? parseDimension(adj.offset, units) : 0;
     const ref = refRoom.bounds;
 
+    const refThicknesses = wallThicknessMap.get(adj.room);
     switch (adj.wall) {
       case "east":
         x =
           ref.x +
           ref.width +
-          computeSharedGap(refRoom, config.walls, "east", units);
+          computeSharedGap(refThicknesses, config.walls, "east", units);
         y = alignPosition(ref.y, ref.height, height, adj.alignment, offset);
         break;
       case "west":
         x =
           ref.x -
           width -
-          computeSharedGap(refRoom, config.walls, "west", units);
+          computeSharedGap(refThicknesses, config.walls, "west", units);
         y = alignPosition(ref.y, ref.height, height, adj.alignment, offset);
         break;
       case "north":
         y =
           ref.y +
           ref.height +
-          computeSharedGap(refRoom, config.walls, "north", units);
+          computeSharedGap(refThicknesses, config.walls, "north", units);
         x = alignPosition(ref.x, ref.width, width, adj.alignment, offset);
         break;
       case "south":
         y =
           ref.y -
           height -
-          computeSharedGap(refRoom, config.walls, "south", units);
+          computeSharedGap(refThicknesses, config.walls, "south", units);
         x = alignPosition(ref.x, ref.width, width, adj.alignment, offset);
         break;
     }
@@ -159,6 +192,8 @@ function resolveRoom(
   // Resolve enclosures and extensions (before wall generation)
   let enclosures: ResolvedEnclosure[] | undefined;
   let extensions: ResolvedExtension[] | undefined;
+  let enclosureWalls: Wall[] = [];
+  let extensionWalls: Wall[] = [];
   let wallModifications:
     | Map<CardinalDirection, { shortenFromStart?: number; shortenFromEnd?: number }>
     | undefined;
@@ -174,6 +209,7 @@ function resolveRoom(
       config.id,
     );
     enclosures = encResult.enclosures;
+    enclosureWalls = encResult.walls;
     wallModifications = encResult.wallModifications;
   }
 
@@ -185,11 +221,12 @@ function resolveRoom(
       config.id,
     );
     extensions = extResult.extensions;
+    extensionWalls = extResult.walls;
     wallGaps = extResult.wallGaps;
   }
 
   // Resolve walls (with optional modifications from enclosures/extensions)
-  const walls = resolveWalls(
+  const parentWalls = resolveWalls(
     config.walls,
     config.id,
     bounds,
@@ -198,8 +235,8 @@ function resolveRoom(
     wallGaps,
   );
 
-  // Resolve openings on each wall, then compute wall segments
-  for (const wall of walls) {
+  // Resolve openings on each parent wall, then compute wall segments
+  for (const wall of parentWalls) {
     const wallDir = wall.direction;
     const wallConfig = config.walls?.[wallDir];
     if (wallConfig?.openings && wallConfig.openings.length > 0) {
@@ -238,14 +275,18 @@ function resolveRoom(
   }
 
   return {
-    id: config.id,
-    label: config.label,
-    bounds,
-    labelPosition,
-    walls,
-    compositeOutline,
-    enclosures,
-    extensions,
+    room: {
+      id: config.id,
+      label: config.label,
+      bounds,
+      labelPosition,
+      compositeOutline,
+      enclosures,
+      extensions,
+    },
+    parentWalls,
+    enclosureWalls,
+    extensionWalls,
   };
 }
 
@@ -325,7 +366,7 @@ function alignPosition(
  * fills this gap without intruding into either room's interior.
  */
 function computeSharedGap(
-  refRoom: ResolvedRoom,
+  refThicknesses: Map<CardinalDirection, number> | undefined,
   thisWallsConfig: WallsConfig | undefined,
   adjWall: CardinalDirection,
   units: UnitSystem,
@@ -336,8 +377,7 @@ function computeSharedGap(
     north: "south",
     south: "north",
   };
-  const refWall = refRoom.walls.find((w) => w.direction === adjWall);
-  const refThickness = refWall?.thickness ?? 0;
+  const refThickness = refThicknesses?.get(adjWall) ?? 0;
   const thisDir = oppositeDir[adjWall];
   const thisWallConfig = thisWallsConfig?.[thisDir];
   const thisWallType = thisWallConfig?.type ?? "interior";
@@ -346,11 +386,11 @@ function computeSharedGap(
 }
 
 /**
- * Compute plan bounds including exterior wall extents.
- * Room bounds are interior clear space; walls extend outside.
+ * Compute plan bounds from all walls in the unified graph.
+ * Includes all wall geometry (parent, enclosure, extension).
  */
-function computeBounds(rooms: ResolvedRoom[]): Rect {
-  if (rooms.length === 0) {
+function computeBounds(walls: Wall[]): Rect {
+  if (walls.length === 0) {
     return { x: 0, y: 0, width: 0, height: 0 };
   }
 
@@ -359,21 +399,12 @@ function computeBounds(rooms: ResolvedRoom[]): Rect {
   let maxX = -Infinity;
   let maxY = -Infinity;
 
-  for (const room of rooms) {
-    // Include wall extents outside room bounds
-    for (const wall of room.walls) {
-      const wr = wall.rect;
-      minX = Math.min(minX, wr.x);
-      minY = Math.min(minY, wr.y);
-      maxX = Math.max(maxX, wr.x + wr.width);
-      maxY = Math.max(maxY, wr.y + wr.height);
-    }
-    // Also include room interior bounds
-    const { x, y, width, height } = room.bounds;
-    minX = Math.min(minX, x);
-    minY = Math.min(minY, y);
-    maxX = Math.max(maxX, x + width);
-    maxY = Math.max(maxY, y + height);
+  for (const wall of walls) {
+    const wr = wall.rect;
+    minX = Math.min(minX, wr.x);
+    minY = Math.min(minY, wr.y);
+    maxX = Math.max(maxX, wr.x + wr.width);
+    maxY = Math.max(maxY, wr.y + wr.height);
   }
 
   return {

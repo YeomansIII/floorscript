@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { validatePlan } from "../src/resolver/validation.js";
 import type {
-  PlanWall,
+  ResolvedExtension,
   ResolvedOpening,
   ResolvedPlan,
   ResolvedRoom,
+  Wall,
   WallGraph,
 } from "../src/types/geometry.js";
 
@@ -19,6 +20,7 @@ function makePlan(overrides: Partial<ResolvedPlan> = {}): ResolvedPlan {
     rooms: [],
     dimensions: [],
     bounds: { x: 0, y: 0, width: 20, height: 20 },
+    wallGraph: { walls: [], byRoom: new Map(), bySubSpace: new Map(), perimeter: [] },
     ...overrides,
   };
 }
@@ -35,7 +37,6 @@ function makeRoom(
     label: id,
     bounds: { x, y, width: w, height: h },
     labelPosition: { x: x + w / 2, y: y + h / 2 },
-    walls: [],
   };
 }
 
@@ -61,21 +62,21 @@ function makeOpening(
   };
 }
 
-function makePlanWall(
+function makeWall(
   id: string,
-  roomA: string | null,
-  roomB: string | null,
-  dirA: "north" | "south" | "east" | "west" | null,
-  dirB: "north" | "south" | "east" | "west" | null,
+  roomId: string | null,
+  roomIdB: string | null,
+  direction: "north" | "south" | "east" | "west" | null,
+  directionInB: "north" | "south" | "east" | "west" | null,
   rect: { x: number; y: number; width: number; height: number },
   openings: ResolvedOpening[] = [],
-): PlanWall {
+): Wall {
   return {
     id,
-    roomA,
-    roomB,
-    directionInA: dirA,
-    directionInB: dirB,
+    roomId: roomId ?? "",
+    roomIdB,
+    direction: direction ?? "south",
+    directionInB,
     type: "interior",
     composition: {
       stud: null,
@@ -101,23 +102,26 @@ function makePlanWall(
     rect,
     openings,
     segments: [rect],
-    shared: roomA !== null && roomB !== null,
+    shared: roomId !== null && roomIdB !== null,
+    interiorStartOffset: 0,
+    subSpaceId: null,
+    source: "parent",
   };
 }
 
-function makeWallGraph(walls: PlanWall[]): WallGraph {
-  const byRoom = new Map<string, Map<string, PlanWall>>();
+function makeWallGraph(walls: Wall[]): WallGraph {
+  const byRoom = new Map<string, Map<string, Wall>>();
   for (const wall of walls) {
-    if (wall.roomA && wall.directionInA) {
-      if (!byRoom.has(wall.roomA)) byRoom.set(wall.roomA, new Map());
-      byRoom.get(wall.roomA)!.set(wall.directionInA, wall);
+    if (wall.roomId && wall.direction) {
+      if (!byRoom.has(wall.roomId)) byRoom.set(wall.roomId, new Map());
+      byRoom.get(wall.roomId)!.set(wall.direction, wall);
     }
-    if (wall.roomB && wall.directionInB) {
-      if (!byRoom.has(wall.roomB)) byRoom.set(wall.roomB, new Map());
-      byRoom.get(wall.roomB)!.set(wall.directionInB, wall);
+    if (wall.roomIdB && wall.directionInB) {
+      if (!byRoom.has(wall.roomIdB)) byRoom.set(wall.roomIdB, new Map());
+      byRoom.get(wall.roomIdB)!.set(wall.directionInB, wall);
     }
   }
-  return { walls, byRoom } as WallGraph;
+  return { walls, byRoom, bySubSpace: new Map(), perimeter: [] } as WallGraph;
 }
 
 describe("validatePlan", () => {
@@ -127,7 +131,7 @@ describe("validatePlan", () => {
       const opening1 = makeOpening(2, 0, 5, 0, 3); // x: 2-5
       const opening2 = makeOpening(4, 0, 7, 0, 3); // x: 4-7, overlaps at 4-5
 
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
@@ -152,7 +156,7 @@ describe("validatePlan", () => {
       const opening1 = makeOpening(2, 0, 5, 0, 3); // x: 2-5
       const opening2 = makeOpening(7, 0, 10, 0, 3); // x: 7-10, no overlap
 
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
@@ -181,7 +185,7 @@ describe("validatePlan", () => {
       // Wall is 10ft wide, opening is 12ft
       const opening = makeOpening(0, 0, 12, 0, 12);
 
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
@@ -208,7 +212,7 @@ describe("validatePlan", () => {
     it("does not report error when opening fits in wall", () => {
       const opening = makeOpening(2, 0, 5, 0, 3);
 
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
@@ -234,7 +238,7 @@ describe("validatePlan", () => {
 
   describe("sealed-room", () => {
     it("warns when a room has no openings", () => {
-      const wall = makePlanWall(
+      const wall = makeWall(
         "sealed.south",
         "sealed",
         null,
@@ -243,7 +247,7 @@ describe("validatePlan", () => {
         { x: 0, y: -0.375, width: 10, height: 0.375 },
         [], // no openings
       );
-      const wallN = makePlanWall(
+      const wallN = makeWall(
         "sealed.north",
         "sealed",
         null,
@@ -251,13 +255,13 @@ describe("validatePlan", () => {
         null,
         { x: 0, y: 10, width: 10, height: 0.375 },
       );
-      const wallE = makePlanWall("sealed.east", "sealed", null, "east", null, {
+      const wallE = makeWall("sealed.east", "sealed", null, "east", null, {
         x: 10,
         y: 0,
         width: 0.375,
         height: 10,
       });
-      const wallW = makePlanWall("sealed.west", "sealed", null, "west", null, {
+      const wallW = makeWall("sealed.west", "sealed", null, "west", null, {
         x: -0.375,
         y: 0,
         width: 0.375,
@@ -278,7 +282,7 @@ describe("validatePlan", () => {
 
     it("does not warn when room has an opening", () => {
       const opening = makeOpening(2, 0, 5, 0, 3);
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
@@ -287,19 +291,19 @@ describe("validatePlan", () => {
         { x: 0, y: -0.375, width: 10, height: 0.375 },
         [opening],
       );
-      const wallN = makePlanWall("room1.north", "room1", null, "north", null, {
+      const wallN = makeWall("room1.north", "room1", null, "north", null, {
         x: 0,
         y: 10,
         width: 10,
         height: 0.375,
       });
-      const wallE = makePlanWall("room1.east", "room1", null, "east", null, {
+      const wallE = makeWall("room1.east", "room1", null, "east", null, {
         x: 10,
         y: 0,
         width: 0.375,
         height: 10,
       });
-      const wallW = makePlanWall("room1.west", "room1", null, "west", null, {
+      const wallW = makeWall("room1.west", "room1", null, "west", null, {
         x: -0.375,
         y: 0,
         width: 0.375,
@@ -371,7 +375,7 @@ describe("validatePlan", () => {
   describe("run-through-wall", () => {
     it("warns when a supply run crosses a wall without an opening", () => {
       // Vertical wall at x=10 (between rooms), no openings
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.east|room2.west",
         "room1",
         "room2",
@@ -415,7 +419,7 @@ describe("validatePlan", () => {
       // Override wallDirection to east for proper gap checking
       opening.wallDirection = "east";
 
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.east|room2.west",
         "room1",
         "room2",
@@ -453,7 +457,7 @@ describe("validatePlan", () => {
     });
 
     it("does not warn when run does not cross any wall", () => {
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.east|room2.west",
         "room1",
         "room2",
@@ -493,7 +497,7 @@ describe("validatePlan", () => {
   describe("combined validation", () => {
     it("returns empty results for a valid plan with no plumbing", () => {
       const opening = makeOpening(2, 0, 5, 0, 3);
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
@@ -502,19 +506,19 @@ describe("validatePlan", () => {
         { x: 0, y: -0.375, width: 10, height: 0.375 },
         [opening],
       );
-      const wallN = makePlanWall("room1.north", "room1", null, "north", null, {
+      const wallN = makeWall("room1.north", "room1", null, "north", null, {
         x: 0,
         y: 10,
         width: 10,
         height: 0.375,
       });
-      const wallE = makePlanWall("room1.east", "room1", null, "east", null, {
+      const wallE = makeWall("room1.east", "room1", null, "east", null, {
         x: 10,
         y: 0,
         width: 0.375,
         height: 10,
       });
-      const wallW = makePlanWall("room1.west", "room1", null, "west", null, {
+      const wallW = makeWall("room1.west", "room1", null, "west", null, {
         x: -0.375,
         y: 0,
         width: 0.375,
@@ -534,28 +538,28 @@ describe("validatePlan", () => {
 
     it("reports multiple issues in one pass", () => {
       // Sealed room + fixture out of bounds
-      const wall = makePlanWall(
+      const wall = makeWall(
         "room1.south",
         "room1",
         null,
         "south",
         null,
         { x: 0, y: -0.375, width: 10, height: 0.375 },
-        [], // no openings → sealed
+        [], // no openings -> sealed
       );
-      const wallN = makePlanWall("room1.north", "room1", null, "north", null, {
+      const wallN = makeWall("room1.north", "room1", null, "north", null, {
         x: 0,
         y: 10,
         width: 10,
         height: 0.375,
       });
-      const wallE = makePlanWall("room1.east", "room1", null, "east", null, {
+      const wallE = makeWall("room1.east", "room1", null, "east", null, {
         x: 10,
         y: 0,
         width: 0.375,
         height: 10,
       });
-      const wallW = makePlanWall("room1.west", "room1", null, "west", null, {
+      const wallW = makeWall("room1.west", "room1", null, "west", null, {
         x: -0.375,
         y: 0,
         width: 0.375,
@@ -584,6 +588,172 @@ describe("validatePlan", () => {
       const codes = result.warnings.map((w) => w.code);
       expect(codes).toContain("sealed-room");
       expect(codes).toContain("fixture-out-of-bounds");
+    });
+  });
+
+  describe("sealed-extension", () => {
+    it("warns when an extension has no openings", () => {
+      const wall = makeWall(
+        "room1.south",
+        "room1",
+        null,
+        "south",
+        null,
+        { x: 0, y: -0.375, width: 10, height: 0.375 },
+        [makeOpening(2, 0, 5, 0, 3)],
+      );
+      const wallN = makeWall("room1.north", "room1", null, "north", null, {
+        x: 0,
+        y: 10,
+        width: 10,
+        height: 0.375,
+      });
+      const wallE = makeWall("room1.east", "room1", null, "east", null, {
+        x: 10,
+        y: 0,
+        width: 0.375,
+        height: 10,
+      });
+      const wallW = makeWall("room1.west", "room1", null, "west", null, {
+        x: -0.375,
+        y: 0,
+        width: 0.375,
+        height: 10,
+      });
+
+      // Extension wall with no openings
+      const extNorth: Wall = {
+        ...makeWall("nook.north", "room1", null, "north", null, {
+          x: 3,
+          y: 12,
+          width: 4,
+          height: 0.375,
+        }),
+        source: "extension",
+        subSpaceId: "nook",
+      };
+
+      const graph = makeWallGraph([wall, wallN, wallE, wallW, extNorth]);
+      // Add extension wall to bySubSpace
+      graph.bySubSpace.set("nook", new Map([["north", extNorth]]) as Map<string, Wall>);
+
+      const room = makeRoom("room1", 0, 0, 10, 10);
+      room.extensions = [
+        {
+          id: "nook",
+          label: "Nook",
+          parentRoomId: "room1",
+          bounds: { x: 3, y: 10, width: 4, height: 2 },
+          parentWall: "north",
+        },
+      ];
+
+      const plan = makePlan({
+        rooms: [room],
+        wallGraph: graph,
+      });
+
+      const result = validatePlan(plan);
+      const sealed = result.warnings.filter(
+        (w) => w.code === "sealed-extension",
+      );
+      expect(sealed).toHaveLength(1);
+      expect(sealed[0].elementId).toBe("nook");
+    });
+  });
+
+  describe("overlapping openings on enclosure wall", () => {
+    it("reports error when enclosure wall has overlapping openings", () => {
+      // Vertical wall (east): overlap is checked on y-axis
+      const opening1 = makeOpening(0, 1, 0, 3, 2);
+      opening1.wallDirection = "east";
+      const opening2 = makeOpening(0, 2, 0, 4, 2); // overlaps at y=2-3
+      opening2.wallDirection = "east";
+
+      const encWall: Wall = {
+        ...makeWall(
+          "closet.east",
+          "room1",
+          null,
+          "east",
+          null,
+          { x: 3, y: 4, width: 0.375, height: 6 },
+          [opening1, opening2],
+        ),
+        source: "enclosure",
+        subSpaceId: "closet",
+      };
+
+      const parentWall = makeWall(
+        "room1.south",
+        "room1",
+        null,
+        "south",
+        null,
+        { x: 0, y: -0.375, width: 10, height: 0.375 },
+        [makeOpening(2, 0, 5, 0, 3)],
+      );
+
+      const graph = makeWallGraph([parentWall, encWall]);
+      graph.bySubSpace.set("closet", new Map([["east", encWall]]) as Map<string, Wall>);
+
+      const room = makeRoom("room1", 0, 0, 10, 10);
+      const plan = makePlan({
+        rooms: [room],
+        wallGraph: graph,
+      });
+
+      const result = validatePlan(plan);
+      const overlaps = result.errors.filter(
+        (e) => e.code === "overlapping-openings",
+      );
+      expect(overlaps).toHaveLength(1);
+      expect(overlaps[0].wallId).toBe("closet.east");
+    });
+  });
+
+  describe("run through enclosure wall", () => {
+    it("warns when supply run crosses enclosure wall without opening", () => {
+      const encWall: Wall = {
+        ...makeWall(
+          "closet.east",
+          "room1",
+          null,
+          "east",
+          null,
+          { x: 3, y: 4, width: 0.375, height: 6 },
+          [], // no openings
+        ),
+        source: "enclosure",
+        subSpaceId: "closet",
+      };
+
+      const graph = makeWallGraph([encWall]);
+
+      const room = makeRoom("room1", 0, 0, 10, 10);
+      const plan = makePlan({
+        rooms: [room],
+        wallGraph: graph,
+        plumbing: {
+          fixtures: [],
+          supplyRuns: [
+            {
+              supplyType: "cold",
+              path: [
+                { x: 1, y: 7 },
+                { x: 5, y: 7 }, // crosses enclosure wall at x=3
+              ],
+            },
+          ],
+          drainRuns: [],
+          valves: [],
+        },
+      });
+
+      const result = validatePlan(plan);
+      const rtw = result.warnings.filter((w) => w.code === "run-through-wall");
+      expect(rtw).toHaveLength(1);
+      expect(rtw[0].wallId).toBe("closet.east");
     });
   });
 });

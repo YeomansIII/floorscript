@@ -7,7 +7,7 @@ import type {
 import type {
   Rect,
   ResolvedExtension,
-  ResolvedWall,
+  Wall,
 } from "../types/geometry.js";
 import { resolveFromOffset } from "./opening-resolver.js";
 import { resolveOpenings } from "./opening-resolver.js";
@@ -20,6 +20,7 @@ const EXT_LINE_WEIGHT = 0.7;
 
 export interface ExtensionResult {
   extensions: ResolvedExtension[];
+  walls: Wall[];
   wallGaps: Map<CardinalDirection, WallGap[]>;
 }
 
@@ -50,11 +51,13 @@ export function resolveExtensions(
   }
 
   const extensions: ResolvedExtension[] = [];
+  const allWalls: Wall[] = [];
   const wallGaps = new Map<CardinalDirection, WallGap[]>();
 
   for (const config of configs) {
     const ext = resolveExtension(config, parentBounds, units, parentRoomId);
     extensions.push(ext.extension);
+    allWalls.push(...ext.walls);
 
     // Accumulate wall gaps
     const existing = wallGaps.get(config.wall) ?? [];
@@ -62,11 +65,12 @@ export function resolveExtensions(
     wallGaps.set(config.wall, existing);
   }
 
-  return { extensions, wallGaps };
+  return { extensions, walls: allWalls, wallGaps };
 }
 
 interface SingleExtensionResult {
   extension: ResolvedExtension;
+  walls: Wall[];
   gap: WallGap;
 }
 
@@ -129,7 +133,7 @@ function resolveExtension(
   );
 
   // Generate 3 exterior walls (open side faces parent)
-  const walls = generateExtensionWalls(
+  const extWalls = generateExtensionWalls(
     config.wall,
     bounds,
     config,
@@ -144,8 +148,8 @@ function resolveExtension(
       parentRoomId,
       bounds,
       parentWall: config.wall,
-      walls,
     },
+    walls: extWalls,
     gap,
   };
 }
@@ -234,7 +238,7 @@ function generateExtensionWalls(
   config: ExtensionConfig,
   units: UnitSystem,
   parentRoomId: string,
-): ResolvedWall[] {
+): Wall[] {
   // The open side is the one facing the parent room
   const openSide = getOppositDirection(parentWall);
   const allDirs: CardinalDirection[] = ["north", "south", "east", "west"];
@@ -243,7 +247,7 @@ function generateExtensionWalls(
   // The far wall is the same direction as the parent wall
   const farWallDir = parentWall;
 
-  const walls: ResolvedWall[] = [];
+  const walls: Wall[] = [];
   for (const dir of closedDirs) {
     // For the far wall, extend bounds so it goes through corners
     const isFarWall = dir === farWallDir;
@@ -253,6 +257,8 @@ function generateExtensionWalls(
       `${parentRoomId}.${config.id}.${dir}`,
       dir,
       wallBounds,
+      parentRoomId,
+      config.id,
     );
 
     // Far wall needs interiorStartOffset so openings stay positioned
@@ -329,7 +335,9 @@ function createExteriorWall(
   id: string,
   direction: CardinalDirection,
   bounds: Rect,
-): ResolvedWall {
+  parentRoomId: string,
+  extensionId: string,
+): Wall {
   const { x, y, width, height } = bounds;
   const t = EXT_WALL_THICKNESS;
 
@@ -338,7 +346,6 @@ function createExteriorWall(
   let outerEnd: { x: number; y: number };
   let innerStart: { x: number; y: number };
   let innerEnd: { x: number; y: number };
-  let interiorStartOffset: number;
 
   switch (direction) {
     case "south":
@@ -347,7 +354,6 @@ function createExteriorWall(
       outerEnd = { x: x + width, y: y - t };
       innerStart = { x, y };
       innerEnd = { x: x + width, y };
-      interiorStartOffset = 0;
       break;
     case "north":
       rect = { x, y: y + height, width, height: t };
@@ -355,7 +361,6 @@ function createExteriorWall(
       outerEnd = { x: x + width, y: y + height + t };
       innerStart = { x, y: y + height };
       innerEnd = { x: x + width, y: y + height };
-      interiorStartOffset = 0;
       break;
     case "east":
       rect = { x: x + width, y, width: t, height };
@@ -363,7 +368,6 @@ function createExteriorWall(
       outerEnd = { x: x + width + t, y: y + height };
       innerStart = { x: x + width, y };
       innerEnd = { x: x + width, y: y + height };
-      interiorStartOffset = 0;
       break;
     case "west":
       rect = { x: x - t, y, width: t, height };
@@ -371,9 +375,11 @@ function createExteriorWall(
       outerEnd = { x: x - t, y: y + height };
       innerStart = { x, y };
       innerEnd = { x, y: y + height };
-      interiorStartOffset = 0;
       break;
   }
+
+  const outerEdge = { start: outerStart, end: outerEnd };
+  const innerEdge = { start: innerStart, end: innerEnd };
 
   return {
     id,
@@ -381,11 +387,34 @@ function createExteriorWall(
     type: "exterior",
     thickness: t,
     lineWeight: EXT_LINE_WEIGHT,
-    outerEdge: { start: outerStart, end: outerEnd },
-    innerEdge: { start: innerStart, end: innerEnd },
+    outerEdge,
+    innerEdge,
+    centerline: {
+      start: {
+        x: (outerStart.x + innerStart.x) / 2,
+        y: (outerStart.y + innerStart.y) / 2,
+      },
+      end: {
+        x: (outerEnd.x + innerEnd.x) / 2,
+        y: (outerEnd.y + innerEnd.y) / 2,
+      },
+    },
     rect,
     openings: [],
     segments: [rect],
-    interiorStartOffset,
+    interiorStartOffset: 0,
+    composition: {
+      stud: null,
+      studWidthFt: 0,
+      finishA: 0,
+      finishB: 0,
+      totalThickness: t,
+    },
+    roomId: parentRoomId,
+    roomIdB: null,
+    directionInB: null,
+    subSpaceId: extensionId,
+    source: "extension",
+    shared: false,
   };
 }

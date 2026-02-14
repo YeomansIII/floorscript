@@ -9,7 +9,7 @@ import type {
 import type {
   Rect,
   ResolvedEnclosure,
-  ResolvedWall,
+  Wall,
 } from "../types/geometry.js";
 import { resolveFromOffset, resolveOpenings } from "./opening-resolver.js";
 import { resolveWallSegments } from "./segment-resolver.js";
@@ -25,6 +25,7 @@ export interface WallModification {
 
 export interface EnclosureResult {
   enclosures: ResolvedEnclosure[];
+  walls: Wall[];
   wallModifications: Map<CardinalDirection, WallModification>;
 }
 
@@ -55,6 +56,7 @@ export function resolveEnclosures(
   }
 
   const enclosures: ResolvedEnclosure[] = [];
+  const allWalls: Wall[] = [];
   const wallModifications = new Map<CardinalDirection, WallModification>();
 
   for (const config of configs) {
@@ -66,6 +68,7 @@ export function resolveEnclosures(
         parentRoomId,
       );
       enclosures.push(enc.enclosure);
+      allWalls.push(...enc.walls);
       mergeWallModifications(wallModifications, enc.modifications);
     } else if (config.wall != null) {
       const enc = resolveWallEnclosure(
@@ -75,6 +78,7 @@ export function resolveEnclosures(
         parentRoomId,
       );
       enclosures.push(enc.enclosure);
+      allWalls.push(...enc.walls);
       mergeWallModifications(wallModifications, enc.modifications);
     }
   }
@@ -91,11 +95,12 @@ export function resolveEnclosures(
     }
   }
 
-  return { enclosures, wallModifications };
+  return { enclosures, walls: allWalls, wallModifications };
 }
 
 interface CornerEnclosureResult {
   enclosure: ResolvedEnclosure;
+  walls: Wall[];
   modifications: Map<CardinalDirection, WallModification>;
 }
 
@@ -151,8 +156,8 @@ function resolveCornerEnclosure(
       parentRoomId,
       bounds,
       facing,
-      walls,
     },
+    walls,
     modifications,
   };
 }
@@ -232,7 +237,7 @@ function resolveWallEnclosure(
     wallLength,
   );
 
-  const walls = generateEnclosureWalls(
+  const encWalls = generateEnclosureWalls(
     exposedEdges,
     bounds,
     config,
@@ -256,8 +261,8 @@ function resolveWallEnclosure(
       parentRoomId,
       bounds,
       facing,
-      walls,
     },
+    walls: encWalls,
     modifications,
   };
 }
@@ -549,14 +554,16 @@ function generateEnclosureWalls(
   config: EnclosureConfig,
   units: UnitSystem,
   parentRoomId: string,
-): ResolvedWall[] {
-  const walls: ResolvedWall[] = [];
+): Wall[] {
+  const walls: Wall[] = [];
 
   for (const dir of exposedEdges) {
     const wall = createInteriorWall(
       `${parentRoomId}.${config.id}.${dir}`,
       dir,
       bounds,
+      parentRoomId,
+      config.id,
     );
 
     // Resolve openings on this wall if configured
@@ -583,14 +590,16 @@ function generateEnclosureWalls(
 }
 
 /**
- * Create a ResolvedWall for an interior wall on one edge of an enclosure.
+ * Create a Wall for an interior wall on one edge of an enclosure.
  * The wall is placed on the boundary of the enclosure bounds, extending inward.
  */
 function createInteriorWall(
   id: string,
   direction: CardinalDirection,
   bounds: Rect,
-): ResolvedWall {
+  parentRoomId: string,
+  enclosureId: string,
+): Wall {
   const { x, y, width, height } = bounds;
   const t = INT_WALL_THICKNESS;
 
@@ -599,46 +608,40 @@ function createInteriorWall(
   let outerEnd: { x: number; y: number };
   let innerStart: { x: number; y: number };
   let innerEnd: { x: number; y: number };
-  let interiorStartOffset: number;
 
   switch (direction) {
     case "south":
-      // Exposed south edge: wall sits at the south boundary of enclosure, extending inward (north)
       rect = { x, y, width, height: t };
       outerStart = { x, y };
       outerEnd = { x: x + width, y };
       innerStart = { x, y: y + t };
       innerEnd = { x: x + width, y: y + t };
-      interiorStartOffset = 0;
       break;
     case "north":
-      // Exposed north edge: wall sits at the north boundary, extending inward (south)
       rect = { x, y: y + height - t, width, height: t };
       outerStart = { x, y: y + height };
       outerEnd = { x: x + width, y: y + height };
       innerStart = { x, y: y + height - t };
       innerEnd = { x: x + width, y: y + height - t };
-      interiorStartOffset = 0;
       break;
     case "east":
-      // Exposed east edge: wall at east boundary, extending inward (west)
       rect = { x: x + width - t, y, width: t, height };
       outerStart = { x: x + width, y };
       outerEnd = { x: x + width, y: y + height };
       innerStart = { x: x + width - t, y };
       innerEnd = { x: x + width - t, y: y + height };
-      interiorStartOffset = 0;
       break;
     case "west":
-      // Exposed west edge: wall at west boundary, extending inward (east)
       rect = { x, y, width: t, height };
       outerStart = { x, y };
       outerEnd = { x, y: y + height };
       innerStart = { x: x + t, y };
       innerEnd = { x: x + t, y: y + height };
-      interiorStartOffset = 0;
       break;
   }
+
+  const outerEdge = { start: outerStart, end: outerEnd };
+  const innerEdge = { start: innerStart, end: innerEnd };
 
   return {
     id,
@@ -646,12 +649,35 @@ function createInteriorWall(
     type: "interior",
     thickness: t,
     lineWeight: INT_LINE_WEIGHT,
-    outerEdge: { start: outerStart, end: outerEnd },
-    innerEdge: { start: innerStart, end: innerEnd },
+    outerEdge,
+    innerEdge,
+    centerline: {
+      start: {
+        x: (outerStart.x + innerStart.x) / 2,
+        y: (outerStart.y + innerStart.y) / 2,
+      },
+      end: {
+        x: (outerEnd.x + innerEnd.x) / 2,
+        y: (outerEnd.y + innerEnd.y) / 2,
+      },
+    },
     rect,
     openings: [],
     segments: [rect],
-    interiorStartOffset,
+    interiorStartOffset: 0,
+    composition: {
+      stud: null,
+      studWidthFt: 0,
+      finishA: 0,
+      finishB: 0,
+      totalThickness: t,
+    },
+    roomId: parentRoomId,
+    roomIdB: null,
+    directionInB: null,
+    subSpaceId: enclosureId,
+    source: "enclosure",
+    shared: false,
   };
 }
 

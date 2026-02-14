@@ -7,16 +7,16 @@ import {
 } from "../src/resolver/shared-wall-resolver.js";
 import { resolveWalls } from "../src/resolver/wall-resolver.js";
 import type { WallsConfig } from "../src/types/config.js";
-import type { ResolvedRoom } from "../src/types/geometry.js";
+import type { ResolvedRoom, Wall } from "../src/types/geometry.js";
 
-function makeRoom(
+function makeRoomAndWalls(
   id: string,
   x: number,
   y: number,
   width: number,
   height: number,
   wallsConfig?: WallsConfig,
-): ResolvedRoom {
+): { room: ResolvedRoom; walls: Wall[] } {
   const bounds = { x, y, width, height };
   const walls = resolveWalls(wallsConfig, id, bounds, "imperial");
   if (wallsConfig) {
@@ -28,13 +28,26 @@ function makeRoom(
       }
     }
   }
-  return {
+  const room: ResolvedRoom = {
     id,
     label: id,
     bounds,
     labelPosition: { x: x + width / 2, y: y + height / 2 },
-    walls,
   };
+  return { room, walls };
+}
+
+function buildRoomsAndWallMap(
+  ...args: Parameters<typeof makeRoomAndWalls>[]
+): { rooms: ResolvedRoom[]; parentWallsByRoom: Map<string, Wall[]> } {
+  const rooms: ResolvedRoom[] = [];
+  const parentWallsByRoom = new Map<string, Wall[]>();
+  for (const a of args) {
+    const { room, walls } = makeRoomAndWalls(...a);
+    rooms.push(room);
+    parentWallsByRoom.set(room.id, walls);
+  }
+  return { rooms, parentWallsByRoom };
 }
 
 describe("resolveWallComposition", () => {
@@ -75,39 +88,41 @@ describe("resolveWallComposition", () => {
 
 describe("buildWallGraph", () => {
   it("detects shared boundary between adjacent rooms (east/west)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12),
-      makeRoom("kitchen", 15, 0, 12, 10),
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12],
+      ["kitchen", 15, 0, 12, 10],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     expect(graph.walls.length).toBeGreaterThan(0);
 
     // Should have a shared wall between living.east and kitchen.west
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
-    expect(shared!.roomA).toBe("living");
-    expect(shared!.roomB).toBe("kitchen");
-    expect(shared!.directionInA).toBe("east");
+    expect(shared!.roomId).toBe("living");
+    expect(shared!.roomIdB).toBe("kitchen");
+    expect(shared!.direction).toBe("east");
     expect(shared!.directionInB).toBe("west");
   });
 
   it("detects shared boundary between adjacent rooms (north/south)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12),
-      makeRoom("bathroom", 0, -6, 8, 6),
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12],
+      ["bathroom", 0, -6, 8, 6],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
-    expect(shared!.directionInA).toBe("south");
+    expect(shared!.direction).toBe("south");
     expect(shared!.directionInB).toBe("north");
   });
 
   it("creates non-shared walls for exterior edges", () => {
-    const rooms = [makeRoom("room1", 0, 0, 10, 8)];
-    const graph = buildWallGraph(rooms);
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["room1", 0, 0, 10, 8],
+    );
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
 
     // All 4 walls should be non-shared
     expect(graph.walls).toHaveLength(4);
@@ -115,16 +130,12 @@ describe("buildWallGraph", () => {
   });
 
   it("applies thicker-wins rule for shared walls", () => {
-    const rooms = [
-      makeRoom("a", 0, 0, 10, 8, {
-        east: { type: "exterior" }, // thicker (2x6 default)
-      }),
-      makeRoom("b", 10, 0, 10, 8, {
-        west: { type: "interior" }, // thinner (2x4 default)
-      }),
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["a", 0, 0, 10, 8, { east: { type: "exterior" } }],
+      ["b", 10, 0, 10, 8, { west: { type: "interior" } }],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     // Thicker wins: exterior 2x6 = 6.5" = 0.5417ft
@@ -132,29 +143,43 @@ describe("buildWallGraph", () => {
   });
 
   it("merges openings from both rooms on shared wall", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12, {
-        east: {
-          type: "interior",
-          openings: [
-            {
-              type: "door",
-              position: "2ft",
-              width: "3ft",
-              swing: "inward-left",
-            },
-          ],
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      [
+        "living",
+        0,
+        0,
+        15,
+        12,
+        {
+          east: {
+            type: "interior",
+            openings: [
+              {
+                type: "door",
+                position: "2ft",
+                width: "3ft",
+                swing: "inward-left",
+              },
+            ],
+          },
         },
-      }),
-      makeRoom("kitchen", 15, 0, 12, 10, {
-        west: {
-          type: "interior",
-          openings: [{ type: "window", position: "7ft", width: "4ft" }],
+      ],
+      [
+        "kitchen",
+        15,
+        0,
+        12,
+        10,
+        {
+          west: {
+            type: "interior",
+            openings: [{ type: "window", position: "7ft", width: "4ft" }],
+          },
         },
-      }),
-    ];
+      ],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     expect(shared!.openings).toHaveLength(2);
@@ -163,30 +188,30 @@ describe("buildWallGraph", () => {
   });
 
   it("provides O(1) lookup via byRoom index", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12),
-      makeRoom("kitchen", 15, 0, 12, 10),
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12],
+      ["kitchen", 15, 0, 12, 10],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
 
     // Can look up living's east wall
     const livingEast = graph.byRoom.get("living")?.get("east");
     expect(livingEast).toBeDefined();
     expect(livingEast!.shared).toBe(true);
 
-    // Same PlanWall from kitchen's west
+    // Same Wall from kitchen's west
     const kitchenWest = graph.byRoom.get("kitchen")?.get("west");
     expect(kitchenWest).toBe(livingEast);
   });
 
   it("handles partial overlap (rooms of different heights)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12),
-      makeRoom("kitchen", 15, 2, 12, 8), // Offset vertically
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12],
+      ["kitchen", 15, 2, 12, 8],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     // Shared wall height should be the overlap: min(12, 2+8) - max(0, 2) = 10 - 2 = 8
@@ -194,24 +219,31 @@ describe("buildWallGraph", () => {
   });
 
   it("realigns opening coordinates to shared wall position (vertical)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12, {
-        east: {
-          type: "interior",
-          openings: [
-            {
-              type: "door",
-              position: "3ft",
-              width: "3ft",
-              swing: "inward-left" as const,
-            },
-          ],
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      [
+        "living",
+        0,
+        0,
+        15,
+        12,
+        {
+          east: {
+            type: "interior",
+            openings: [
+              {
+                type: "door",
+                position: "3ft",
+                width: "3ft",
+                swing: "inward-left" as const,
+              },
+            ],
+          },
         },
-      }),
-      makeRoom("kitchen", 15, 0, 12, 10),
-    ];
+      ],
+      ["kitchen", 15, 0, 12, 10],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     expect(shared!.openings).toHaveLength(1);
@@ -230,24 +262,31 @@ describe("buildWallGraph", () => {
   });
 
   it("realigns opening coordinates to shared wall position (horizontal)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12),
-      makeRoom("bathroom", 0, -6, 8, 6, {
-        north: {
-          type: "interior",
-          openings: [
-            {
-              type: "door",
-              position: "2ft",
-              width: "2.5ft",
-              swing: "inward-left" as const,
-            },
-          ],
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12],
+      [
+        "bathroom",
+        0,
+        -6,
+        8,
+        6,
+        {
+          north: {
+            type: "interior",
+            openings: [
+              {
+                type: "door",
+                position: "2ft",
+                width: "2.5ft",
+                swing: "inward-left" as const,
+              },
+            ],
+          },
         },
-      }),
-    ];
+      ],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     expect(shared!.openings).toHaveLength(1);
@@ -259,34 +298,28 @@ describe("buildWallGraph", () => {
   });
 
   it("forces shared wall type to interior even when sides declare exterior", () => {
-    const rooms = [
-      makeRoom("a", 0, 0, 10, 8, {
-        east: { type: "exterior" },
-      }),
-      makeRoom("b", 10, 0, 10, 8, {
-        west: { type: "exterior" },
-      }),
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["a", 0, 0, 10, 8, { east: { type: "exterior" } }],
+      ["b", 10, 0, 10, 8, { west: { type: "exterior" } }],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     expect(shared!.type).toBe("interior");
   });
 
   it("creates remainder walls when rooms have different widths (north/south shared)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12, {
-        south: { type: "exterior" },
-      }),
-      makeRoom("bathroom", 0, -6, 8, 6),
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12, { south: { type: "exterior" } }],
+      ["bathroom", 0, -6, 8, 6],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
 
     // Should have a shared wall for the overlap region (x=0 to x=8)
     const shared = graph.walls.find(
-      (w) => w.shared && w.roomA === "living" && w.roomB === "bathroom",
+      (w) => w.shared && w.roomId === "living" && w.roomIdB === "bathroom",
     );
     expect(shared).toBeDefined();
     expect(shared!.rect.width).toBeCloseTo(8, 1);
@@ -304,12 +337,12 @@ describe("buildWallGraph", () => {
   });
 
   it("creates remainder walls when rooms have different heights (east/west shared)", () => {
-    const rooms = [
-      makeRoom("living", 0, 0, 15, 12),
-      makeRoom("kitchen", 15, 2, 12, 8), // Offset: y=2, height=8 → overlap y=2 to y=10
-    ];
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["living", 0, 0, 15, 12],
+      ["kitchen", 15, 2, 12, 8],
+    );
 
-    const graph = buildWallGraph(rooms);
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
 
     // Remainders for living.east (y=0 to y=2 and y=10 to y=12)
     const remainders = graph.walls.filter((w) =>
@@ -318,17 +351,63 @@ describe("buildWallGraph", () => {
     expect(remainders).toHaveLength(2);
   });
 
-  it("preserves load-bearing type on shared walls", () => {
-    const rooms = [
-      makeRoom("a", 0, 0, 10, 8, {
-        east: { type: "load-bearing" },
-      }),
-      makeRoom("b", 10, 0, 10, 8, {
-        west: { type: "interior" },
-      }),
+  it("shared_walls config override works with enclosure/extension walls present (FR-014)", () => {
+    // Regression test: shared_walls override should not affect sub-space walls
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["bedroom", 0, 0, 14, 12, { east: { type: "interior" } }],
+      ["hallway", 14, 0, 4, 12, { west: { type: "interior" } }],
+    );
+
+    // Add enclosure walls
+    const encWalls: Wall[] = [
+      {
+        ...makeRoomAndWalls("closet-enc", 0, 6, 4, 6).walls.find(
+          (w) => w.direction === "south",
+        )!,
+        id: "closet.south",
+        roomId: "bedroom",
+        subSpaceId: "closet",
+        source: "enclosure",
+        shared: false,
+      },
     ];
 
-    const graph = buildWallGraph(rooms);
+    // Build with shared_walls override (thickness override)
+    const graph = buildWallGraph(
+      rooms,
+      parentWallsByRoom,
+      [
+        {
+          rooms: ["bedroom", "hallway"],
+          wall: "east",
+          thickness: "8in",
+        },
+      ],
+      "imperial",
+      encWalls,
+    );
+
+    // Shared wall should have overridden thickness (8in = 0.6667ft)
+    const shared = graph.walls.find((w) => w.shared);
+    expect(shared).toBeDefined();
+    expect(shared!.thickness).toBeCloseTo(8 / 12, 3);
+
+    // Enclosure wall should NOT be affected by shared_walls override
+    const closetWall = graph.walls.find((w) => w.subSpaceId === "closet");
+    expect(closetWall).toBeDefined();
+    expect(closetWall!.source).toBe("enclosure");
+    expect(closetWall!.shared).toBe(false);
+    // Enclosure wall thickness should be default interior (not 8in)
+    expect(closetWall!.thickness).not.toBeCloseTo(8 / 12, 3);
+  });
+
+  it("preserves load-bearing type on shared walls", () => {
+    const { rooms, parentWallsByRoom } = buildRoomsAndWallMap(
+      ["a", 0, 0, 10, 8, { east: { type: "load-bearing" } }],
+      ["b", 10, 0, 10, 8, { west: { type: "interior" } }],
+    );
+
+    const graph = buildWallGraph(rooms, parentWallsByRoom);
     const shared = graph.walls.find((w) => w.shared);
     expect(shared).toBeDefined();
     expect(shared!.type).toBe("load-bearing");

@@ -4,7 +4,7 @@ import type {
   WallConfig,
   WallsConfig,
 } from "../types/config.js";
-import type { Rect, ResolvedWall } from "../types/geometry.js";
+import type { LineSegment, Rect, Wall } from "../types/geometry.js";
 import type { WallModification } from "./enclosure-resolver.js";
 import { resolveWallComposition } from "./shared-wall-resolver.js";
 
@@ -35,8 +35,8 @@ export function resolveWalls(
   units: UnitSystem,
   wallModifications?: Map<CardinalDirection, WallModification>,
   wallGaps?: Map<CardinalDirection, WallGap[]>,
-): ResolvedWall[] {
-  const walls: ResolvedWall[] = [];
+): Wall[] {
+  const walls: Wall[] = [];
   const directions: CardinalDirection[] = ["north", "south", "east", "west"];
 
   // Pre-compute all thicknesses so horizontal walls can extend by perpendicular thicknesses
@@ -60,7 +60,7 @@ export function resolveWalls(
       roomId,
       dir,
       wallType,
-      composition.totalThickness,
+      composition,
       roomBounds,
       thicknesses.get("west")!,
       thicknesses.get("east")!,
@@ -86,13 +86,14 @@ function resolveWallGeometry(
   roomId: string,
   direction: CardinalDirection,
   wallType: string,
-  thickness: number,
+  composition: import("../types/config.js").WallComposition,
   bounds: Rect,
   westThickness: number,
   eastThickness: number,
   modification?: WallModification,
   gaps?: WallGap[],
-): ResolvedWall {
+): Wall {
+  const thickness = composition.totalThickness;
   const { x, y, width, height } = bounds;
   const shortenStart = modification?.shortenFromStart ?? 0;
   const shortenEnd = modification?.shortenFromEnd ?? 0;
@@ -170,18 +171,39 @@ function resolveWallGeometry(
     segments = [rect];
   }
 
+  const outerEdge: LineSegment = { start: outerStart, end: outerEnd };
+  const innerEdge: LineSegment = { start: innerStart, end: innerEnd };
+  const centerline: LineSegment = {
+    start: {
+      x: (outerStart.x + innerStart.x) / 2,
+      y: (outerStart.y + innerStart.y) / 2,
+    },
+    end: {
+      x: (outerEnd.x + innerEnd.x) / 2,
+      y: (outerEnd.y + innerEnd.y) / 2,
+    },
+  };
+
   return {
     id: `${roomId}.${direction}`,
     direction,
     type: wallType as "exterior" | "interior" | "load-bearing",
     thickness,
     lineWeight: LINE_WEIGHTS[wallType] ?? 0.5,
-    outerEdge: { start: outerStart, end: outerEnd },
-    innerEdge: { start: innerStart, end: innerEnd },
+    outerEdge,
+    innerEdge,
+    centerline,
     rect,
     openings: [],
     segments,
     interiorStartOffset,
+    composition,
+    roomId,
+    roomIdB: null,
+    directionInB: null,
+    subSpaceId: null,
+    source: "parent",
+    shared: false,
   };
 }
 

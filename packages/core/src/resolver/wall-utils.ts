@@ -1,17 +1,15 @@
 import type { CardinalDirection } from "../types/config.js";
 import type {
-  PlanWall,
   Point,
   ResolvedRoom,
-  ResolvedWall,
+  Wall,
   WallGraph,
 } from "../types/geometry.js";
 
 /**
  * Find a wall by its reference string (e.g. "kitchen.south").
- * When a WallGraph is available, looks up the PlanWall from the graph.
- * Falls back to per-room wall lookup when no graph is provided.
- * Throws a descriptive error if the room or wall direction is not found.
+ * Looks up the Wall from the unified wall graph by room or sub-space ID.
+ * Throws a descriptive error if the room/sub-space or wall direction is not found.
  */
 export function findWallById(
   wallRef: string,
@@ -19,8 +17,7 @@ export function findWallById(
   wallGraph?: WallGraph,
 ): {
   room: ResolvedRoom;
-  wall: ResolvedWall;
-  planWall?: PlanWall;
+  wall: Wall;
   direction: CardinalDirection;
 } {
   const dotIndex = wallRef.lastIndexOf(".");
@@ -30,7 +27,7 @@ export function findWallById(
     );
   }
 
-  const roomId = wallRef.substring(0, dotIndex);
+  const prefix = wallRef.substring(0, dotIndex);
   const direction = wallRef.substring(dotIndex + 1) as CardinalDirection;
 
   const validDirections: CardinalDirection[] = [
@@ -45,26 +42,42 @@ export function findWallById(
     );
   }
 
-  const room = rooms.find((r) => r.id === roomId);
+  // Try room lookup first
+  const room = rooms.find((r) => r.id === prefix);
+
+  if (room && wallGraph) {
+    const wall = wallGraph.byRoom.get(prefix)?.get(direction);
+    if (wall) {
+      return { room, wall, direction };
+    }
+  }
+
+  // Try sub-space lookup (enclosure/extension)
+  if (!room && wallGraph) {
+    const subSpaceWall = wallGraph.bySubSpace.get(prefix)?.get(direction);
+    if (subSpaceWall) {
+      const parentRoom = rooms.find((r) => r.id === subSpaceWall.roomId);
+      if (parentRoom) {
+        return { room: parentRoom, wall: subSpaceWall, direction };
+      }
+    }
+  }
+
   if (!room) {
     const available = rooms.map((r) => r.id).join(", ");
     throw new Error(
-      `Room "${roomId}" not found in wall reference "${wallRef}". Available rooms: ${available}`,
+      `Room "${prefix}" not found in wall reference "${wallRef}". Available rooms: ${available}`,
     );
   }
 
-  const wall = room.walls.find((w) => w.direction === direction);
-  if (!wall) {
-    throw new Error(`Wall "${direction}" not found on room "${roomId}"`);
+  // If no wall graph, we can't look up the wall
+  if (!wallGraph) {
+    throw new Error(
+      `Wall "${direction}" not found on room "${prefix}" — no wall graph available`,
+    );
   }
 
-  // Also look up the PlanWall from the graph if available
-  let planWall: PlanWall | undefined;
-  if (wallGraph) {
-    planWall = wallGraph.byRoom.get(roomId)?.get(direction);
-  }
-
-  return { room, wall, planWall, direction };
+  throw new Error(`Wall "${direction}" not found on room "${prefix}"`);
 }
 
 /**
@@ -73,7 +86,7 @@ export function findWallById(
  * on the wall's inner face (toward the room interior).
  */
 export function computeWallPosition(
-  wall: ResolvedWall,
+  wall: Wall,
   _room: ResolvedRoom,
   alongWallOffset: number,
 ): Point {

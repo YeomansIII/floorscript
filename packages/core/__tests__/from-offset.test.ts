@@ -63,8 +63,7 @@ plans:
 `;
     const config = parseConfig(yaml);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const west = room.walls.find((w) => w.direction === "west")!;
+    const west = plan.wallGraph.byRoom.get("room1")!.get("west")!;
 
     expect(west.openings).toHaveLength(1);
     const door = west.openings[0];
@@ -102,15 +101,14 @@ plans:
 `;
     const config = parseConfig(yaml);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const north = room.walls.find((w) => w.direction === "north")!;
+    const roomWalls = plan.wallGraph.byRoom.get("room1")!;
+    const north = roomWalls.get("north")!;
 
     expect(north.openings).toHaveLength(1);
     const window = north.openings[0];
     // position = wallInteriorLength - offset - width = 12 - 4 - 4 = 4ft from start (west)
     // gapStart.x = wallRect.x + interiorStartOffset + position
-    const westThickness = room.walls.find((w) => w.direction === "west")!
-      .thickness;
+    const westThickness = roomWalls.get("west")!.thickness;
     expect(window.gapStart.x).toBeCloseTo(
       north.rect.x + westThickness + 4,
       3,
@@ -143,14 +141,13 @@ plans:
 `;
     const config = parseConfig(yaml);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const north = room.walls.find((w) => w.direction === "north")!;
+    const roomWalls = plan.wallGraph.byRoom.get("room1")!;
+    const north = roomWalls.get("north")!;
 
     expect(north.openings).toHaveLength(1);
     const window = north.openings[0];
     // center = (wallInteriorLength - openingWidth) / 2 = (10 - 4) / 2 = 3ft
-    const westThickness = room.walls.find((w) => w.direction === "west")!
-      .thickness;
+    const westThickness = roomWalls.get("west")!.thickness;
     expect(window.gapStart.x).toBeCloseTo(
       north.rect.x + westThickness + 3,
       3,
@@ -184,8 +181,7 @@ plans:
 `;
     const config = parseConfig(yaml);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const west = room.walls.find((w) => w.direction === "west")!;
+    const west = plan.wallGraph.byRoom.get("room1")!.get("west")!;
 
     expect(west.openings).toHaveLength(1);
     const door = west.openings[0];

@@ -14,17 +14,14 @@ export function validatePlan(plan: ResolvedPlan): ValidationResult {
   const errors: ValidationIssue[] = [];
   const warnings: ValidationIssue[] = [];
 
-  if (plan.wallGraph) {
-    checkOverlappingOpenings(plan, errors);
-    checkOpeningExceedsWall(plan, errors);
-  }
+  checkOverlappingOpenings(plan, errors);
+  checkOpeningExceedsWall(plan, errors);
   checkSealedRooms(plan, warnings);
   checkFixtureOutOfBounds(plan, warnings);
-  if (plan.wallGraph) {
-    checkRunsThroughWalls(plan, warnings);
-  }
+  checkRunsThroughWalls(plan, warnings);
   checkOpeningInExtensionGap(plan, warnings);
   checkSealedEnclosures(plan, warnings);
+  checkSealedExtensions(plan, warnings);
 
   return { errors, warnings };
 }
@@ -36,7 +33,6 @@ function checkOverlappingOpenings(
   plan: ResolvedPlan,
   errors: ValidationIssue[],
 ): void {
-  if (!plan.wallGraph) return;
 
   for (const wall of plan.wallGraph.walls) {
     const openings = wall.openings;
@@ -44,7 +40,7 @@ function checkOverlappingOpenings(
 
     // Sort by position along wall
     const sorted = [...openings].sort((a, b) => {
-      const dir = wall.directionInA ?? wall.directionInB;
+      const dir = wall.direction;
       if (dir === "south" || dir === "north") {
         return a.gapStart.x - b.gapStart.x;
       }
@@ -54,7 +50,7 @@ function checkOverlappingOpenings(
     for (let i = 0; i < sorted.length - 1; i++) {
       const a = sorted[i];
       const b = sorted[i + 1];
-      const dir = wall.directionInA ?? wall.directionInB;
+      const dir = wall.direction;
 
       let aEnd: number, bStart: number;
       if (dir === "south" || dir === "north") {
@@ -70,7 +66,7 @@ function checkOverlappingOpenings(
           code: "overlapping-openings",
           severity: "error",
           message: `Two openings overlap on wall "${wall.id}"`,
-          roomId: wall.roomA,
+          roomId: wall.roomId,
           wallId: wall.id,
           elementId: null,
           suggestion: "Move or resize one of the overlapping openings",
@@ -87,10 +83,9 @@ function checkOpeningExceedsWall(
   plan: ResolvedPlan,
   errors: ValidationIssue[],
 ): void {
-  if (!plan.wallGraph) return;
 
   for (const wall of plan.wallGraph.walls) {
-    const dir = wall.directionInA ?? wall.directionInB;
+    const dir = wall.direction;
     const wallLength =
       dir === "south" || dir === "north" ? wall.rect.width : wall.rect.height;
 
@@ -100,7 +95,7 @@ function checkOpeningExceedsWall(
           code: "opening-exceeds-wall",
           severity: "error",
           message: `Opening (${opening.width.toFixed(2)}ft) exceeds wall length (${wallLength.toFixed(2)}ft) on wall "${wall.id}"`,
-          roomId: wall.roomA,
+          roomId: wall.roomId,
           wallId: wall.id,
           elementId: null,
           suggestion: "Reduce opening width or increase room size",
@@ -120,18 +115,9 @@ function checkSealedRooms(
   for (const room of plan.rooms) {
     let hasOpening = false;
 
-    if (plan.wallGraph) {
-      const roomWalls = plan.wallGraph.byRoom.get(room.id);
-      if (roomWalls) {
-        for (const [, planWall] of roomWalls) {
-          if (planWall.openings.length > 0) {
-            hasOpening = true;
-            break;
-          }
-        }
-      }
-    } else {
-      for (const wall of room.walls) {
+    const roomWalls = plan.wallGraph.byRoom.get(room.id);
+    if (roomWalls) {
+      for (const [, wall] of roomWalls) {
         if (wall.openings.length > 0) {
           hasOpening = true;
           break;
@@ -201,7 +187,7 @@ function checkRunsThroughWalls(
   plan: ResolvedPlan,
   warnings: ValidationIssue[],
 ): void {
-  if (!plan.wallGraph || !plan.plumbing) return;
+  if (!plan.plumbing) return;
 
   const allRuns = [
     ...plan.plumbing.supplyRuns.map((r) => ({
@@ -226,7 +212,7 @@ function checkRunsThroughWalls(
 
         // Check if crossing is through an opening
         const crossesThroughOpening = wall.openings.some((opening) => {
-          const dir = wall.directionInA ?? wall.directionInB;
+          const dir = wall.direction;
           if (dir === "south" || dir === "north") {
             // Horizontal wall: check if segment's x range overlaps opening gap x range
             const segMinX = Math.min(segStart.x, segEnd.x);
@@ -251,7 +237,7 @@ function checkRunsThroughWalls(
             code: "run-through-wall",
             severity: "warning",
             message: `Plumbing ${run.label} passes through wall "${wall.id}" without an opening`,
-            roomId: wall.roomA,
+            roomId: wall.roomId,
             wallId: wall.id,
             elementId: null,
             suggestion:
@@ -274,7 +260,10 @@ function checkOpeningInExtensionGap(
   for (const room of plan.rooms) {
     if (!room.extensions || room.extensions.length === 0) continue;
 
-    for (const wall of room.walls) {
+    const roomWalls = plan.wallGraph.byRoom.get(room.id);
+    if (!roomWalls) continue;
+
+    for (const [, wall] of roomWalls) {
       // Find extensions on this wall
       const wallExts = room.extensions.filter(
         (ext) => ext.parentWall === wall.direction,
@@ -330,7 +319,16 @@ function checkSealedEnclosures(
     if (!room.enclosures) continue;
 
     for (const enc of room.enclosures) {
-      const hasOpening = enc.walls.some((w) => w.openings.length > 0);
+      let hasOpening = false;
+      const encWalls = plan.wallGraph.bySubSpace.get(enc.id);
+      if (encWalls) {
+        for (const [, w] of encWalls) {
+          if (w.openings.length > 0) {
+            hasOpening = true;
+            break;
+          }
+        }
+      }
       if (!hasOpening) {
         warnings.push({
           code: "sealed-enclosure",
@@ -341,6 +339,43 @@ function checkSealedEnclosures(
           elementId: enc.id,
           suggestion:
             `Add a door to one of the enclosure's interior walls (e.g., the "${enc.facing}" wall)`,
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Check that extensions have at least one opening.
+ * Extensions without openings emit a "sealed-extension" warning (distinct from "sealed-room").
+ */
+function checkSealedExtensions(
+  plan: ResolvedPlan,
+  warnings: ValidationIssue[],
+): void {
+  for (const room of plan.rooms) {
+    if (!room.extensions) continue;
+
+    for (const ext of room.extensions) {
+      let hasOpening = false;
+      const extWalls = plan.wallGraph.bySubSpace.get(ext.id);
+      if (extWalls) {
+        for (const [, w] of extWalls) {
+          if (w.openings.length > 0) {
+            hasOpening = true;
+            break;
+          }
+        }
+      }
+      if (!hasOpening) {
+        warnings.push({
+          code: "sealed-extension",
+          severity: "warning",
+          message: `Extension "${ext.id}" in room "${room.id}" has no openings`,
+          roomId: room.id,
+          wallId: null,
+          elementId: ext.id,
+          suggestion: "Add a door or window to one of the extension's walls",
         });
       }
     }

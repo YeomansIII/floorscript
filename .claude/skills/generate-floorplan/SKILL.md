@@ -109,12 +109,14 @@ extensions:
 
 - Place the `panel` first with an [x, y] position inside a room.
 - `outlets` and `switches` reference walls as `roomid.direction` (e.g. `kitchen.south`).
+- **Enclosure and extension walls** can also be referenced for electrical placement using `subspaceid.direction` (e.g., `wall: "pantry.south"`, `wall: "nook.north"`). This is useful for placing outlets or switches on closet, pantry, or bump-out walls.
 - `fixtures` use absolute [x, y] coordinates within the room coordinate space.
 - Assign `circuit` numbers consistently.
 
 ### Plumbing (only if requested)
 
 - Plumbing `fixtures` can use wall-relative placement: `wall: roomid.direction` with `position` as offset along the wall.
+- **Enclosure and extension walls** can also be referenced for plumbing fixture placement using `wall: "subspaceid.direction"` (e.g., `wall: "pantry.south"`, `wall: "nook.north"`).
 - `supply_runs` need a `type` of `hot` or `cold`.
 - `drain_runs` connect fixtures to waste lines.
 

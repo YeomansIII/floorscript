@@ -2,37 +2,40 @@ import { describe, expect, it } from "vitest";
 import { parseConfig } from "../src/parser/config-parser.js";
 import { resolveElectrical } from "../src/resolver/electrical-resolver.js";
 import { resolveLayout } from "../src/resolver/layout-resolver.js";
+import { buildWallGraph } from "../src/resolver/shared-wall-resolver.js";
 import { resolveWalls } from "../src/resolver/wall-resolver.js";
 import { findWallById } from "../src/resolver/wall-utils.js";
-import type { ResolvedRoom } from "../src/types/geometry.js";
+import type { ResolvedRoom, Wall, WallGraph } from "../src/types/geometry.js";
 
-// Helper: build a minimal resolved room for testing
-function makeRoom(
-  id: string,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-): ResolvedRoom {
-  const bounds = { x, y, width, height };
-  const walls = resolveWalls(undefined, id, bounds, "imperial");
-  return {
-    id,
-    label: id,
-    bounds,
-    labelPosition: { x: x + width / 2, y: y + height / 2 },
-    walls,
-  };
+// Helper: build minimal resolved rooms and a wall graph for testing
+function makeRoomsAndGraph(
+  ...roomDefs: [string, number, number, number, number][]
+): { rooms: ResolvedRoom[]; wallGraph: WallGraph } {
+  const rooms: ResolvedRoom[] = [];
+  const parentWallsByRoom = new Map<string, Wall[]>();
+  for (const [id, x, y, width, height] of roomDefs) {
+    const bounds = { x, y, width, height };
+    const walls = resolveWalls(undefined, id, bounds, "imperial");
+    rooms.push({
+      id,
+      label: id,
+      bounds,
+      labelPosition: { x: x + width / 2, y: y + height / 2 },
+    });
+    parentWallsByRoom.set(id, walls);
+  }
+  const wallGraph = buildWallGraph(rooms, parentWallsByRoom);
+  return { rooms, wallGraph };
 }
 
-// Default interior thickness: 2x4 (3.5") + 0.5" × 2 = 4.5" = 0.375ft
+// Default interior thickness: 2x4 (3.5") + 0.5" x 2 = 4.5" = 0.375ft
 const _INT_THICK = 4.5 / 12;
 
 describe("electrical resolver", () => {
-  const rooms = [
-    makeRoom("kitchen", 0, 0, 12, 10),
-    makeRoom("living", 12, 0, 15, 12),
-  ];
+  const { rooms, wallGraph } = makeRoomsAndGraph(
+    ["kitchen", 0, 0, 12, 10],
+    ["living", 12, 0, 15, 12],
+  );
 
   it("resolves panel position", () => {
     const result = resolveElectrical(
@@ -61,6 +64,7 @@ describe("electrical resolver", () => {
       },
       rooms,
       "imperial",
+      wallGraph,
     );
 
     expect(result.outlets).toHaveLength(1);
@@ -71,7 +75,7 @@ describe("electrical resolver", () => {
     // South wall extends below room: rect at y = -thickness
     // Offset 3ft along x, centerline at y = rect.y + thickness/2
     expect(outlet.position.x).toBe(3);
-    const southWall = rooms[0].walls.find((w) => w.direction === "south")!;
+    const southWall = wallGraph.byRoom.get("kitchen")!.get("south")!;
     expect(outlet.position.y).toBeCloseTo(
       southWall.rect.y + southWall.thickness / 2,
       5,
@@ -92,12 +96,13 @@ describe("electrical resolver", () => {
       },
       rooms,
       "imperial",
+      wallGraph,
     );
 
     const outlet = result.outlets[0];
     expect(outlet.wallDirection).toBe("east");
     // East wall extends right of room: rect at x = 12
-    const eastWall = rooms[0].walls.find((w) => w.direction === "east")!;
+    const eastWall = wallGraph.byRoom.get("kitchen")!.get("east")!;
     expect(outlet.position.y).toBe(5);
     expect(outlet.position.x).toBeCloseTo(
       eastWall.rect.x + eastWall.thickness / 2,
@@ -120,6 +125,7 @@ describe("electrical resolver", () => {
       },
       rooms,
       "imperial",
+      wallGraph,
     );
 
     expect(result.switches).toHaveLength(1);
@@ -229,32 +235,168 @@ describe("electrical resolver", () => {
 });
 
 describe("findWallById", () => {
-  const rooms = [
-    makeRoom("kitchen", 0, 0, 12, 10),
-    makeRoom("living", 12, 0, 15, 12),
-  ];
+  const { rooms, wallGraph } = makeRoomsAndGraph(
+    ["kitchen", 0, 0, 12, 10],
+    ["living", 12, 0, 15, 12],
+  );
 
   it("finds wall by roomId.direction", () => {
-    const { room, wall } = findWallById("kitchen.south", rooms);
+    const { room, wall } = findWallById("kitchen.south", rooms, wallGraph);
     expect(room.id).toBe("kitchen");
     expect(wall.direction).toBe("south");
   });
 
   it("throws on invalid format (no dot)", () => {
-    expect(() => findWallById("kitchen", rooms)).toThrow(
+    expect(() => findWallById("kitchen", rooms, wallGraph)).toThrow(
       'expected format "roomId.direction"',
     );
   });
 
   it("throws on invalid direction", () => {
-    expect(() => findWallById("kitchen.up", rooms)).toThrow(
+    expect(() => findWallById("kitchen.up", rooms, wallGraph)).toThrow(
       'Invalid wall direction "up"',
     );
   });
 
   it("throws on unknown room", () => {
-    expect(() => findWallById("garage.south", rooms)).toThrow(
+    expect(() => findWallById("garage.south", rooms, wallGraph)).toThrow(
       'Room "garage" not found',
+    );
+  });
+
+  it("finds enclosure wall by subSpaceId.direction", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bedroom
+        label: "Bedroom"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        enclosures:
+          - id: closet
+            label: "Closet"
+            corner: northwest
+            facing: east
+            length: 6ft
+            depth: 3ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    position: 1ft
+                    width: 2ft 6in
+                    style: bifold
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+    const { room, wall, direction } = findWallById(
+      "closet.east",
+      plan.rooms,
+      plan.wallGraph,
+    );
+    expect(room.id).toBe("bedroom"); // returns parent room
+    expect(wall.source).toBe("enclosure");
+    expect(wall.subSpaceId).toBe("closet");
+    expect(direction).toBe("east");
+  });
+
+  it("finds extension wall by subSpaceId.direction", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bedroom
+        label: "Bedroom"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        extensions:
+          - id: nook
+            label: "Window Nook"
+            wall: north
+            from: west
+            offset: 3ft
+            width: 4ft
+            depth: 2ft
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+    const { room, wall, direction } = findWallById(
+      "nook.north",
+      plan.rooms,
+      plan.wallGraph,
+    );
+    expect(room.id).toBe("bedroom"); // returns parent room
+    expect(wall.source).toBe("extension");
+    expect(wall.subSpaceId).toBe("nook");
+    expect(direction).toBe("north");
+  });
+});
+
+describe("outlet on enclosure wall", () => {
+  it("resolves outlet on an enclosure wall to correct position", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bedroom
+        label: "Bedroom"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        enclosures:
+          - id: closet
+            label: "Closet"
+            corner: northwest
+            facing: east
+            length: 6ft
+            depth: 3ft
+            walls:
+              east:
+                type: interior
+                openings:
+                  - type: door
+                    position: 1ft
+                    width: 2ft 6in
+                    style: bifold
+    electrical:
+      outlets:
+        - type: duplex
+          position: [1ft, 0]
+          wall: closet.east
+          circuit: 1
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    expect(plan.electrical).toBeDefined();
+    expect(plan.electrical!.outlets).toHaveLength(1);
+    const outlet = plan.electrical!.outlets[0];
+    expect(outlet.wallId).toBe("closet.east");
+    expect(outlet.wallDirection).toBe("east");
+    // Closet is in NW corner: x=0, depth=3ft, so east wall at x=3
+    const closetEast = plan.wallGraph.bySubSpace.get("closet")!.get("east")!;
+    expect(outlet.position.x).toBeCloseTo(
+      closetEast.rect.x + closetEast.thickness / 2,
+      3,
     );
   });
 });

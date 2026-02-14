@@ -101,11 +101,11 @@ describe("resolveExtensions", () => {
       "imperial",
       "room1",
     );
-    const ext = result.extensions[0];
 
     // North extension: open side is south (facing parent), so 3 walls: north, east, west
-    expect(ext.walls).toHaveLength(3);
-    const wallDirs = ext.walls.map((w) => w.direction);
+    const nookWalls = result.walls.filter((w) => w.subSpaceId === "nook");
+    expect(nookWalls).toHaveLength(3);
+    const wallDirs = nookWalls.map((w) => w.direction);
     expect(wallDirs).toContain("north");
     expect(wallDirs).toContain("east");
     expect(wallDirs).toContain("west");
@@ -185,8 +185,8 @@ describe("resolveExtensions", () => {
       "imperial",
       "room1",
     );
-    const ext = result.extensions[0];
-    const northWall = ext.walls.find((w) => w.direction === "north");
+    const nookWalls = result.walls.filter((w) => w.subSpaceId === "nook");
+    const northWall = nookWalls.find((w) => w.direction === "north");
     expect(northWall).toBeDefined();
     expect(northWall!.openings).toHaveLength(1);
     expect(northWall!.openings[0].type).toBe("window");
@@ -249,10 +249,53 @@ describe("resolveExtensions", () => {
     expect(ext.bounds.height).toBeCloseTo(4, 3); // ext width becomes height
 
     // 3 walls: north, south, east (open side = west, facing parent)
-    const wallDirs = ext.walls.map((w) => w.direction);
+    const bayWalls = result.walls.filter((w) => w.subSpaceId === "bay");
+    const wallDirs = bayWalls.map((w) => w.direction);
     expect(wallDirs).toContain("north");
     expect(wallDirs).toContain("south");
     expect(wallDirs).toContain("east");
     expect(wallDirs).not.toContain("west");
+  });
+
+  it("two extensions on the same parent wall produce independent walls", () => {
+    const configs: ExtensionConfig[] = [
+      makeExtension({
+        id: "nook1",
+        label: "Nook 1",
+        wall: "north",
+        from: "west",
+        offset: "1ft",
+        width: "3ft",
+        depth: "2ft",
+      }),
+      makeExtension({
+        id: "nook2",
+        label: "Nook 2",
+        wall: "north",
+        from: "west",
+        offset: "7ft",
+        width: "3ft",
+        depth: "2ft",
+      }),
+    ];
+
+    const result = resolveExtensions(
+      configs,
+      parentBounds,
+      "imperial",
+      "room1",
+    );
+
+    expect(result.extensions).toHaveLength(2);
+
+    // Each extension should have its own set of walls
+    const nook1Walls = result.walls.filter((w) => w.subSpaceId === "nook1");
+    const nook2Walls = result.walls.filter((w) => w.subSpaceId === "nook2");
+    expect(nook1Walls.length).toBe(3); // north, east, west
+    expect(nook2Walls.length).toBe(3);
+
+    // Wall gaps should have two entries for the north wall
+    const northGaps = result.wallGaps.get("north");
+    expect(northGaps).toHaveLength(2);
   });
 });

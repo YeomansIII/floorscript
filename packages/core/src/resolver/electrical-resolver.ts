@@ -10,6 +10,7 @@ import type {
   ResolvedRoom,
   ResolvedSmokeDetector,
   ResolvedSwitch,
+  WallGraph,
 } from "../types/geometry.js";
 import { computeWallPosition, findWallById } from "./wall-utils.js";
 
@@ -25,15 +26,16 @@ export function resolveElectrical(
   config: ElectricalConfig,
   rooms: ResolvedRoom[],
   units: UnitSystem,
+  wallGraph?: WallGraph,
 ): ResolvedElectrical {
   const panel = config.panel ? resolvePanel(config.panel, units) : undefined;
 
   const outlets = (config.outlets ?? []).map((o) =>
-    resolveOutlet(o, rooms, units),
+    resolveOutlet(o, rooms, units, wallGraph),
   );
 
   const switches = (config.switches ?? []).map((s) =>
-    resolveSwitch(s, rooms, units),
+    resolveSwitch(s, rooms, units, wallGraph),
   );
 
   const fixtures = (config.fixtures ?? []).map((f) =>
@@ -64,8 +66,9 @@ function resolveOutlet(
   config: NonNullable<ElectricalConfig["outlets"]>[number],
   rooms: ResolvedRoom[],
   units: UnitSystem,
+  wallGraph?: WallGraph,
 ): ResolvedOutlet {
-  const { wall, room } = findWallById(config.wall, rooms);
+  const { wall, room } = findWallById(config.wall, rooms, wallGraph);
   const alongWallOffset = parseDimension(config.position[0], units);
   const position = computeWallPosition(wall, room, alongWallOffset);
 
@@ -85,8 +88,9 @@ function resolveSwitch(
   config: NonNullable<ElectricalConfig["switches"]>[number],
   rooms: ResolvedRoom[],
   units: UnitSystem,
+  wallGraph?: WallGraph,
 ): ResolvedSwitch {
-  const { wall, room } = findWallById(config.wall, rooms);
+  const { wall, room } = findWallById(config.wall, rooms, wallGraph);
   const alongWallOffset = parseDimension(config.position[0], units);
   const position = computeWallPosition(wall, room, alongWallOffset);
 

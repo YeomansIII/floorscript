@@ -10,10 +10,10 @@ import type {
 } from "../types/config.js";
 import type {
   LineSegment,
-  PlanWall,
   Rect,
   ResolvedOpening,
   ResolvedRoom,
+  Wall,
   WallGraph,
 } from "../types/geometry.js";
 import { resolveWallSegments } from "./segment-resolver.js";
@@ -123,11 +123,14 @@ function _oppositeDirection(dir: CardinalDirection): CardinalDirection {
  */
 export function buildWallGraph(
   rooms: ResolvedRoom[],
+  parentWallsByRoom: Map<string, Wall[]>,
   sharedWalls?: SharedWallConfig[],
   units: UnitSystem = "imperial",
+  enclosureWalls: Wall[] = [],
+  extensionWalls: Wall[] = [],
 ): WallGraph {
-  const walls: PlanWall[] = [];
-  const byRoom = new Map<string, Map<CardinalDirection, PlanWall>>();
+  const walls: Wall[] = [];
+  const byRoom = new Map<string, Map<CardinalDirection, Wall>>();
 
   // Initialize byRoom maps
   for (const room of rooms) {
@@ -180,8 +183,8 @@ export function buildWallGraph(
         continue;
       }
 
-      const wallA = roomA.walls.find((w) => w.direction === dirInA)!;
-      const wallB = roomB.walls.find((w) => w.direction === dirInB)!;
+      const wallA = parentWallsByRoom.get(roomA.id)!.find((w) => w.direction === dirInA)!;
+      const wallB = parentWallsByRoom.get(roomB.id)!.find((w) => w.direction === dirInB)!;
 
       // Thicker wins rule (or use shared_walls config override)
       const override = findSharedWallOverride(roomA.id, roomB.id, sharedWalls);
@@ -223,12 +226,9 @@ export function buildWallGraph(
         ),
       ];
 
-      const planWall: PlanWall = {
+      const sharedWall: Wall = {
         id: `${roomA.id}.${dirInA}|${roomB.id}.${dirInB}`,
-        roomA: roomA.id,
-        roomB: roomB.id,
-        directionInA: dirInA,
-        directionInB: dirInB,
+        direction: dirInA,
         type: wallType,
         composition: {
           stud: null,
@@ -245,24 +245,25 @@ export function buildWallGraph(
         rect: geometry.rect,
         openings: mergedOpenings,
         segments: [], // Will be computed after
+        interiorStartOffset: 0,
+        roomId: roomA.id,
+        roomIdB: roomB.id,
+        directionInB: dirInB,
+        subSpaceId: null,
+        source: "parent",
         shared: true,
       };
 
       // Recompute segments around merged openings
-      planWall.segments = resolveWallSegments({
-        ...planWall,
-        id: planWall.id,
-        direction: dirInA, // Use direction for segment computation
-        interiorStartOffset: 0,
-      });
+      sharedWall.segments = resolveWallSegments(sharedWall);
 
-      walls.push(planWall);
+      walls.push(sharedWall);
       // Set byRoom for first shared wall on this direction (don't overwrite)
       if (!byRoom.get(roomA.id)!.has(dirInA)) {
-        byRoom.get(roomA.id)!.set(dirInA, planWall);
+        byRoom.get(roomA.id)!.set(dirInA, sharedWall);
       }
       if (!byRoom.get(roomB.id)!.has(dirInB)) {
-        byRoom.get(roomB.id)!.set(dirInB, planWall);
+        byRoom.get(roomB.id)!.set(dirInB, sharedWall);
       }
 
       addConsumed(wallKeyA, overlapStart, overlapEnd);
@@ -272,7 +273,8 @@ export function buildWallGraph(
 
   // Step 2: Create remainder walls for partially consumed room walls
   for (const room of rooms) {
-    for (const wall of room.walls) {
+    const roomWalls = parentWallsByRoom.get(room.id) ?? [];
+    for (const wall of roomWalls) {
       const wallKey = `${room.id}.${wall.direction}`;
       const ranges = consumedRanges.get(wallKey);
       if (!ranges || ranges.length === 0) continue;
@@ -286,7 +288,7 @@ export function buildWallGraph(
 
       for (const [start, end] of uncovered) {
         const side = start <= wallRange[0] + EPSILON ? "before" : "after";
-        const remainder = buildRemainderPlanWall(
+        const remainder = buildRemainderWall(
           room,
           wall,
           wall.direction,
@@ -299,39 +301,21 @@ export function buildWallGraph(
     }
   }
 
-  // Step 3: Create PlanWalls for fully non-shared (exterior) walls
+  // Step 3: Create Wall entries for fully non-shared (exterior) walls
   for (const room of rooms) {
-    for (const wall of room.walls) {
+    const roomWalls = parentWallsByRoom.get(room.id) ?? [];
+    for (const wall of roomWalls) {
       const wallKey = `${room.id}.${wall.direction}`;
       if (consumedRanges.has(wallKey)) continue; // Has shared portions, handled above
 
-      const planWall: PlanWall = {
-        id: wallKey,
-        roomA: room.id,
-        roomB: null,
-        directionInA: wall.direction,
-        directionInB: null,
-        type: wall.type,
-        composition: {
-          stud: null,
-          studWidthFt: 0,
-          finishA: 0,
-          finishB: 0,
-          totalThickness: wall.thickness,
-        },
-        thickness: wall.thickness,
-        lineWeight: wall.lineWeight,
-        centerline: computeCenterline(wall.outerEdge, wall.innerEdge),
-        outerEdge: wall.outerEdge,
-        innerEdge: wall.innerEdge,
-        rect: wall.rect,
+      // Parent walls already have full Wall fields from wall-resolver
+      const graphWall: Wall = {
+        ...wall,
         openings: wall.openings.map((o) => ({ ...o, ownerRoomId: room.id })),
-        segments: wall.segments,
-        shared: false,
       };
 
-      walls.push(planWall);
-      byRoom.get(room.id)!.set(wall.direction, planWall);
+      walls.push(graphWall);
+      byRoom.get(room.id)!.set(wall.direction, graphWall);
     }
   }
 
@@ -346,10 +330,11 @@ export function buildWallGraph(
   //   this wall is the only one, so it extends to the FULL far edge of the gap.
   for (const pw of walls) {
     if (pw.shared) continue;
-    const dir = pw.directionInA;
+    if (pw.source !== "parent") continue;
+    const dir = pw.direction;
     if (dir !== "east" && dir !== "west") continue;
 
-    const room = rooms.find((r) => r.id === pw.roomA);
+    const room = rooms.find((r) => r.id === pw.roomId);
     if (!room) continue;
 
     // The inner X position of this vertical wall (room boundary edge)
@@ -465,18 +450,32 @@ export function buildWallGraph(
       } else {
         // No gaps — recompute segments normally
         pw.rect = newRect;
-        pw.segments = resolveWallSegments({
-          ...pw,
-          id: pw.id,
-          direction: dir!,
-          interiorStartOffset: 0,
-        });
+        pw.segments = resolveWallSegments(pw);
       }
       pw.rect = newRect;
     }
   }
 
-  return { walls, byRoom };
+  // Step 5: Append enclosure and extension walls to the graph
+  for (const ew of enclosureWalls) {
+    walls.push(ew);
+  }
+  for (const xw of extensionWalls) {
+    walls.push(xw);
+  }
+
+  // Build bySubSpace index for enclosure/extension walls
+  const bySubSpace = new Map<string, Map<CardinalDirection, Wall>>();
+  for (const w of walls) {
+    if (w.subSpaceId) {
+      if (!bySubSpace.has(w.subSpaceId)) {
+        bySubSpace.set(w.subSpaceId, new Map());
+      }
+      bySubSpace.get(w.subSpaceId)!.set(w.direction, w);
+    }
+  }
+
+  return { walls, byRoom, bySubSpace, perimeter: [] };
 }
 
 /**
@@ -653,7 +652,7 @@ function realignOpeningToSharedWall(
   return aligned;
 }
 
-function buildRemainderPlanWall(
+function buildRemainderWall(
   room: ResolvedRoom,
   wall: {
     type: WallType;
@@ -661,12 +660,13 @@ function buildRemainderPlanWall(
     lineWeight: number;
     direction: CardinalDirection;
     openings: ResolvedOpening[];
+    composition: import("../types/config.js").WallComposition;
   },
   direction: CardinalDirection,
   start: number,
   end: number,
   side: "before" | "after",
-): PlanWall {
+): Wall {
   const b = room.bounds;
   const thickness = wall.thickness;
   const halfThick = thickness / 2;
@@ -795,20 +795,11 @@ function buildRemainderPlanWall(
       wallThickness: thickness,
     }));
 
-  const pw: PlanWall = {
+  const rw: Wall = {
     id: `${room.id}.${direction}.remainder-${side}`,
-    roomA: room.id,
-    roomB: null,
-    directionInA: direction,
-    directionInB: null,
+    direction,
     type: wall.type,
-    composition: {
-      stud: null,
-      studWidthFt: 0,
-      finishA: 0,
-      finishB: 0,
-      totalThickness: thickness,
-    },
+    composition: wall.composition,
     thickness,
     lineWeight: wall.lineWeight,
     centerline,
@@ -817,20 +808,21 @@ function buildRemainderPlanWall(
     rect,
     openings: filteredOpenings,
     segments: [rect],
+    interiorStartOffset: 0,
+    roomId: room.id,
+    roomIdB: null,
+    directionInB: null,
+    subSpaceId: null,
+    source: "parent",
     shared: false,
   };
 
   // Recompute segments if openings exist
   if (filteredOpenings.length > 0) {
-    pw.segments = resolveWallSegments({
-      ...pw,
-      id: pw.id,
-      direction,
-      interiorStartOffset: 0,
-    });
+    rw.segments = resolveWallSegments(rw);
   }
 
-  return pw;
+  return rw;
 }
 
 /**

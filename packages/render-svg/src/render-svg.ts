@@ -6,12 +6,7 @@ import { renderElectrical } from "./renderers/electrical-renderer.js";
 import { renderLabel } from "./renderers/label-renderer.js";
 import { renderPlumbing } from "./renderers/plumbing-renderer.js";
 import { renderTitleBlock } from "./renderers/title-block-renderer.js";
-import {
-  renderEnclosureWalls,
-  renderExtensionWalls,
-  renderWallGraph,
-  renderWalls,
-} from "./renderers/wall-renderer.js";
+import { renderWallGraph } from "./renderers/wall-renderer.js";
 import { renderWindow } from "./renderers/window-renderer.js";
 import { SvgDocument } from "./svg-document.js";
 import { SvgDrawingContext } from "./svg-drawing-context.js";
@@ -79,89 +74,22 @@ export function renderSvg(
     opts.background,
   );
 
-  // Render walls + openings
+  // Render walls + openings from unified wall graph (single pass)
   if (isLayerVisible("structural", plan, opts)) {
-    if (plan.wallGraph) {
-      // Render from plan-level wall graph (shared walls rendered once)
-      const wallDc = new SvgDrawingContext();
-      renderWallGraph(plan.wallGraph, ctx, wallDc);
-      doc.addToLayer("structural", wallDc.getOutput());
+    const wallDc = new SvgDrawingContext();
+    renderWallGraph(plan.wallGraph, ctx, wallDc);
+    doc.addToLayer("structural", wallDc.getOutput());
 
-      // Render openings from wall graph
-      for (const planWall of plan.wallGraph.walls) {
-        for (const opening of planWall.openings) {
-          const openingDc = new SvgDrawingContext();
-          if (opening.type === "door") {
-            renderDoor(opening, ctx, openingDc);
-          } else if (opening.type === "window") {
-            renderWindow(opening, ctx, openingDc);
-          }
-          doc.addToLayer("structural", openingDc.getOutput());
+    // Render openings from wall graph
+    for (const wall of plan.wallGraph.walls) {
+      for (const opening of wall.openings) {
+        const openingDc = new SvgDrawingContext();
+        if (opening.type === "door") {
+          renderDoor(opening, ctx, openingDc);
+        } else if (opening.type === "window") {
+          renderWindow(opening, ctx, openingDc);
         }
-      }
-    } else {
-      // Fallback: per-room wall rendering
-      for (const room of plan.rooms) {
-        const dc = new SvgDrawingContext();
-        renderWalls(room, ctx, dc);
-        doc.addToLayer("structural", dc.getOutput());
-
-        for (const wall of room.walls) {
-          for (const opening of wall.openings) {
-            const openingDc = new SvgDrawingContext();
-            if (opening.type === "door") {
-              renderDoor(opening, ctx, openingDc);
-            } else if (opening.type === "window") {
-              renderWindow(opening, ctx, openingDc);
-            }
-            doc.addToLayer("structural", openingDc.getOutput());
-          }
-        }
-      }
-    }
-
-    // Render enclosure/extension walls and their openings
-    for (const room of plan.rooms) {
-      if (room.enclosures && room.enclosures.length > 0) {
-        const dc = new SvgDrawingContext();
-        renderEnclosureWalls(room.enclosures, ctx, dc);
-        doc.addToLayer("structural", dc.getOutput());
-
-        // Render openings on enclosure walls
-        for (const enc of room.enclosures) {
-          for (const wall of enc.walls) {
-            for (const opening of wall.openings) {
-              const openingDc = new SvgDrawingContext();
-              if (opening.type === "door") {
-                renderDoor(opening, ctx, openingDc);
-              } else if (opening.type === "window") {
-                renderWindow(opening, ctx, openingDc);
-              }
-              doc.addToLayer("structural", openingDc.getOutput());
-            }
-          }
-        }
-      }
-
-      if (room.extensions && room.extensions.length > 0) {
-        const dc = new SvgDrawingContext();
-        renderExtensionWalls(room.extensions, ctx, dc);
-        doc.addToLayer("structural", dc.getOutput());
-
-        // Render openings on extension walls
-        for (const ext of room.extensions) {
-          for (const wall of ext.walls) {
-            for (const opening of wall.openings) {
-              const openingDc = new SvgDrawingContext();
-              if (opening.type === "door") {
-                renderDoor(opening, ctx, openingDc);
-              } else if (opening.type === "window") {
-                renderWindow(opening, ctx, openingDc);
-              }
-              doc.addToLayer("structural", openingDc.getOutput());
-            }
-          }
-        }
+        doc.addToLayer("structural", openingDc.getOutput());
       }
     }
   }
@@ -186,7 +114,6 @@ export function renderSvg(
                 x: enc.bounds.x + enc.bounds.width / 2,
                 y: enc.bounds.y + enc.bounds.height / 2,
               },
-              walls: [],
             },
             ctx,
             subDc,
@@ -206,7 +133,6 @@ export function renderSvg(
                 x: ext.bounds.x + ext.bounds.width / 2,
                 y: ext.bounds.y + ext.bounds.height / 2,
               },
-              walls: [],
             },
             ctx,
             subDc,

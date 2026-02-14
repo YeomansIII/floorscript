@@ -1,10 +1,10 @@
-import type { Rect, ResolvedWall } from "../types/geometry.js";
+import type { Rect, Wall } from "../types/geometry.js";
 
 /**
  * Compute wall segments by splitting the wall rectangle around openings.
  * Returns the original wall rect as a single segment if there are no openings.
  */
-export function resolveWallSegments(wall: ResolvedWall): Rect[] {
+export function resolveWallSegments(wall: Wall): Rect[] {
   if (wall.openings.length === 0) {
     return [wall.rect];
   }

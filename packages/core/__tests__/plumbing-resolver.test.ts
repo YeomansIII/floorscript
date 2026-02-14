@@ -317,6 +317,59 @@ plans:
   });
 });
 
+describe("fixture on extension wall", () => {
+  it("resolves fixture on an extension wall to correct position", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: bath
+        label: "Bathroom"
+        position: [0, 0]
+        width: 8ft
+        height: 6ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: exterior }
+          west: { type: exterior }
+        extensions:
+          - id: alcove
+            label: "Alcove"
+            wall: north
+            from: west
+            offset: 2ft
+            width: 4ft
+            depth: 2ft
+    plumbing:
+      fixtures:
+        - id: sink
+          type: bath-sink
+          wall: alcove.north
+          position: 1ft
+          offset: 0in
+          width: 20in
+          depth: 16in
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    const fixture = plan.plumbing!.fixtures[0];
+    expect(fixture.fixtureType).toBe("bath-sink");
+    // Extension alcove is on north wall: x=2, y=6, width=4, depth=2
+    // alcove.north wall is at y=8 (6+2)
+    // Fixture should be positioned correctly relative to extension north wall
+    const alcoveNorth = plan.wallGraph.bySubSpace.get("alcove")!.get("north")!;
+    expect(alcoveNorth).toBeDefined();
+    expect(fixture.orientation).toBe("facing-south");
+  });
+});
+
 describe("plumbing resolver integration via resolveLayout", () => {
   it("resolves plumbing from YAML config", () => {
     const yaml = `

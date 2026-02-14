@@ -7,7 +7,7 @@ import type {
 import type {
   LineSegment,
   ResolvedOpening,
-  ResolvedWall,
+  Wall,
 } from "../types/geometry.js";
 
 /**
@@ -69,7 +69,7 @@ export function resolveFromOffset(
  *   3. `from`/`offset` — human-natural reference from a perpendicular wall
  */
 export function resolveOpenings(
-  wall: ResolvedWall,
+  wall: Wall,
   openings: OpeningConfig[],
   units: UnitSystem,
   ownerRoomId?: string,
@@ -98,7 +98,7 @@ export function resolveOpenings(
  */
 function resolveOpeningPosition(
   config: OpeningConfig,
-  wall: ResolvedWall,
+  wall: Wall,
   units: UnitSystem,
   openingWidth: number,
   wallInteriorLength?: number,
@@ -144,7 +144,7 @@ function resolveOpeningPosition(
 }
 
 function resolveOpeningGeometry(
-  wall: ResolvedWall,
+  wall: Wall,
   config: OpeningConfig,
   position: number,
   width: number,

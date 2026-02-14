@@ -68,22 +68,20 @@ describe("resolveLayout", () => {
   it("resolves four walls", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
+    const roomWalls = plan.wallGraph.byRoom.get("room1")!;
 
-    expect(room.walls).toHaveLength(4);
+    expect(roomWalls.size).toBe(4);
 
-    const wallIds = room.walls.map((w) => w.id);
-    expect(wallIds).toContain("room1.north");
-    expect(wallIds).toContain("room1.south");
-    expect(wallIds).toContain("room1.east");
-    expect(wallIds).toContain("room1.west");
+    expect(roomWalls.get("north")).toBeDefined();
+    expect(roomWalls.get("south")).toBeDefined();
+    expect(roomWalls.get("east")).toBeDefined();
+    expect(roomWalls.get("west")).toBeDefined();
   });
 
   it("resolves exterior wall thickness from composition (2x6 default)", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const northWall = room.walls.find((w) => w.direction === "north")!;
+    const northWall = plan.wallGraph.byRoom.get("room1")!.get("north")!;
 
     expect(northWall.type).toBe("exterior");
     expect(northWall.thickness).toBeCloseTo(EXT_THICK, 4);
@@ -93,10 +91,10 @@ describe("resolveLayout", () => {
   it("resolves south wall geometry (extends below room, includes corners)", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const south = room.walls.find((w) => w.direction === "south")!;
-    const west = room.walls.find((w) => w.direction === "west")!;
-    const east = room.walls.find((w) => w.direction === "east")!;
+    const roomWalls = plan.wallGraph.byRoom.get("room1")!;
+    const south = roomWalls.get("south")!;
+    const west = roomWalls.get("west")!;
+    const east = roomWalls.get("east")!;
 
     // South wall extends below room and through corners
     expect(south.rect.x).toBeCloseTo(-west.thickness, 4);
@@ -115,10 +113,10 @@ describe("resolveLayout", () => {
   it("resolves north wall geometry (extends above room, includes corners)", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const north = room.walls.find((w) => w.direction === "north")!;
-    const west = room.walls.find((w) => w.direction === "west")!;
-    const east = room.walls.find((w) => w.direction === "east")!;
+    const roomWalls = plan.wallGraph.byRoom.get("room1")!;
+    const north = roomWalls.get("north")!;
+    const west = roomWalls.get("west")!;
+    const east = roomWalls.get("east")!;
 
     // North wall extends above room and through corners
     expect(north.rect.x).toBeCloseTo(-west.thickness, 4);
@@ -134,9 +132,9 @@ describe("resolveLayout", () => {
   it("vertical walls do not extend through corners", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const east = room.walls.find((w) => w.direction === "east")!;
-    const west = room.walls.find((w) => w.direction === "west")!;
+    const roomWalls = plan.wallGraph.byRoom.get("room1")!;
+    const east = roomWalls.get("east")!;
+    const west = roomWalls.get("west")!;
 
     expect(east.rect.y).toBe(0);
     expect(east.rect.height).toBe(12);
@@ -149,8 +147,7 @@ describe("resolveLayout", () => {
   it("resolves window opening on east wall", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const east = room.walls.find((w) => w.direction === "east")!;
+    const east = plan.wallGraph.byRoom.get("room1")!.get("east")!;
 
     expect(east.openings).toHaveLength(1);
     const window = east.openings[0];
@@ -165,8 +162,7 @@ describe("resolveLayout", () => {
   it("resolves door opening on west wall", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const west = room.walls.find((w) => w.direction === "west")!;
+    const west = plan.wallGraph.byRoom.get("room1")!.get("west")!;
 
     expect(west.openings).toHaveLength(1);
     const door = west.openings[0];
@@ -311,16 +307,18 @@ plans:
     expect(closet.bounds.height).toBeCloseTo(6, 3);
 
     // Closet should have 2 interior walls (east and south)
-    expect(closet.walls).toHaveLength(2);
-    const eastWall = closet.walls.find((w) => w.direction === "east");
+    const closetWalls = plan.wallGraph.bySubSpace.get("closet")!;
+    expect(closetWalls.size).toBe(2);
+    const eastWall = closetWalls.get("east");
     expect(eastWall).toBeDefined();
     expect(eastWall!.openings).toHaveLength(1);
     expect(eastWall!.openings[0].type).toBe("door");
 
     // Parent walls should NOT be shortened — exterior walls stay full length
     // (they ARE the closet's backing walls)
-    const northWall = room.walls.find((w) => w.direction === "north")!;
-    const westWall = room.walls.find((w) => w.direction === "west")!;
+    const roomWalls = plan.wallGraph.byRoom.get("bedroom1")!;
+    const northWall = roomWalls.get("north")!;
+    const westWall = roomWalls.get("west")!;
 
     // North wall starts at x - westThickness (full length, no shortening)
     expect(northWall.rect.x).toBeCloseTo(-westWall.thickness, 3);
@@ -382,14 +380,15 @@ plans:
     expect(nook.bounds.height).toBeCloseTo(2, 3);
 
     // Extension has 3 exterior walls and a window on the north wall
-    expect(nook.walls).toHaveLength(3);
-    const northWall = nook.walls.find((w) => w.direction === "north");
-    expect(northWall).toBeDefined();
-    expect(northWall!.openings).toHaveLength(1);
-    expect(northWall!.openings[0].type).toBe("window");
+    const nookWalls = plan.wallGraph.bySubSpace.get("nook")!;
+    expect(nookWalls.size).toBe(3);
+    const northExtWall = nookWalls.get("north");
+    expect(northExtWall).toBeDefined();
+    expect(northExtWall!.openings).toHaveLength(1);
+    expect(northExtWall!.openings[0].type).toBe("window");
 
     // Parent north wall should have segments split by the extension gap
-    const parentNorth = room.walls.find((w) => w.direction === "north")!;
+    const parentNorth = plan.wallGraph.byRoom.get("bedroom1")!.get("north")!;
     // Gap from x=3 to x=7. Wall should be split into 2 segments.
     expect(parentNorth.segments.length).toBeGreaterThanOrEqual(2);
   });
@@ -442,7 +441,8 @@ plans:
     expect(closet.bounds.height).toBeCloseTo(2, 3);
 
     // Door on south wall (facing)
-    const southWall = closet.walls.find((w) => w.direction === "south");
+    const closetWalls = plan.wallGraph.bySubSpace.get("closet")!;
+    const southWall = closetWalls.get("south");
     expect(southWall).toBeDefined();
     expect(southWall!.openings).toHaveLength(1);
   });
@@ -474,8 +474,7 @@ plans:
 `;
     const config = parseConfig(yaml);
     const plan = resolveLayout(config);
-    const room = plan.rooms[0];
-    const west = room.walls.find((w) => w.direction === "west")!;
+    const west = plan.wallGraph.byRoom.get("bedroom1")!.get("west")!;
 
     expect(west.openings).toHaveLength(1);
     // from:south means position = offset = 1ft
@@ -536,7 +535,7 @@ plans:
 
     // Hallway is positioned east of bedroom, sharing the east wall
     // Corner enclosures no longer shorten parent walls — exterior walls stay full length
-    const bedroomEast = bedroom.walls.find((w) => w.direction === "east")!;
+    const bedroomEast = plan.wallGraph.byRoom.get("bedroom")!.get("east")!;
     expect(bedroomEast.rect.height).toBeCloseTo(12, 1);
 
     // Hallway should still be adjacent and properly positioned
@@ -594,7 +593,7 @@ plans:
     expect(living.extensions).toHaveLength(1);
 
     // The north wall should be split by the extension gap
-    const northWall = living.walls.find((w) => w.direction === "north")!;
+    const northWall = plan.wallGraph.byRoom.get("living")!.get("north")!;
     expect(northWall.segments.length).toBeGreaterThanOrEqual(2);
 
     // Dining room attaches to south wall (unaffected by north extension)
@@ -643,6 +642,49 @@ plans:
 
     // Label position should be computed (not the simple center)
     expect(room.labelPosition).toBeDefined();
+  });
+
+  it("plan bounds include extension wall geometry", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Bounds Extension Test"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: room1
+        label: "Room"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: exterior }
+          west: { type: exterior }
+        extensions:
+          - id: nook
+            label: "Nook"
+            wall: north
+            from: west
+            offset: 3ft
+            width: 4ft
+            depth: 2ft
+`;
+    const config = parseConfig(yaml);
+    const plan = resolveLayout(config);
+
+    // Extension nook adds 2ft depth on north wall (at y=10)
+    // Plan bounds must extend to include the nook's north wall outer edge
+    const nookNorth = plan.wallGraph.bySubSpace.get("nook")!.get("north")!;
+    const nookNorthOuterY = nookNorth.rect.y + nookNorth.rect.height;
+
+    // plan.bounds.y + plan.bounds.height should encompass the nook's north wall
+    expect(plan.bounds.y + plan.bounds.height).toBeGreaterThanOrEqual(
+      nookNorthOuterY - 0.001,
+    );
   });
 
   it("sealed enclosure generates validation warning", () => {

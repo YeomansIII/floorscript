@@ -274,9 +274,8 @@ plans:
     const resolved = resolveLayout(config);
     const svg = renderSvg(resolved);
 
-    // Enclosure interior walls present
-    expect(svg).toContain("enclosure-walls");
-    expect(svg).toContain('id="enclosure-closet"');
+    // All walls (including enclosure interior) rendered in single walls group
+    expect(svg).toContain('class="walls"');
 
     // Sub-space label
     expect(svg).toContain("Walk-in Closet");
@@ -296,9 +295,8 @@ plans:
     const resolved = resolveLayout(config);
     const svg = renderSvg(resolved);
 
-    // Extension exterior walls present
-    expect(svg).toContain("extension-walls");
-    expect(svg).toContain('id="extension-window-nook"');
+    // All walls (including extension exterior) rendered in single walls group
+    expect(svg).toContain('class="walls"');
 
     // Sub-space labels
     expect(svg).toContain("Window Nook");
@@ -307,9 +305,6 @@ plans:
 
     // Window on extension wall
     expect(svg).toContain("opening window");
-
-    // Enclosure also present
-    expect(svg).toContain("enclosure-walls");
   });
 
   it("hides plumbing layer when layer visibility is false", () => {
