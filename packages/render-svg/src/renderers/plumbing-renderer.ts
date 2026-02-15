@@ -137,32 +137,35 @@ function renderPlumbingFixture(
       break;
     }
     case "bathtub": {
-      // Rectangle with one rounded end (arc at bottom)
-      const arcR = w / 2;
-      dc.rect(pos.x - w / 2, pos.y - d / 2, w, d - arcR, FIXTURE_STYLE);
-      // Rounded bottom end
+      // Rectangle with one rounded end (arc at bottom).
+      // Cap arc radius so the rectangular body is at least 60% of depth.
+      const arcR = Math.min(w / 2, d * 0.4);
+      const bodyH = d - arcR;
+      dc.rect(pos.x - w / 2, pos.y - d / 2, w, bodyH, FIXTURE_STYLE);
+      // Rounded bottom end (elliptical: rx spans tub width, ry controls curve depth)
       dc.arc(
         pos.x - w / 2,
-        pos.y + d / 2 - arcR,
-        arcR,
+        pos.y - d / 2 + bodyH,
+        w / 2,
         pos.x + w / 2,
-        pos.y + d / 2 - arcR,
+        pos.y - d / 2 + bodyH,
         1,
         FIXTURE_STYLE,
+        arcR,
       );
       // Connect sides to arc
       dc.line(
         pos.x - w / 2,
         pos.y - d / 2,
         pos.x - w / 2,
-        pos.y + d / 2 - arcR,
+        pos.y - d / 2 + bodyH,
         FIXTURE_STYLE,
       );
       dc.line(
         pos.x + w / 2,
         pos.y - d / 2,
         pos.x + w / 2,
-        pos.y + d / 2 - arcR,
+        pos.y - d / 2 + bodyH,
         FIXTURE_STYLE,
       );
       break;

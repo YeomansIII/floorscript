@@ -175,17 +175,48 @@ describe("resolveLayout", () => {
     expect(door.gapEnd.y).toBe(7);
   });
 
-  it("generates auto-dimensions", () => {
+  it("generates auto-dimensions as DimensionChain[]", () => {
     const config = parseConfig(MINIMAL_YAML);
     const plan = resolveLayout(config);
 
+    // R1 dedup: single room → north + west preferred, south + east removed
+    // R2/R3: each chain has 3 segments: leading wall + room + trailing wall
     expect(plan.dimensions).toHaveLength(2);
+    expect(plan.dimensions.every((d) => d.lane === 0)).toBe(true);
 
-    const hDim = plan.dimensions.find((d) => d.orientation === "horizontal")!;
-    expect(hDim.label).toBe("15'-0\"");
+    // Horizontal chain: north edge only (room width = 15ft)
+    const hChains = plan.dimensions.filter(
+      (d) => d.orientation === "horizontal",
+    );
+    expect(hChains).toHaveLength(1);
+    const hChain = hChains[0];
+    expect(hChain.id).toMatch(/^chain-/);
+    expect(hChain.direction).toBe("north");
+    // 3 segments: west wall + room + east wall
+    expect(hChain.segments).toHaveLength(3);
+    const hRoom = hChain.segments.find((s) => s.segmentType === "room");
+    expect(hRoom).toBeDefined();
+    expect(hRoom!.label).toBe("15'-0\"");
+    expect(hRoom!.roomId).toBe("room1");
+    expect(hRoom!.textFits).toBe(true);
+    expect(hChain.segments.filter((s) => s.segmentType === "wall")).toHaveLength(2);
 
-    const vDim = plan.dimensions.find((d) => d.orientation === "vertical")!;
-    expect(vDim.label).toBe("12'-0\"");
+    // Vertical chain: west edge only (room height = 12ft)
+    const vChains = plan.dimensions.filter(
+      (d) => d.orientation === "vertical",
+    );
+    expect(vChains).toHaveLength(1);
+    const vChain = vChains[0];
+    expect(vChain.id).toMatch(/^chain-/);
+    expect(vChain.direction).toBe("west");
+    // 3 segments: south wall + room + north wall
+    expect(vChain.segments).toHaveLength(3);
+    const vRoom = vChain.segments.find((s) => s.segmentType === "room");
+    expect(vRoom).toBeDefined();
+    expect(vRoom!.label).toBe("12'-0\"");
+    expect(vRoom!.roomId).toBe("room1");
+    expect(vRoom!.textFits).toBe(true);
+    expect(vChain.segments.filter((s) => s.segmentType === "wall")).toHaveLength(2);
   });
 
   it("computes overall bounds including wall extents", () => {

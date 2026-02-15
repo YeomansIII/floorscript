@@ -45,7 +45,7 @@ export interface ResolvedPlan {
   units: UnitSystem;
   title: string;
   rooms: ResolvedRoom[];
-  dimensions: ResolvedDimension[];
+  dimensions: DimensionChain[];
   bounds: Rect;
   wallGraph: WallGraph;
   validation?: ValidationResult;
@@ -94,12 +94,52 @@ export interface ResolvedOpening {
   centerline: LineSegment;
 }
 
-export interface ResolvedDimension {
-  from: Point;
-  to: Point;
-  offset: number;
-  label: string;
+// ---- Chain dimensions ----
+
+export interface DimensionChain {
+  /** Unique identifier for this chain (e.g., "chain-north-0") */
+  id: string;
+  /** Ordered segments from start to end along the baseline */
+  segments: ChainSegment[];
+  /** Orientation of the chain baseline */
   orientation: "horizontal" | "vertical";
+  /** Building edge direction this chain annotates */
+  direction: CardinalDirection;
+  /** Lane index (0 = room-edge, 1 = overall building) */
+  lane: number;
+  /** Perpendicular offset from building edge to baseline (signed, plan units) */
+  offset: number;
+  /** Per-boundary perpendicular wall-edge coordinates for extension lines.
+   *  Length = segments.length + 1 (one per boundary point).
+   *  When set, the renderer uses these instead of chain.offset to compute
+   *  individual extension line start positions. */
+  extensionWallCoords?: number[];
+}
+
+export interface ChainSegment {
+  /** Start point on the dimension baseline (plan coordinates) */
+  from: Point;
+  /** End point on the dimension baseline (plan coordinates) */
+  to: Point;
+  /** Formatted dimension label (e.g., "12'-0\"") */
+  label: string;
+  /** Room ID that owns this segment */
+  roomId: string;
+  /** Whether text fits between extension lines */
+  textFits: boolean;
+  /** Segment classification: room interior, wall thickness, or overall building */
+  segmentType?: "room" | "wall" | "overall";
+}
+
+export interface TextBoundingBox {
+  /** Center point of text (plan coordinates) */
+  center: Point;
+  /** Width of text area */
+  width: number;
+  /** Height of text area */
+  height: number;
+  /** Rotation angle in degrees (0 for horizontal, -90 for vertical) */
+  rotation: number;
 }
 
 // ---- Unified wall type ----

@@ -40,9 +40,11 @@ export class SvgDrawingContext implements DrawingContext {
     endY: number,
     sweepFlag: 0 | 1,
     opts?: StyleOpts,
+    ry?: number,
   ): void {
+    const ryVal = ry ?? radius;
     this.parts.push(
-      `<path d="M ${n(startX)},${n(startY)} A ${n(radius)},${n(radius)} 0 0,${sweepFlag} ${n(endX)},${n(endY)}"${styleAttrs(opts)}/>`,
+      `<path d="M ${n(startX)},${n(startY)} A ${n(radius)},${n(ryVal)} 0 0,${sweepFlag} ${n(endX)},${n(endY)}"${styleAttrs(opts)}/>`,
     );
   }
 

@@ -83,6 +83,14 @@ function getDefaultDepth(units: UnitSystem): number {
   return units === "imperial" ? 1.5 * 0.7 : 0.45 * 0.7;
 }
 
+/**
+ * Get the default width for a fixture when not specified.
+ * Matches the renderer default: 1.5ft / 0.45m.
+ */
+function getDefaultWidth(units: UnitSystem): number {
+  return units === "imperial" ? 1.5 : 0.45;
+}
+
 function resolveFixture(
   config: NonNullable<PlumbingConfig["fixtures"]>[number],
   units: UnitSystem,
@@ -104,11 +112,17 @@ function resolveFixture(
       : parseDimension(config.position, units);
     const userOffset = config.offset ? parseDimension(config.offset, units) : 0;
 
+    // Position uses leading-edge convention: add width/2 to get center along wall
+    const fixtureWidth = config.width
+      ? parseDimension(config.width, units)
+      : getDefaultWidth(units);
+    const alongWallCenter = alongWall + fixtureWidth / 2;
+
     // Add depth/2 so the fixture edge (not center) sits at the wall face + userOffset
     const fixtureDepth = resolvedDepth ?? getDefaultDepth(units);
     const flushOffset = userOffset + fixtureDepth / 2;
 
-    position = computeWallRelativePosition(wall, alongWall, flushOffset);
+    position = computeWallRelativePosition(wall, alongWallCenter, flushOffset);
 
     // Auto-infer orientation from wall if not explicitly set
     if (!orientation) {

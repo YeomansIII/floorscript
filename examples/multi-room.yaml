@@ -353,7 +353,7 @@ plans:
       smoke_detectors:
         - position: [9ft, 10ft]
           type: combo
-        - position: [6ft, 19ft]
+        - position: [6ft, 17ft]
           type: combo
       runs:
         - circuit: 1
@@ -368,42 +368,42 @@ plans:
         - id: k-sink
           type: kitchen-sink
           wall: kitchen.north
-          position: 3ft
+          position: 1ft 8in
           offset: 0in
           width: 33in
           depth: 22in
         - id: bath-tub
           type: bathtub
           wall: bath.north
-          position: 0ft 6in
+          position: 6in
           offset: 0in
           width: 5ft
           depth: 30in
         - id: bath-toilet
           type: toilet
           wall: bath.east
-          position: 1ft
+          position: 3in
           offset: 0in
           width: 18in
           depth: 28in
         - id: bath-sink
           type: bath-sink
           wall: bath.east
-          position: 4ft
+          position: 3ft 2in
           offset: 0in
           width: 20in
           depth: 16in
         - id: hb-sink
           type: bath-sink
           wall: halfbath.south
-          position: 1ft
+          position: 2in
           offset: 0in
           width: 20in
           depth: 16in
         - id: hb-toilet
           type: toilet
           wall: halfbath.south
-          position: 3ft
+          position: 2ft 3in
           offset: 0in
           width: 18in
           depth: 28in

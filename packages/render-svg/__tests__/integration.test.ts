@@ -63,7 +63,8 @@ describe("end-to-end SVG rendering", () => {
     expect(svg).toContain("opening door");
     expect(svg).toContain("opening window");
 
-    // Dimensions (XML-escaped in SVG text)
+    // Chain dimensions (XML-escaped in SVG text)
+    expect(svg).toContain('class="chain-dimension"');
     expect(svg).toContain("15&apos;-0&quot;");
     expect(svg).toContain("12&apos;-0&quot;");
 
@@ -305,6 +306,13 @@ plans:
 
     // Window on extension wall
     expect(svg).toContain("opening window");
+
+    // Sub-space dimensions: nook width (5ft) and depth (3ft)
+    expect(svg).toContain("5&apos;-0&quot;");
+    expect(svg).toContain("3&apos;-0&quot;");
+
+    // Closet length (6ft) dimension
+    expect(svg).toContain("6&apos;-0&quot;");
   });
 
   it("hides plumbing layer when layer visibility is false", () => {
@@ -321,5 +329,117 @@ plans:
     expect(svg).not.toContain('class="layer-plumbing"');
     // Electrical should still be visible
     expect(svg).toContain('class="layer-electrical"');
+  });
+
+  it("single-room plan produces clean single-lane dimensions (SC-006)", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Single Room Test"
+  scale: "1/4in = 1ft"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: living
+        label: "Living Room"
+        position: [0, 0]
+        width: 15ft
+        height: 12ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: exterior }
+          west: { type: exterior }
+`;
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+
+    // R1: north + west preferred → 2 chains. R2/R3: each has wall + room + wall segments
+    expect(resolved.dimensions).toHaveLength(2);
+    for (const chain of resolved.dimensions) {
+      expect(chain.lane).toBe(0);
+      expect(chain.segments).toHaveLength(3);
+      expect(chain.segments.filter((s: any) => s.segmentType === "room")).toHaveLength(1);
+      expect(chain.segments.filter((s: any) => s.segmentType === "wall")).toHaveLength(2);
+    }
+
+    // Render to SVG
+    const svg = renderSvg(resolved);
+
+    // Chain dimension groups present
+    expect(svg).toContain('class="chain-dimension"');
+
+    // Width and height dimension labels
+    expect(svg).toContain("15&apos;-0&quot;");
+    expect(svg).toContain("12&apos;-0&quot;");
+
+    // Extension lines present (the renderer adds them for every chain)
+    // Each chain-dimension group has at least one <line> for the baseline
+    const chainGroups = svg.match(/class="chain-dimension"/g);
+    expect(chainGroups).not.toBeNull();
+    expect(chainGroups!.length).toBeGreaterThanOrEqual(2);
+
+    // SVG well-formed
+    const opens = (svg.match(/<g /g) ?? []).length;
+    const closes = (svg.match(/<\/g>/g) ?? []).length;
+    expect(opens).toBe(closes);
+  });
+
+  it("renders chain dimensions with per-segment text for multi-room plans", () => {
+    const yaml = `
+version: "0.1"
+project:
+  title: "Chain Dim Test"
+  scale: "1/4in = 1ft"
+units: imperial
+plans:
+  - id: main
+    title: "Plan"
+    rooms:
+      - id: kitchen
+        label: "Kitchen"
+        position: [0, 0]
+        width: 12ft
+        height: 10ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: interior }
+          west: { type: exterior }
+      - id: dining
+        label: "Dining"
+        adjacent_to:
+          room: kitchen
+          wall: east
+        width: 14ft
+        height: 10ft
+        walls:
+          north: { type: exterior }
+          south: { type: exterior }
+          east: { type: exterior }
+          west: { type: interior }
+`;
+    const config = parseConfig(yaml);
+    const resolved = resolveLayout(config);
+    const svg = renderSvg(resolved);
+
+    // Chain dimension groups present
+    expect(svg).toContain('class="chain-dimension"');
+
+    // Per-segment text labels for both rooms
+    expect(svg).toContain("12&apos;-0&quot;");
+    expect(svg).toContain("14&apos;-0&quot;");
+
+    // Multiple chain-dimension groups rendered
+    const chainGroups = svg.match(/class="chain-dimension"/g);
+    expect(chainGroups).not.toBeNull();
+    expect(chainGroups!.length).toBeGreaterThanOrEqual(2);
+
+    // SVG well-formed
+    const opens = (svg.match(/<g /g) ?? []).length;
+    const closes = (svg.match(/<\/g>/g) ?? []).length;
+    expect(opens).toBe(closes);
   });
 });

@@ -55,7 +55,7 @@ export function resolveLayout(
   const wallGraph = buildWallGraph(rooms, parentWallsByRoom, plan.shared_walls, config.units, enclosureWalls, extensionWalls);
   wallGraph.perimeter = computePerimeter(wallGraph);
   const bounds = computeBounds(wallGraph.walls);
-  const dimensions = generateDimensions(rooms, config.units);
+  const dimensions = generateDimensions(rooms, config.units, wallGraph);
 
   const electrical = plan.electrical
     ? resolveElectrical(plan.electrical, rooms, config.units, wallGraph)

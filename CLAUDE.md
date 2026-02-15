@@ -163,6 +163,8 @@ npx sharp-cli -i examples/multi-room.svg -o examples/multi-room.png
 ## Active Technologies
 - TypeScript 5.7.0, target ES2022, strict mode + Zod (validation), yaml (parsing), tsup (bundler), Commander (CLI) (001-fix-structural-rendering)
 - N/A (file-based I/O) (001-fix-structural-rendering)
+- TypeScript 5.7.0, target ES2022, strict mode + Zod (validation), tsup (bundler), yaml (parsing) (004-smart-dimensions)
+- N/A (file-based I/O, SVG output) (004-smart-dimensions)
 
 ## Recent Changes
 - 001-fix-structural-rendering: Added TypeScript 5.7.0, target ES2022, strict mode + Zod (validation), yaml (parsing), tsup (bundler), Commander (CLI)

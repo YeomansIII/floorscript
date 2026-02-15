@@ -3,11 +3,7 @@
  * Convert an SVG file to PNG using sharp.
  * Usage: node scripts/svg-to-png.mjs <input.svg> [output.png]
  */
-import { createRequire } from "node:module";
-
-const require = createRequire("/opt/node22/lib/node_modules/");
-const sharp = require("sharp");
-
+import sharp from "sharp";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 

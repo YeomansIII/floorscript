@@ -36,6 +36,7 @@ export interface DrawingContext {
     endY: number,
     sweepFlag: 0 | 1,
     opts?: StyleOpts,
+    ry?: number,
   ): void;
   circle(cx: number, cy: number, r: number, opts?: StyleOpts): void;
   polyline(points: { x: number; y: number }[], opts?: StyleOpts): void;

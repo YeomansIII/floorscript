@@ -1,6 +1,6 @@
 import type { ResolvedPlan } from "@floorscript/core";
 import { createTransform } from "./coordinate-transform.js";
-import { renderDimension } from "./renderers/dimension-renderer.js";
+import { renderChainDimension } from "./renderers/dimension-renderer.js";
 import { renderDoor } from "./renderers/door-renderer.js";
 import { renderElectrical } from "./renderers/electrical-renderer.js";
 import { renderLabel } from "./renderers/label-renderer.js";
@@ -29,8 +29,8 @@ const DEFAULT_OPTIONS = {
   showTitleBlock: true,
 } as const;
 
-// Compute margin based on what needs to fit: dimension line offset + text + padding
-const DEFAULT_MARGIN = 3; // 2ft dim offset + 0.5ft text + 0.5ft padding
+// Compute margin based on what needs to fit: lane 1 dim offset + text + overshoot + padding
+const DEFAULT_MARGIN = 5; // 3.5ft lane 1 offset + 0.5ft text + 0.5ft overshoot + 0.5ft padding
 
 // Base title block reserve at reference width of 1200px
 const BASE_TITLE_BLOCK_RESERVE = 160;
@@ -145,9 +145,9 @@ export function renderSvg(
 
   // Dimensions
   if (opts.showDimensions && isLayerVisible("dimensions", plan, opts)) {
-    for (const dim of plan.dimensions) {
+    for (const chain of plan.dimensions) {
       const dc = new SvgDrawingContext();
-      renderDimension(dim, ctx, dc);
+      renderChainDimension(chain, ctx, dc);
       doc.addToLayer("dimensions", dc.getOutput());
     }
   }

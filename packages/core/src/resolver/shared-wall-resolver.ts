@@ -204,26 +204,46 @@ export function buildWallGraph(
         thickness,
       );
 
-      // Merge openings from both rooms and realign to shared wall position
+      // Merge openings from both rooms, filtering to only those that overlap
+      // the shared wall's coordinate range. This prevents openings that belong
+      // on remainder walls from being duplicated onto the shared wall.
+      const isHoriz = dirInA === "north" || dirInA === "south";
+      const openingOverlapsShared = (o: ResolvedOpening): boolean => {
+        if (isHoriz) {
+          return (
+            o.gapStart.x < overlapEnd + EPSILON &&
+            o.gapEnd.x > overlapStart - EPSILON
+          );
+        }
+        return (
+          o.gapStart.y < overlapEnd + EPSILON &&
+          o.gapEnd.y > overlapStart - EPSILON
+        );
+      };
+
       const mergedOpenings = [
-        ...wallA.openings.map((o) =>
-          realignOpeningToSharedWall(
-            { ...o, ownerRoomId: roomA.id },
-            wallA.rect,
-            geometry.rect,
-            dirInA,
-            thickness,
+        ...wallA.openings
+          .filter(openingOverlapsShared)
+          .map((o) =>
+            realignOpeningToSharedWall(
+              { ...o, ownerRoomId: roomA.id },
+              wallA.rect,
+              geometry.rect,
+              dirInA,
+              thickness,
+            ),
           ),
-        ),
-        ...wallB.openings.map((o) =>
-          realignOpeningToSharedWall(
-            { ...o, ownerRoomId: roomB.id },
-            wallB.rect,
-            geometry.rect,
-            dirInB,
-            thickness,
+        ...wallB.openings
+          .filter(openingOverlapsShared)
+          .map((o) =>
+            realignOpeningToSharedWall(
+              { ...o, ownerRoomId: roomB.id },
+              wallB.rect,
+              geometry.rect,
+              dirInB,
+              thickness,
+            ),
           ),
-        ),
       ];
 
       const sharedWall: Wall = {
@@ -866,11 +886,12 @@ function computeSharedWallGeometry(
           start: { x: gapCenterX, y: minY },
           end: { x: gapCenterX, y: maxY },
         },
-        outerEdge: { start: { x: wallX, y: minY }, end: { x: wallX, y: maxY } },
-        innerEdge: {
+        // Inner = closest to room A (left edge), outer = away from room A (right edge)
+        outerEdge: {
           start: { x: wallX + thickness, y: minY },
           end: { x: wallX + thickness, y: maxY },
         },
+        innerEdge: { start: { x: wallX, y: minY }, end: { x: wallX, y: maxY } },
         overlapStart: minY,
         overlapEnd: maxY,
       };
@@ -890,11 +911,12 @@ function computeSharedWallGeometry(
           start: { x: gapCenterX, y: minY },
           end: { x: gapCenterX, y: maxY },
         },
-        outerEdge: {
+        // Inner = closest to room A (right edge), outer = away from room A (left edge)
+        outerEdge: { start: { x: wallX, y: minY }, end: { x: wallX, y: maxY } },
+        innerEdge: {
           start: { x: wallX + thickness, y: minY },
           end: { x: wallX + thickness, y: maxY },
         },
-        innerEdge: { start: { x: wallX, y: minY }, end: { x: wallX, y: maxY } },
         overlapStart: minY,
         overlapEnd: maxY,
       };

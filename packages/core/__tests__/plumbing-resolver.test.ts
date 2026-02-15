@@ -197,10 +197,11 @@ plans:
 
     const fixture = plan.plumbing!.fixtures[0];
     expect(fixture.fixtureType).toBe("toilet");
-    // Wall-relative: 2ft along south wall, 0 user offset
+    // Wall-relative: position=2ft is leading edge, width=18in=1.5ft
+    // Center along wall = 2 + 0.75 = 2.75ft
     // Flush offset adds depth/2: 28in = 2.333ft, half = 1.1667ft
     // South wall inner face is at y=0, fixture center at y = 0 + depth/2
-    expect(fixture.position.x).toBe(2);
+    expect(fixture.position.x).toBeCloseTo(2.75, 3);
     expect(fixture.position.y).toBeCloseTo(28 / 12 / 2, 3); // ~1.167
     // Orientation auto-inferred from south wall → facing-north
     expect(fixture.orientation).toBe("facing-north");
